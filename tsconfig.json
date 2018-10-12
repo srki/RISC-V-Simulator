@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "UMD",
+    "target": "es5",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true
+  }
+}
