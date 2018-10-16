@@ -5,13 +5,14 @@ import {CircuitNode} from "./CircutNode";
 import {Config} from "./Config";
 import {ConstValue} from "./ConstValue";
 import {Component} from "./Component";
+import {Memory} from "./Memory";
 
 class Simulator {
     protected elements: Component[] = [];
     g: Graphics;
 
     constructor(canvas: HTMLCanvasElement) {
-        this.g = new Graphics(canvas, 1000, 500);
+        this.g = new Graphics(canvas, 1000, 800);
 
         this.create();
     }
@@ -20,26 +21,29 @@ class Simulator {
         let path: CircuitNode[];
         let node: CircuitNode;
 
-        let PCRegister = new Register(30, 200, RegisterOrientation.HORIZONTAL);
-        let PCAdder = new ArithmeticLogicUnit(150, 100);
-        let PCIncValue = new ConstValue(100, 100, 4);
+        let PCRegister = new Register(40, 150, RegisterOrientation.HORIZONTAL);
+        let PCAdder = new ArithmeticLogicUnit(150, 50);
+        let PCIncValue = new ConstValue(100, 50, 4);
         this.elements.push(PCAdder, PCRegister, PCIncValue);
 
 
-        path = this.createPath([[125, 112.5], [150, 112.5]]);
+        path = this.createPath([[125, 62.5], [150, 62.5]]);
         PCIncValue.outNode = path[0];
         PCAdder.input1Node = path[1];
 
-        path = this.createPath([[180, 137.5], [200, 137.5], [200, 212.5], [180, 212.5]]);
+        path = this.createPath([[180, 87.5], [210, 87.5], [210, 162.5], [190, 162.5]]);
         PCAdder.outputNode = path[0];
         PCRegister.inputNode = path[path.length - 1];
 
-        node = new CircuitNode(105, 225, 1);
+        node = new CircuitNode(105, 175, 1);
         PCRegister.writeEnable = node;
 
-        path = this.createPath([[30, 212.5], [25, 212.5], [25, 162.5], [150, 162.5]]);
+        path = this.createPath([[40, 162.5], [25, 162.5], [25, 112.5], [150, 112.5]]);
         PCRegister.outNode = path[0];
         PCAdder.input2Node = path[path.length - 1];
+
+        let memory = new Memory(25, 225);
+        this.elements.push(memory);
     }
 
     draw() {
@@ -69,7 +73,6 @@ class Simulator {
         }
 
         pathNodes.forEach(el => this.elements.push(el));
-
 
         return pathNodes;
     }

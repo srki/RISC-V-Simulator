@@ -34,15 +34,6 @@ class Graphics {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    fillRect(offsetX: number, offsetY: number, x: number, y: number, w: number, h: number, fillStyle: string) {
-        offsetX = offsetX * this.scale + this.rescaleOffsetX;
-        offsetY = offsetY * this.scale +  this.rescaleOffsetY;
-
-        this.ctx.fillStyle = fillStyle;
-        this.ctx.fillRect(offsetX + x * this.scale, offsetY + y * this.scale,
-            w * this.scale, h * this.scale);
-    }
-
     line(x1: number, y1: number, x2: number, y2: number, color: string) {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
@@ -51,9 +42,15 @@ class Graphics {
         this.ctx.stroke();
     }
 
+    fillRect(offsetX: number, offsetY: number, x: number, y: number, w: number, h: number,
+             fillStyle: string, strokeStyle: string) {
+        this.fillPolygon(offsetX + x, offsetY + y,
+            [[0, 0], [w, 0], [w, h], [0, h]], fillStyle, strokeStyle);
+    }
+
     fillPolygon(offsetX: number, offsetY: number, point: number[][], fillStyle: string, strokeStyle: string) {
         offsetX = offsetX * this.scale + this.rescaleOffsetX;
-        offsetY = offsetY * this.scale +  this.rescaleOffsetY;
+        offsetY = offsetY * this.scale + this.rescaleOffsetY;
 
         this.ctx.fillStyle = fillStyle;
         this.ctx.strokeStyle = strokeStyle;
@@ -69,20 +66,20 @@ class Graphics {
         this.ctx.stroke();
     }
 
-    fillCircle(offsetX: number, offsetY: number, x : number, y: number, r: number, fillStyle: string) {
+    fillCircle(offsetX: number, offsetY: number, x: number, y: number, r: number, fillStyle: string) {
         offsetX = offsetX * this.scale + this.rescaleOffsetX;
-        offsetY = offsetY * this.scale +  this.rescaleOffsetY;
+        offsetY = offsetY * this.scale + this.rescaleOffsetY;
 
         this.ctx.fillStyle = fillStyle;
         this.ctx.beginPath();
-        this.ctx.arc(offsetX + x * this.scale, offsetY + y * this.scale, r* this.scale,
+        this.ctx.arc(offsetX + x * this.scale, offsetY + y * this.scale, r * this.scale,
             0, 2 * Math.PI);
         this.ctx.fill();
     }
 
     drawText(offsetX: number, offsetY: number, text: string, fontColor: string, fontSize: number) {
         offsetX = offsetX * this.scale + this.rescaleOffsetX;
-        offsetY = offsetY * this.scale +  this.rescaleOffsetY;
+        offsetY = offsetY * this.scale + this.rescaleOffsetY;
 
         this.ctx.font = fontSize * this.scale + "px Monospace";
         this.ctx.fillStyle = fontColor;
