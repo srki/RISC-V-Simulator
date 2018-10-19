@@ -13,7 +13,7 @@ class ConstValue extends Component {
     }
 
     draw(g: Graphics): void {
-        g.fillPolygon(this.x, this.y, [[0, 0], [0, 25], [25, 25], [25, 0]],
+        g.fillPolygon(Graphics.addOffset([[0, 0], [0, 25], [25, 25], [25, 0]], this.x, this.y),
             Config.elementFillColor, Config.elementStrokeColor);
         g.drawText(this.x + 5, this.y + 20, this.value.toString(), Config.fontColor, Config.fontSize);
     }

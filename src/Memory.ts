@@ -15,11 +15,11 @@ class Memory extends Component {
 
 
     draw(g: Graphics): void {
-        g.fillRect(this.x, this.y, 0, 0, 100, this.size * 15 + 20,
+        g.fillRect(this.x, this.y, 100, this.size * 15 + 20,
             Config.elementFillColor, Config.elementStrokeColor);
 
         for (let i = 0; i < this.size; i++) {
-            g.fillRect(this.x + 10, this.y + 10, 0, i * 15, 80, 15,
+            g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15,
                 Config.memoryFillColor, Config.memoryStrokeColor);
             g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.formatValue(i),
                 Config.fontColor, 12);

@@ -14,7 +14,7 @@ class CircuitNode extends Component{
     }
 
     draw(g: Graphics): void {
-        g.fillCircle(this.x, this.y, 0, 0, 2, "#FF0000");
+        g.fillCircle(this.x, this.y, 2, "#FF0000");
         this.neighbourNodes.forEach(el => g.line(this.x, this.y, el.x, el.y, Config.lineColor));
 
     }

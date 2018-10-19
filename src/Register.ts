@@ -25,7 +25,7 @@ class Register extends Component {
 
     draw(g: Graphics): void {
         if (this.orientation == RegisterOrientation.HORIZONTAL) {
-            g.fillRect(this.x, this.y, 0, 0, 150, 25, Config.elementFillColor, Config.elementStrokeColor);
+            g.fillRect(this.x, this.y, 150, 25, Config.elementFillColor, Config.elementStrokeColor);
             g.drawText(this.x + 10, this.y + 21, this.formatValue(), Config.fontColor, Config.fontSize);
         } else if (this.orientation == RegisterOrientation.VERTICAL) {
             // TODO: implement

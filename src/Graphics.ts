@@ -42,23 +42,21 @@ class Graphics {
         this.ctx.stroke();
     }
 
-    fillRect(offsetX: number, offsetY: number, x: number, y: number, w: number, h: number,
+    fillRect(x: number, y: number, w: number, h: number,
              fillStyle: string, strokeStyle: string) {
-        this.fillPolygon(offsetX + x, offsetY + y,
-            [[0, 0], [w, 0], [w, h], [0, h]], fillStyle, strokeStyle);
+        this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y +h]], fillStyle, strokeStyle);
     }
 
-    fillPolygon(offsetX: number, offsetY: number, point: number[][], fillStyle: string, strokeStyle: string) {
-        offsetX = offsetX * this.scale + this.rescaleOffsetX;
-        offsetY = offsetY * this.scale + this.rescaleOffsetY;
-
+    fillPolygon(point: number[][], fillStyle: string, strokeStyle: string) {
         this.ctx.fillStyle = fillStyle;
         this.ctx.strokeStyle = strokeStyle;
         this.ctx.beginPath();
 
-        this.ctx.moveTo(offsetX + point[0][0] * this.scale, offsetY + point[0][1] * this.scale);
+        this.ctx.moveTo(this.rescaleOffsetX + point[0][0] * this.scale,
+            this.rescaleOffsetY + point[0][1] * this.scale);
         for (let i = 1; i < point.length; i++) {
-            this.ctx.lineTo(offsetX + point[i][0] * this.scale, offsetY + point[i][1] * this.scale);
+            this.ctx.lineTo(this.rescaleOffsetX + point[i][0] * this.scale,
+                this.rescaleOffsetY + point[i][1] * this.scale);
         }
 
         this.ctx.closePath();
@@ -66,24 +64,28 @@ class Graphics {
         this.ctx.stroke();
     }
 
-    fillCircle(offsetX: number, offsetY: number, x: number, y: number, r: number, fillStyle: string) {
-        offsetX = offsetX * this.scale + this.rescaleOffsetX;
-        offsetY = offsetY * this.scale + this.rescaleOffsetY;
-
+    fillCircle(x: number, y: number, r: number, fillStyle: string) {
         this.ctx.fillStyle = fillStyle;
         this.ctx.beginPath();
-        this.ctx.arc(offsetX + x * this.scale, offsetY + y * this.scale, r * this.scale,
-            0, 2 * Math.PI);
+        this.ctx.arc(this.rescaleOffsetX + x * this.scale, this.rescaleOffsetY + y * this.scale,
+            r * this.scale, 0, 2 * Math.PI);
         this.ctx.fill();
     }
 
-    drawText(offsetX: number, offsetY: number, text: string, fontColor: string, fontSize: number) {
-        offsetX = offsetX * this.scale + this.rescaleOffsetX;
-        offsetY = offsetY * this.scale + this.rescaleOffsetY;
-
+    drawText(x: number, y: number, text: string, fontColor: string, fontSize: number) {
         this.ctx.font = fontSize * this.scale + "px Monospace";
         this.ctx.fillStyle = fontColor;
-        this.ctx.fillText(text, offsetX, offsetY);
+        this.ctx.fillText(text, this.rescaleOffsetX + x * this.scale, this.rescaleOffsetX + y * this.scale);
+    }
+
+    static addOffset(points: number[][], xOffset: number, yOffset: number): number[][] {
+        let updated: number[][] = [];
+
+        for (let idx  in points) {
+            updated.push([xOffset + points[idx][0], yOffset + points[idx][1]]);
+        }
+
+        return updated;
     }
 
 }

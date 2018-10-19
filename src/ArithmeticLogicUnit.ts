@@ -18,9 +18,8 @@ class ArithmeticLogicUnit extends Component {
     }
 
     draw(g: Graphics): void {
-        g.fillPolygon(this.x, this.y,
-            [[0, 0], [30, 15], [30, 60], [0, 75], [0, 45], [10, 37.5], [0, 30]],
-            Config.elementFillColor, Config.elementStrokeColor);
+        g.fillPolygon(Graphics.addOffset([[0, 0], [30, 15], [30, 60], [0, 75], [0, 45], [10, 37.5], [0, 30]],
+            this.x, this.y), Config.elementFillColor, Config.elementStrokeColor);
     }
 
     forwardSignal(signaler: Component, value: number): void {
