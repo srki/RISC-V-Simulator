@@ -75,7 +75,7 @@ class Graphics {
     drawText(x: number, y: number, text: string, fontColor: string, fontSize: number) {
         this.ctx.font = fontSize * this.scale + "px Monospace";
         this.ctx.fillStyle = fontColor;
-        this.ctx.fillText(text, this.rescaleOffsetX + x * this.scale, this.rescaleOffsetX + y * this.scale);
+        this.ctx.fillText(text, this.rescaleOffsetX + x * this.scale, this.rescaleOffsetY + y * this.scale);
     }
 
     static addOffset(points: number[][], xOffset: number, yOffset: number): number[][] {
