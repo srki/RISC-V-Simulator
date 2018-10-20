@@ -1,18 +1,21 @@
 import {Component} from "./Component";
 import {Graphics} from "./Graphics";
 import {Config} from "./Config";
+import {CircuitNode} from "./CircutNode";
 
-class Memory extends Component {
+class InstructionMemory extends Component {
     private readonly size: number = 32;
     private values: number[] = [];
+
+    private _inputAddrNode: CircuitNode;
+    private _outputInstrNode: CircuitNode;
 
     constructor(x: number, y: number) {
         super(x, y);
         for (let i = 0; i < this.size; i++) {
-            this.values.push(i);
+            this.values.push(i+1);
         }
     }
-
 
     draw(g: Graphics): void {
         g.fillRect(this.x, this.y, 100, this.size * 15 + 20,
@@ -35,6 +38,19 @@ class Memory extends Component {
         return "0x" + formatted;
     }
 
+
+    forwardSignal(signaler: Component, value: number): void {
+        this._outputInstrNode.forwardSignal(this, this.values[value / 4]);
+    }
+
+    set inputAddrNode(node: CircuitNode) {
+        this._inputAddrNode = node;
+        node.addNeighbour(this);
+    }
+
+    set outputInstrNode(node: CircuitNode) {
+        this._outputInstrNode = node;
+    }
 }
 
-export {Memory}
+export {InstructionMemory}

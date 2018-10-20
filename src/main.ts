@@ -2,11 +2,10 @@ import {Simulator} from "./Simulator";
 
 let canvas = <HTMLCanvasElement> document.getElementById("sim-canvas");
 let sim = new Simulator(canvas);
+sim.draw();
 
 let btnStep = <HTMLButtonElement> document.getElementById("btn-step");
 btnStep.addEventListener("click", evt => sim.step());
-
-sim.step();
 
 // setInterval(() => {
 //     /*if (canvas.width < 1000) {

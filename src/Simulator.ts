@@ -1,11 +1,13 @@
 import {Graphics} from "./Graphics";
 import {ArithmeticLogicUnit} from "./ArithmeticLogicUnit";
-import {Register, RegisterOrientation} from "./Register";
+import {Register} from "./Register";
 import {CircuitNode} from "./CircutNode";
 import {Config} from "./Config";
-import {ConstValue} from "./ConstValue";
 import {Component} from "./Component";
-import {Memory} from "./Memory";
+import {InstructionMemory} from "./InstructionMemory";
+import {Multiplexer, MultiplexerOrientation} from "./Multiplexer";
+import {ControlUnit} from "./ControlUnit";
+import {ConstValue} from "./ConstValue";
 
 class Simulator {
     protected elements: Component[] = [];
@@ -15,35 +17,73 @@ class Simulator {
         this.g = new Graphics(canvas, 1000, 800);
 
         this.create();
+
+        this.elements.forEach(el => el.onFallingEdge());
     }
 
     create() {
+        let PCRegister = new Register(35, 230);
+        let instrMemory = new InstructionMemory(60, 285);
+        let PCStep = new ConstValue(150, 135, 4);
+        let PCAdder = new ArithmeticLogicUnit(205, 135);
+        let branchMux = new Multiplexer(210, 25 ,4, MultiplexerOrientation.LEFT);
+        let controlUnit = new ControlUnit(255, 450);
+
+        this.elements.push(PCRegister, instrMemory, PCStep, branchMux, PCAdder, controlUnit);
+
+        /* PC enable write */
+        let node = new CircuitNode(65, 230, 1);
+        PCRegister.writeEnable = node;
+        this.elements.push(node); // Not required
+
         let path: CircuitNode[];
-        let node: CircuitNode;
 
-        let PCRegister = new Register(40, 150, RegisterOrientation.HORIZONTAL);
-        let PCAdder = new ArithmeticLogicUnit(150, 50);
-        let PCIncValue = new ConstValue(100, 50, 4);
-        this.elements.push(PCAdder, PCRegister, PCIncValue);
-
-
-        path = this.createPath([[125, 62.5], [150, 62.5]]);
-        PCIncValue.outNode = path[0];
-        PCAdder.input1Node = path[1];
-
-        path = this.createPath([[180, 87.5], [210, 87.5], [210, 162.5], [190, 162.5]]);
-        PCAdder.outputNode = path[0];
+        /* Branch Mux ->  PC */
+        path = this.createPath([[210, 72.5], [25, 72.5], [25, 242.5], [35, 242.5]]);
+        branchMux.outNode = path[0];
         PCRegister.inputNode = path[path.length - 1];
 
-        node = new CircuitNode(105, 175, 1);
-        PCRegister.writeEnable = node;
+        /* PC Step -> PC Adder */
+        path = this.createPath([[175, 147.5], [205, 147.5]]);
+        PCStep.outNode = path[0];
+        PCAdder.input1Node = path[path.length - 1];
 
-        path = this.createPath([[40, 162.5], [25, 162.5], [25, 112.5], [150, 112.5]]);
+        /* PC Register -> PC Adder */
+        path = this.createPath([[185, 242.5], [195, 242.5], [195, 197.5], [205, 197.5]]);
         PCRegister.outNode = path[0];
         PCAdder.input2Node = path[path.length - 1];
 
-        let memory = new Memory(25, 225);
-        this.elements.push(memory);
+        let PCRegisterNode = path[1];
+
+        /* PC Adder -> Branch Mux */
+        path = this.createPath([[245, 172.5], [255, 172.5], [255, 95], [235, 95]]);
+        PCAdder.outputNode = path[0];
+        branchMux.setInputNodes(3, path[path.length - 1]);
+
+        /* PC Register -> Instruction memory */
+        path = this.createPath([[195, 242.5], [195, 275], [110, 275], [110, 285]]);
+        PCRegisterNode.addNeighbour(path[0]);
+        instrMemory.inputAddrNode = path[path.length - 1];
+
+        /* Instruction memory -> instrNode */
+        path = this.createPath([[160, 412.5], [340, 412.5]]);
+        instrMemory.outputInstrNode = path[0];
+
+        let instrNode = path[path.length - 1];
+
+        /* instrNode -> Control unit */
+        path = this.createPath([[340, 412.5], [340, 450]]);
+        instrNode.addNeighbour(path[0]);
+        controlUnit.inputNode = path[path.length - 1];
+
+
+
+
+        /* Control signals */
+        //path = this.createPath([[222.5, 10], [222.5, 32.5]]);
+        node = new CircuitNode(222.5, 32.5, 3);
+        branchMux.selInputNode = node;
+
     }
 
     draw() {

@@ -43,17 +43,17 @@ class Register extends Component {
 
     }
 
-    set inputNode(value: CircuitNode) {
-        this._inputNode = value;
+    set inputNode(node: CircuitNode) {
+        this._inputNode = node;
     }
 
-    set outNode(value: CircuitNode) {
-        this._outNode = value;
+    set outNode(node: CircuitNode) {
+        this._outNode = node;
     }
 
 
-    set writeEnable(value: CircuitNode) {
-        this._writeEnable = value;
+    set writeEnable(node: CircuitNode) {
+        this._writeEnable = node;
     }
 
     private formatValue(): string {

@@ -3,20 +3,23 @@ import {Graphics} from "./Graphics";
 import {Config} from "./Config";
 
 class CircuitNode extends Component{
+    public static cnt = 0;
+    private readonly id: number;
+
     private neighbours: Component[] = [];
     private neighbourNodes: CircuitNode[] = [];
-
     private _value: number;
 
     constructor(x: number, y: number, value: number = 0) {
         super(x, y);
         this._value = value;
+
+        this.id = CircuitNode.cnt++;
     }
 
     draw(g: Graphics): void {
         g.fillCircle(this.x, this.y, 2, "#FF0000");
         this.neighbourNodes.forEach(el => g.line(this.x, this.y, el.x, el.y, Config.lineColor));
-
     }
 
     forwardSignal(signaler: Component, value: number): void {
