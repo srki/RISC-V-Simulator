@@ -1,8 +1,8 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
+import Component from "Component";
+import Graphics from "Graphics";
 
 
-class Container extends Component {
+export default class Container extends Component {
     protected elements: Component[] = [];
 
     draw(g: Graphics): void {

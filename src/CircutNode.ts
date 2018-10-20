@@ -1,8 +1,8 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {Config} from "./Config";
+import Component from "Component";
+import Graphics from "Graphics";
+import Config from "Config";
 
-class CircuitNode extends Component{
+export default class CircuitNode extends Component{
     public static cnt = 0;
     private readonly id: number;
 
@@ -44,5 +44,3 @@ class CircuitNode extends Component{
         return this._value;
     }
 }
-
-export {CircuitNode}

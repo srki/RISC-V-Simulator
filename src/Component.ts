@@ -1,6 +1,6 @@
-import {Graphics} from "./Graphics";
+import Graphics from "Graphics";
 
-abstract class Component {
+export default abstract class Component {
     public readonly x: number;
     public readonly y: number;
 
@@ -21,5 +21,3 @@ abstract class Component {
     onFallingEdge(): void {
     }
 }
-
-export {Component}

@@ -1,9 +1,9 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {Config} from "./Config";
-import {CircuitNode} from "./CircutNode";
+import Component from "Component";
+import Graphics from "Graphics";
+import Config from "Config";
+import CircuitNode from "CircutNode";
 
-class ImmSelect extends Component{
+export default class ImmSelect extends Component{
 
     private _inputInstrNode: CircuitNode;
 
@@ -22,5 +22,3 @@ class ImmSelect extends Component{
         this._inputInstrNode = value;
     }
 }
-
-export {ImmSelect}

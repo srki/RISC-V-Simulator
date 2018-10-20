@@ -1,4 +1,4 @@
-class Graphics {
+export default class Graphics {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
 
@@ -89,5 +89,3 @@ class Graphics {
     }
 
 }
-
-export {Graphics}

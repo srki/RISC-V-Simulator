@@ -1,9 +1,9 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {Config} from "./Config";
-import {CircuitNode} from "./CircutNode";
+import Component from "Component";
+import Graphics from "Graphics";
+import Config from "Config";
+import CircuitNode from "CircutNode";
 
-class ControlUnit extends Component{
+export default class ControlUnit extends Component{
     private _inputNode : CircuitNode;
 
     constructor(x: number, y: number) {
@@ -35,5 +35,3 @@ class ControlUnit extends Component{
         return "0x" + formatted;
     }
 }
-
-export {ControlUnit}

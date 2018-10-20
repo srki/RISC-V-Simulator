@@ -1,9 +1,9 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {Config} from "./Config";
-import {CircuitNode} from "./CircutNode";
+import Component from "Component";
+import Graphics from "Graphics";
+import Config from "Config";
+import CircuitNode from "CircutNode";
 
-class ALUControl extends Component{
+export default class ALUControl extends Component{
 
     private _inputInstrNode: CircuitNode;
 
@@ -22,5 +22,3 @@ class ALUControl extends Component{
     }
 
 }
-
-export {ALUControl}

@@ -1,9 +1,9 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {Config} from "./Config";
-import {CircuitNode} from "./CircutNode";
+import Component from "Component";
+import Graphics from "Graphics";
+import Config from "Config";
+import CircuitNode from "CircutNode";
 
-class InstructionMemory extends Component {
+export default class InstructionMemory extends Component {
     private readonly size: number = 32;
     private values: number[] = [];
 
@@ -52,5 +52,3 @@ class InstructionMemory extends Component {
         this._outputInstrNode = node;
     }
 }
-
-export {InstructionMemory}

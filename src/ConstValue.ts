@@ -1,9 +1,9 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {CircuitNode} from "./CircutNode";
-import {Config} from "./Config";
+import Component from "Component";
+import Graphics from "Graphics";
+import CircuitNode from "CircutNode";
+import Config from "Config";
 
-class ConstValue extends Component {
+export default class ConstValue extends Component {
     readonly value: number;
     private _outNode: CircuitNode;
 
@@ -27,5 +27,3 @@ class ConstValue extends Component {
         this._outNode = value;
     }
 }
-
-export {ConstValue}

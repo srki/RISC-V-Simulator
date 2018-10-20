@@ -1,4 +1,4 @@
-class Config {
+export default class Config {
     static readonly backgroundColor: string = "#2f3444";
     static readonly elementFillColor: string = "#3163d8";
     static readonly elementStrokeColor: string = "#000000";
@@ -10,5 +10,3 @@ class Config {
 
     static readonly fontSize: number = 20;
 }
-
-export {Config}

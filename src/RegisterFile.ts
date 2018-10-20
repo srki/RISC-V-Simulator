@@ -1,9 +1,9 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {Config} from "./Config";
-import {CircuitNode} from "./CircutNode";
+import Component from "Component";
+import Graphics from "Graphics";
+import Config from "Config";
+import CircuitNode from "CircutNode";
 
-class RegisterFile extends Component {
+export default class RegisterFile extends Component {
     private readonly size: number = 16;
     private values: number[] = [];
 
@@ -79,5 +79,3 @@ class RegisterFile extends Component {
         this._outputRead2Node = node;
     }
 }
-
-export {RegisterFile}

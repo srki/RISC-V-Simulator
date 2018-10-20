@@ -1,14 +1,14 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {Config} from "./Config";
-import {CircuitNode} from "./CircutNode";
+import Component from "Component";
+import Graphics from "Graphics";
+import Config from "Config";
+import CircuitNode from "CircutNode";
 
-enum MultiplexerOrientation {
+export enum MultiplexerOrientation {
     LEFT,
     RIGHT
 }
 
-class Multiplexer extends Component {
+export default class Multiplexer extends Component {
     private readonly ninputs: number;
     private readonly orientation: MultiplexerOrientation;
     private readonly inputDistance: number;
@@ -71,5 +71,3 @@ class Multiplexer extends Component {
         this._outNode = value;
     }
 }
-
-export {Multiplexer, MultiplexerOrientation}

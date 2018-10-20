@@ -1,18 +1,18 @@
-import {Graphics} from "./Graphics";
-import {ArithmeticLogicUnit} from "./ArithmeticLogicUnit";
-import {Register} from "./Register";
-import {CircuitNode} from "./CircutNode";
-import {Config} from "./Config";
-import {Component} from "./Component";
-import {InstructionMemory} from "./InstructionMemory";
-import {Multiplexer, MultiplexerOrientation} from "./Multiplexer";
-import {ControlUnit} from "./ControlUnit";
-import {ConstValue} from "./ConstValue";
-import {RegisterFile} from "./RegisterFile";
-import {ImmSelect} from "./ImmSelect";
-import {ALUControl} from "./ALUControl";
+import Graphics from "Graphics";
+import ArithmeticLogicUnit from "ArithmeticLogicUnit";
+import Register from "Register";
+import CircuitNode from "CircutNode";
+import Config from "Config";
+import Component from "Component";
+import InstructionMemory from "InstructionMemory";
+import Multiplexer, {MultiplexerOrientation} from "Multiplexer";
+import ControlUnit from "ControlUnit";
+import ConstValue from "ConstValue";
+import RegisterFile from "RegisterFile";
+import ImmSelect from "ImmSelect";
+import ALUControl from "ALUControl";
 
-class Simulator {
+export default class Simulator {
     protected elements: Component[] = [];
     g: Graphics;
 
@@ -178,6 +178,3 @@ class Simulator {
         return pathNodes;
     }
 }
-
-
-export {Simulator}

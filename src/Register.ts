@@ -1,14 +1,14 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {CircuitNode} from "./CircutNode";
-import {Config} from "./Config";
+import Component from "Component";
+import Graphics from "Graphics";
+import CircuitNode from "CircutNode";
+import Config from "Config";
 
 enum RegisterOrientation {
     HORIZONTAL,
     VERTICAL
 }
 
-class Register extends Component {
+export default class Register extends Component {
     private readonly orientation: RegisterOrientation;
 
     private _inputNode: CircuitNode = null;
@@ -65,5 +65,3 @@ class Register extends Component {
         return "0x" + formatted;
     }
 }
-
-export {Register, RegisterOrientation}

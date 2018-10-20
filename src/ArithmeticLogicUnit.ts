@@ -1,9 +1,9 @@
-import {Component} from "./Component";
-import {Graphics} from "./Graphics";
-import {CircuitNode} from "./CircutNode";
-import {Config} from "./Config";
+import Component from "Component";
+import Graphics from "Graphics";
+import CircuitNode from "CircutNode";
+import Config from "Config";
 
-class ArithmeticLogicUnit extends Component {
+export default class ArithmeticLogicUnit extends Component {
     private _outputNode: CircuitNode = null;
     private _input1Node: CircuitNode = null;
     private _input2Node: CircuitNode = null;
@@ -62,5 +62,3 @@ class ArithmeticLogicUnit extends Component {
         this._opInput = node;
     }
 }
-
-export {ArithmeticLogicUnit}
