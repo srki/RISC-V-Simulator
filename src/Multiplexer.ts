@@ -63,12 +63,12 @@ export default class Multiplexer extends Component {
         node.addNeighbour(this);
     }
 
-    set selInputNode(value: CircuitNode) {
-        this._selInputNode = value;
+    set selInputNode(node: CircuitNode) {
+        this._selInputNode = node;
     }
 
 
-    set outNode(value: CircuitNode) {
-        this._outNode = value;
+    set outNode(node: CircuitNode) {
+        this._outNode = node;
     }
 }

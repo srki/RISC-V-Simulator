@@ -6,6 +6,8 @@ import CircuitNode from "CircutNode";
 export default class ALUControl extends Component{
 
     private _inputInstrNode: CircuitNode;
+    private _outNode: CircuitNode;
+
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -17,8 +19,12 @@ export default class ALUControl extends Component{
         g.drawText(this.x + 10, this.y + 43, "Control", Config.fontColor, Config.fontSize);
     }
 
-    set inputInstrNode(value: CircuitNode) {
-        this._inputInstrNode = value;
+    set inputInstrNode(node: CircuitNode) {
+        this._inputInstrNode = node;
     }
 
+
+    set outNode(node: CircuitNode) {
+        this._outNode = node;
+    }
 }

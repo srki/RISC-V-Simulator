@@ -15,8 +15,8 @@ export default class RegisterFile extends Component {
     private _inputWriteEnNode: CircuitNode;
     private _inputWriteNode: CircuitNode;
 
-    private _outputRead1Node: CircuitNode;
-    private _outputRead2Node: CircuitNode;
+    private _outputReadData1Node: CircuitNode;
+    private _outputReadData2Node: CircuitNode;
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -72,11 +72,11 @@ export default class RegisterFile extends Component {
         this._inputWriteNode = node;
     }
 
-    set outputRead1Node(node: CircuitNode) {
-        this._outputRead1Node = node;
+    set outputReadData1Node(node: CircuitNode) {
+        this._outputReadData1Node = node;
     }
 
-    set outputRead2Node(node: CircuitNode) {
-        this._outputRead2Node = node;
+    set outputReadData2Node(node: CircuitNode) {
+        this._outputReadData2Node = node;
     }
 }

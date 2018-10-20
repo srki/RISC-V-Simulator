@@ -18,7 +18,7 @@ export default class Simulator {
     g: Graphics;
 
     constructor(canvas: HTMLCanvasElement) {
-        this.g = new Graphics(canvas, 1000, 800);
+        this.g = new Graphics(canvas, 1200, 800);
 
         this.create();
 
@@ -30,7 +30,7 @@ export default class Simulator {
         let instrMemory = new InstructionMemory(60, 285);
         let PCStep = new ConstValue(150, 135, Val.UnsignedInt(4));
         let PCAdder = new ArithmeticLogicUnit(205, 135);
-        let PCSelMux = new Multiplexer(210, 25 ,4, MultiplexerOrientation.LEFT);
+        let PCSelMux = new Multiplexer(210, 25, 4, MultiplexerOrientation.LEFT);
         let controlUnit = new ControlUnit(250, 450);
 
         this.elements.push(PCRegister, instrMemory, PCStep, PCSelMux, PCAdder, controlUnit);
@@ -42,6 +42,11 @@ export default class Simulator {
         let ALUCtrl = new ALUControl(710, 630);
 
         this.elements.push(WASel1, registerFile, WASelMux, immSel, ALUCtrl);
+
+        let op2SelMux = new Multiplexer(820, 500, 2);
+        let ALU = new ArithmeticLogicUnit(865, 400);
+
+        this.elements.push(op2SelMux, ALU);
 
         /* PC enable write */
         let node = new CircuitNode(65, 230, Val.UnsignedInt(1));
@@ -89,7 +94,7 @@ export default class Simulator {
         controlUnit.inputNode = path[path.length - 1];
 
         /* Extend instruction wire */
-        node = new CircuitNode(430,412.5);
+        node = new CircuitNode(430, 412.5);
         this.elements.push(node);
         instrNode.addNeighbour(node);
         instrNode = node;
@@ -111,7 +116,7 @@ export default class Simulator {
         WASelMux.setInputNodes(1, path[path.length - 1]);
 
         /* instrNode -> ImmSelect */
-        path = this.createPath([[430, 620], [630, 620],[630, 575], [640, 575]]);
+        path = this.createPath([[430, 620], [630, 620], [630, 575], [640, 575]]);
         instrNodeBottom.addNeighbour(path[0]);
         instrNodeBottom = path[0];
         immSel.inputInstrNode = path[path.length - 1];
@@ -134,6 +139,30 @@ export default class Simulator {
         instrNodeTop = path[0];
         registerFile.inputReadSel1Node = path[path.length - 1];
 
+        /* ImmSelect -> op2SelMux */
+        path = this.createPath([[740, 575], [760, 575], [760, 550], [820, 550]]);
+        immSel.outNode = path[0];
+        op2SelMux.setInputNodes(1, path[path.length - 1]);
+
+        /* RF ReadData2 -> op2SelMux */
+        path = this.createPath([[620, 390], [640, 390], [640, 525], [820, 525]]);
+        registerFile.outputReadData2Node = path[0];
+        op2SelMux.setInputNodes(0, path[path.length - 1]);
+
+        /* RF ReadData1 -> ALU */
+        path = this.createPath([[620, 370], [855, 370], [855, 415], [865, 415]]);
+        registerFile.outputReadData1Node = path[0];
+        ALU.input1Node = path[path.length - 1];
+
+        /* op2SelMux -> ALU */
+        path = this.createPath([[845, 532.5], [855, 532.5], [855, 460], [865, 460]]);
+        op2SelMux.outNode = path[0];
+        ALU.input2Node = path[path.length - 1];
+
+        /* ALU Control -> ALU */
+        path = this.createPath([[810, 655], [885, 655], [885, 467.5]]);
+        ALUCtrl.outNode = path[0];
+        ALU.opInput = path[path.length - 1];
 
         /* Control signals */
         //path = this.createPath([[222.5, 10], [222.5, 32.5]]);
