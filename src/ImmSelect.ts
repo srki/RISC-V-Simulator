@@ -6,6 +6,7 @@ import CircuitNode from "CircutNode";
 export default class ImmSelect extends Component{
 
     private _inputInstrNode: CircuitNode;
+    private _outNode: CircuitNode;
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -18,7 +19,11 @@ export default class ImmSelect extends Component{
     }
 
 
-    set inputInstrNode(value: CircuitNode) {
-        this._inputInstrNode = value;
+    set inputInstrNode(node: CircuitNode) {
+        this._inputInstrNode = node;
+    }
+
+    set outNode(node: CircuitNode) {
+        this._outNode = node;
     }
 }
