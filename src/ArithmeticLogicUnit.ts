@@ -2,6 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import CircuitNode from "CircutNode";
 import Config from "Config";
+import Val, {ZERO_VAL_32, ZERO_VAL_5} from "./Val";
 
 export default class ArithmeticLogicUnit extends Component {
     private _outputNode: CircuitNode = null;
@@ -9,9 +10,9 @@ export default class ArithmeticLogicUnit extends Component {
     private _input2Node: CircuitNode = null;
     private _opInput: CircuitNode = null;
 
-    private input1Value: number = 0;
-    private input2Value: number = 0;
-    private opValue: number = 0;
+    private input1Value: Val = ZERO_VAL_32;
+    private input2Value: Val = ZERO_VAL_32;
+    private opValue: Val = ZERO_VAL_5;
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -22,7 +23,7 @@ export default class ArithmeticLogicUnit extends Component {
             this.x, this.y), Config.elementFillColor, Config.elementStrokeColor);
     }
 
-    forwardSignal(signaler: Component, value: number): void {
+    forwardSignal(signaler: Component, value: Val): void {
         switch (signaler) {
             case this._input1Node:
                 this.input1Value = value;
@@ -40,7 +41,7 @@ export default class ArithmeticLogicUnit extends Component {
         // TODO: add op codes
         switch (this.opValue) {
             default:
-                this._outputNode.forwardSignal(this, this.input1Value + this.input2Value)
+                this._outputNode.forwardSignal(this, Val.UnsignedInt(this.input1Value.asUnsignedInt() + this.input2Value.asUnsignedInt()))
         }
     }
 

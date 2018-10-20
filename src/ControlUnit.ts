@@ -17,21 +17,12 @@ export default class ControlUnit extends Component{
 
         g.fillRect(this.x + 10, this.y + 90, 150, 25,
             Config.memoryFillColor, Config.memoryStrokeColor);
-        g.drawText(this.x + 20, this.y + 90 + 21, ControlUnit.formatValue(this._inputNode.value),
+        g.drawText(this.x + 20, this.y + 90 + 21, this._inputNode.value.asHexString(),
             Config.fontColor, Config.fontSize);
     }
 
 
     set inputNode(value: CircuitNode) {
         this._inputNode = value;
-    }
-
-    private static formatValue(value: number): string {
-        let formatted = value.toString(16);
-        while (formatted.length < 8) {
-            formatted = "0" + formatted;
-        }
-
-        return "0x" + formatted;
     }
 }

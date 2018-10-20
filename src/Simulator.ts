@@ -11,6 +11,7 @@ import ConstValue from "ConstValue";
 import RegisterFile from "RegisterFile";
 import ImmSelect from "ImmSelect";
 import ALUControl from "ALUControl";
+import Val from "./Val";
 
 export default class Simulator {
     protected elements: Component[] = [];
@@ -27,14 +28,14 @@ export default class Simulator {
     create() {
         let PCRegister = new Register(35, 230);
         let instrMemory = new InstructionMemory(60, 285);
-        let PCStep = new ConstValue(150, 135, 4);
+        let PCStep = new ConstValue(150, 135, Val.UnsignedInt(4));
         let PCAdder = new ArithmeticLogicUnit(205, 135);
         let PCSelMux = new Multiplexer(210, 25 ,4, MultiplexerOrientation.LEFT);
         let controlUnit = new ControlUnit(250, 450);
 
         this.elements.push(PCRegister, instrMemory, PCStep, PCSelMux, PCAdder, controlUnit);
 
-        let WASel1 = new ConstValue(450, 520, 1);
+        let WASel1 = new ConstValue(450, 520, Val.UnsignedInt(1));
         let WASelMux = new Multiplexer(485, 520, 2);
         let registerFile = new RegisterFile(520, 350);
         let immSel = new ImmSelect(640, 550);
@@ -43,7 +44,7 @@ export default class Simulator {
         this.elements.push(WASel1, registerFile, WASelMux, immSel, ALUCtrl);
 
         /* PC enable write */
-        let node = new CircuitNode(65, 230, 1);
+        let node = new CircuitNode(65, 230, Val.UnsignedInt(1));
         PCRegister.writeEnable = node;
         this.elements.push(node); // Not required
 
@@ -137,11 +138,11 @@ export default class Simulator {
         /* Control signals */
         //path = this.createPath([[222.5, 10], [222.5, 32.5]]);
         /* PCSel */
-        node = new CircuitNode(222.5, 32.5, 3);
+        node = new CircuitNode(222.5, 32.5, Val.UnsignedInt(3));
         PCSelMux.selInputNode = node;
 
         /* WASel */
-        node = new CircuitNode(497.5, 300, 1);
+        node = new CircuitNode(497.5, 300, Val.UnsignedInt(1));
         WASelMux.selInputNode = node;
 
 

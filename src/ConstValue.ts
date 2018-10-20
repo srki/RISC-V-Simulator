@@ -2,12 +2,13 @@ import Component from "Component";
 import Graphics from "Graphics";
 import CircuitNode from "CircutNode";
 import Config from "Config";
+import Val from "./Val";
 
 export default class ConstValue extends Component {
-    readonly value: number;
+    readonly value: Val;
     private _outNode: CircuitNode;
 
-    constructor(x: number, y: number, value: number) {
+    constructor(x: number, y: number, value: Val) {
         super(x, y);
         this.value = value;
     }
@@ -15,7 +16,7 @@ export default class ConstValue extends Component {
     draw(g: Graphics): void {
         g.fillPolygon(Graphics.addOffset([[0, 0], [0, 25], [25, 25], [25, 0]], this.x, this.y),
             Config.elementFillColor, Config.elementStrokeColor);
-        g.drawText(this.x + 5, this.y + 20, this.value.toString(), Config.fontColor, Config.fontSize);
+        g.drawText(this.x + 5, this.y + 20, this.value.asHexString(), Config.fontColor, Config.fontSize);
     }
 
     onFallingEdge(): void {

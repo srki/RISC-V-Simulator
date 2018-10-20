@@ -1,4 +1,5 @@
 import Graphics from "Graphics";
+import Val from "./Val";
 
 export default abstract class Component {
     public readonly x: number;
@@ -11,7 +12,7 @@ export default abstract class Component {
 
     abstract draw(g: Graphics): void;
 
-    forwardSignal(signaler: Component, value: number): void {
+    forwardSignal(signaler: Component, value: Val): void {
 
     }
 

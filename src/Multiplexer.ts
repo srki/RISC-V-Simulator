@@ -2,6 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
+import Val from "./Val";
 
 export enum MultiplexerOrientation {
     LEFT,
@@ -49,11 +50,11 @@ export default class Multiplexer extends Component {
     }
 
 
-    forwardSignal(signaler: Component, value: number): void {
+    forwardSignal(signaler: Component, value: Val): void {
         if (signaler == this._selInputNode) {
-            this._outNode.forwardSignal(this, this._setInputNodes[value].value);
-        } else if (this._setInputNodes[this._selInputNode.value] == signaler) {
-            this._outNode.forwardSignal(this, this._setInputNodes[this._selInputNode.value].value);
+            this._outNode.forwardSignal(this, this._setInputNodes[value.asUnsignedInt()].value);
+        } else if (this._setInputNodes[this._selInputNode.value.asUnsignedInt()] == signaler) {
+            this._outNode.forwardSignal(this, this._setInputNodes[this._selInputNode.value.asUnsignedInt()].value);
         }
     }
 

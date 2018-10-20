@@ -1,5 +1,6 @@
 import Component from "Component";
 import Graphics from "Graphics";
+import Val from "Val";
 
 
 export default class Container extends Component {
@@ -8,7 +9,7 @@ export default class Container extends Component {
     draw(g: Graphics): void {
     }
 
-    forwardSignal(signaler: Component, value: number): void {
+    forwardSignal(signaler: Component, value: Val): void {
         this.elements.forEach(el => el.forwardSignal(signaler, value));
     }
 

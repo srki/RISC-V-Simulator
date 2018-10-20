@@ -2,6 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
+import Val from "./Val";
 
 export default class RegisterFile extends Component {
     private readonly size: number = 16;
@@ -46,7 +47,7 @@ export default class RegisterFile extends Component {
     }
 
 
-    forwardSignal(signaler: Component, value: number): void {
+    forwardSignal(signaler: Component, value: Val): void {
         //this._outputInstrNode.forwardSignal(this, this.values[value / 4]);
     }
 
