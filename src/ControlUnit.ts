@@ -6,6 +6,8 @@ import Val, {VAL_ONE_32b, VAL_THREE_32b, VAL_TWO_32b, VAL_ZERO_32b} from "Val";
 import ALUControl from "ALUControl";
 import DataMemory from "DataMemory";
 import RegisterFile from "RegisterFile";
+import InstructionHelper from "InstructionHelper";
+import ImmSelect from "ImmSelect";
 
 export default class ControlUnit extends Component {
     private _inputNode: CircuitNode;
@@ -41,12 +43,11 @@ export default class ControlUnit extends Component {
             return;
         }
 
+        let opcode = InstructionHelper.getOpCodeStr(value);
         let ImmSel, Op2Sel, FuncSel, MemWr, RFWen, WBSel, WASel, PCSel: Val;
 
-        let opcode = 0;
-
         switch (opcode) {
-            default: {
+            case InstructionHelper.OP_CODE_ALU : {
                 ImmSel = undefined;
                 Op2Sel = VAL_ZERO_32b;
                 FuncSel = ALUControl.FUNC;
@@ -54,6 +55,78 @@ export default class ControlUnit extends Component {
                 RFWen = RegisterFile.WRITE_YES;
                 WBSel = VAL_TWO_32b;
                 WASel = VAL_ONE_32b;
+                PCSel = VAL_THREE_32b;
+                break
+            }
+            case InstructionHelper.OP_CODE_ALUI : {
+                ImmSel = ImmSelect.ITYPE;
+                Op2Sel = VAL_ONE_32b;
+                FuncSel = ALUControl.OP;
+                MemWr = DataMemory.WRITE_NO;
+                RFWen = RegisterFile.WRITE_YES;
+                WBSel = VAL_TWO_32b;
+                WASel = VAL_ONE_32b;
+                PCSel = VAL_THREE_32b;
+                break
+            }
+            case InstructionHelper.OP_CODE_LW : {
+                ImmSel = ImmSelect.ITYPE;
+                Op2Sel = VAL_ONE_32b;
+                FuncSel = ALUControl.ADD;
+                MemWr = DataMemory.WRITE_NO;
+                RFWen = RegisterFile.WRITE_YES;
+                WBSel = VAL_ONE_32b;
+                WASel = VAL_ONE_32b;
+                PCSel = VAL_THREE_32b;
+                break
+            }
+            case InstructionHelper.OP_CODE_SW : {
+                ImmSel = ImmSelect.BSTYPE;
+                Op2Sel = VAL_ONE_32b;
+                FuncSel = ALUControl.ADD;
+                MemWr = DataMemory.WRITE_YES;
+                RFWen = RegisterFile.WRITE_NO;
+                WBSel = undefined;
+                WASel = undefined;
+                PCSel = VAL_THREE_32b;
+                break
+            }
+            case InstructionHelper.OP_CODE_BRANCH : {
+                ImmSel = ImmSelect.BRTYPE;
+                Op2Sel = undefined;
+                FuncSel = undefined;
+                MemWr = DataMemory.WRITE_NO;
+                RFWen = RegisterFile.WRITE_NO;
+                WBSel = undefined;
+                WASel = undefined;
+                PCSel = true ? VAL_ZERO_32b : VAL_THREE_32b; // TODO
+                break
+            }
+            case InstructionHelper.OP_CODE_JAL : {
+                ImmSel = undefined;
+                Op2Sel = undefined;
+                FuncSel = undefined;
+                MemWr = DataMemory.WRITE_NO;
+                RFWen = RegisterFile.WRITE_YES;
+                WBSel = VAL_ZERO_32b;
+                WASel = VAL_ZERO_32b;
+                PCSel = VAL_TWO_32b;
+                break
+            }
+            case InstructionHelper.OP_CODE_JALR : {
+                ImmSel = undefined;
+                Op2Sel = undefined;
+                FuncSel = undefined;
+                MemWr = DataMemory.WRITE_NO;
+                RFWen = RegisterFile.WRITE_YES;
+                WBSel = VAL_ZERO_32b;
+                WASel = VAL_ONE_32b;
+                PCSel = VAL_ONE_32b;
+                break
+            }
+
+            default: {
+                console.error("Unknown OP Code: " + opcode);
                 PCSel = VAL_THREE_32b;
             }
         }
