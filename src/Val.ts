@@ -1,4 +1,9 @@
 export default class Val {
+    public static readonly ZERO_32b = Val.UnsignedInt(0);
+    public static readonly ONE_32b = Val.UnsignedInt(1);
+    public static readonly TWO_32b = Val.UnsignedInt(2);
+    public static readonly THREE_32b = Val.UnsignedInt(3);
+
     readonly val: number;
     readonly num_bits: number;
 
