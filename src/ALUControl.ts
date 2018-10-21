@@ -2,8 +2,12 @@ import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
+import Val from "./Val";
 
 export default class ALUControl extends Component{
+    public static readonly FUNC = Val.UnsignedInt(0, 2);
+    public static readonly OP = Val.UnsignedInt(1, 2);
+    public static readonly ADD = Val.UnsignedInt(2, 2);
 
     private _inputInstrNode: CircuitNode;
     private _outNode: CircuitNode;

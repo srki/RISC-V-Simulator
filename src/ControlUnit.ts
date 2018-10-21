@@ -2,10 +2,13 @@ import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
-import Val from "Val";
+import Val, {VAL_ONE_32b, VAL_THREE_32b, VAL_TWO_32b, VAL_ZERO_32b} from "Val";
+import ALUControl from "ALUControl";
+import DataMemory from "DataMemory";
+import RegisterFile from "RegisterFile";
 
-export default class ControlUnit extends Component{
-    private _inputNode : CircuitNode;
+export default class ControlUnit extends Component {
+    private _inputNode: CircuitNode;
 
     private _PCSelNode: CircuitNode;
     private _RegWriteEn: CircuitNode;
@@ -33,7 +36,36 @@ export default class ControlUnit extends Component{
 
 
     forwardSignal(signaler: Component, value: Val): void {
-        super.forwardSignal(signaler, value);
+        if (signaler != this._inputNode) {
+            console.error("Error");
+            return;
+        }
+
+        let ImmSel, Op2Sel, FuncSel, MemWr, RFWen, WBSel, WASel, PCSel: Val;
+
+        let opcode = 0;
+
+        switch (opcode) {
+            default: {
+                ImmSel = undefined;
+                Op2Sel = VAL_ZERO_32b;
+                FuncSel = ALUControl.FUNC;
+                MemWr = DataMemory.WRITE_NO;
+                RFWen = RegisterFile.WRITE_YES;
+                WBSel = VAL_TWO_32b;
+                WASel = VAL_ONE_32b;
+                PCSel = VAL_THREE_32b;
+            }
+        }
+
+        if (ImmSel) this._ImmSel.forwardSignal(this, ImmSel);
+        if (Op2Sel) this._Op2Sel.forwardSignal(this, Op2Sel);
+        if (FuncSel) this._FuncSel.forwardSignal(this, FuncSel);
+        if (MemWr) this._MemWrite.forwardSignal(this, MemWr);
+        if (RFWen) this._RegWriteEn.forwardSignal(this, RFWen);
+        if (WBSel) this._WBSel.forwardSignal(this, WBSel);
+        if (WASel) this._WASel.forwardSignal(this, WASel);
+        if (PCSel) this._PCSelNode.forwardSignal(this, PCSel);
     }
 
     set inputNode(node: CircuitNode) {

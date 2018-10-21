@@ -2,7 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import CircuitNode from "CircutNode";
 import Config from "Config";
-import Val, {ZERO_VAL_32, ZERO_VAL_5} from "Val";
+import Val, {VAL_ZERO_0b, VAL_ZERO_32b, VAL_ZERO_5b} from "Val";
 
 export default class ArithmeticLogicUnit extends Component {
     private _outputNode: CircuitNode = null;
@@ -10,9 +10,9 @@ export default class ArithmeticLogicUnit extends Component {
     private _input2Node: CircuitNode = null;
     private _opInput: CircuitNode = null;
 
-    private input1Value: Val = ZERO_VAL_32;
-    private input2Value: Val = ZERO_VAL_32;
-    private opValue: Val = ZERO_VAL_5;
+    private input1Value: Val = VAL_ZERO_32b;
+    private input2Value: Val = VAL_ZERO_0b;
+    private opValue: Val = VAL_ZERO_5b;
 
     constructor(x: number, y: number) {
         super(x, y);

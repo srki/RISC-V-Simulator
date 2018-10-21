@@ -5,6 +5,9 @@ import Component from "Component";
 import Val from "Val";
 
 export default class DataMemory extends Component {
+    public static readonly WRITE_NO = Val.UnsignedInt(0, 1);
+    public static readonly WRITE_YES = Val.UnsignedInt(1, 1);
+
     private readonly size: number = 32;
     private values: Val[] = [];
 
@@ -35,7 +38,6 @@ export default class DataMemory extends Component {
     forwardSignal(signaler: Component, value: Val): void {
         this._outputDataNode.forwardSignal(this, this.values[value.asUnsignedInt() / 4]);
     }
-
 
     set writeEnNode(value: CircuitNode) {
         this._writeEnNode = value;

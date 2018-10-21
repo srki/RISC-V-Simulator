@@ -5,6 +5,9 @@ import CircuitNode from "CircutNode";
 import Val from "Val";
 
 export default class RegisterFile extends Component {
+    public static readonly WRITE_NO = Val.UnsignedInt(0, 1);
+    public static readonly WRITE_YES = Val.UnsignedInt(1, 1);
+
     private readonly size: number = 16;
     private values: Val[] = [];
 
@@ -38,7 +41,6 @@ export default class RegisterFile extends Component {
     }
 
     forwardSignal(signaler: Component, value: Val): void {
-        //this._outputInstrNode.forwardSignal(this, this.values[value / 4]);
     }
 
 
