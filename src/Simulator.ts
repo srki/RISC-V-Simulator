@@ -11,6 +11,7 @@ import ConstValue from "ConstValue";
 import RegisterFile from "RegisterFile";
 import ImmSelect from "ImmSelect";
 import ALUControl from "ALUControl";
+import DataMemory from "./DataMemory";
 import Val from "./Val";
 
 export default class Simulator {
@@ -48,6 +49,11 @@ export default class Simulator {
 
         this.elements.push(op2SelMux, ALU);
 
+        let dataMemory = new DataMemory(955,200);
+        let WBSelMux = new Multiplexer(1105, 600, 3);
+
+        this.elements.push(dataMemory, WBSelMux);
+
         /* PC enable write */
         let node = new CircuitNode(65, 230, Val.UnsignedInt(1));
         PCRegister.writeEnable = node;
@@ -80,11 +86,11 @@ export default class Simulator {
         /* PC Register -> Instruction memory */
         path = this.createPath([[195, 242.5], [195, 275], [110, 275], [110, 285]]);
         PCRegisterNode.addNeighbour(path[0]);
-        instrMemory.inputAddrNode = path[path.length - 1];
+        instrMemory.addressNode = path[path.length - 1];
 
         /* Instruction memory -> instrNode */
         path = this.createPath([[160, 412.5], [335, 412.5]]);
-        instrMemory.outputInstrNode = path[0];
+        instrMemory.outputDataNode = path[0];
 
         let instrNode = path[path.length - 1];
 
@@ -145,9 +151,10 @@ export default class Simulator {
         op2SelMux.setInputNodes(1, path[path.length - 1]);
 
         /* RF ReadData2 -> op2SelMux */
-        path = this.createPath([[620, 390], [640, 390], [640, 525], [820, 525]]);
+        path = this.createPath([[620, 390], [640, 390], [640, 525], [800, 525], [820, 525]]);
         registerFile.outputReadData2Node = path[0];
         op2SelMux.setInputNodes(0, path[path.length - 1]);
+        let readData2Node = path[path.length - 2];
 
         /* RF ReadData1 -> ALU */
         path = this.createPath([[620, 370], [855, 370], [855, 415], [865, 415]]);
@@ -163,6 +170,20 @@ export default class Simulator {
         path = this.createPath([[810, 655], [885, 655], [885, 467.5]]);
         ALUCtrl.outNode = path[0];
         ALU.opInput = path[path.length - 1];
+
+        /* ALU -> WBSel Mux */
+        path = this.createPath([[905, 437.5], [930, 437.5], [930, 710], [1080, 710], [1080, 655], [1105, 655]]);
+        ALU.outputNode = path[0];
+        WBSelMux.setInputNodes(2, path[path.length - 1]);
+
+        /* WBSel Mux -> RF WriteData */
+        path = this.createPath([[1130, 640], [1150, 640], [1150, 750], [500, 750], [500, 590], [520, 590]]);
+        WBSelMux.outNode = path[0];
+        registerFile.inputWriteNode = path[path.length - 1];
+
+        /* RF ReadData2 -> DataMemory */
+        path = this.createPath([[800, 610], [955, 610]]);
+        readData2Node.addNeighbour(path[0]);
 
         /* Control signals */
         //path = this.createPath([[222.5, 10], [222.5, 32.5]]);

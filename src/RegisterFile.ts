@@ -6,7 +6,7 @@ import Val from "./Val";
 
 export default class RegisterFile extends Component {
     private readonly size: number = 16;
-    private values: number[] = [];
+    private values: Val[] = [];
 
     private _inputReadSel1Node: CircuitNode;
     private _inputReadSel2Node: CircuitNode;
@@ -21,7 +21,7 @@ export default class RegisterFile extends Component {
     constructor(x: number, y: number) {
         super(x, y);
         for (let i = 0; i < this.size; i++) {
-            this.values.push(i);
+            this.values.push(Val.UnsignedInt(i));
         }
     }
 
@@ -32,20 +32,10 @@ export default class RegisterFile extends Component {
         for (let i = 0; i < this.size; i++) {
             g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15,
                 Config.memoryFillColor, Config.memoryStrokeColor);
-            g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.formatValue(i),
+            g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(),
                 Config.fontColor, 12);
         }
     }
-
-    private formatValue(idx: number): string {
-        let formatted = this.values[idx].toString(16);
-        while (formatted.length < 8) {
-            formatted = "0" + formatted;
-        }
-
-        return "0x" + formatted;
-    }
-
 
     forwardSignal(signaler: Component, value: Val): void {
         //this._outputInstrNode.forwardSignal(this, this.values[value / 4]);

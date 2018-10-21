@@ -16,7 +16,7 @@ export default class ConstValue extends Component {
     draw(g: Graphics): void {
         g.fillPolygon(Graphics.addOffset([[0, 0], [0, 25], [25, 25], [25, 0]], this.x, this.y),
             Config.elementFillColor, Config.elementStrokeColor);
-        g.drawText(this.x + 5, this.y + 20, this.value.asHexString(), Config.fontColor, Config.fontSize);
+        g.drawText(this.x + 5, this.y + 20, this.value.asShortHexString(), Config.fontColor, Config.fontSize);
     }
 
     onFallingEdge(): void {

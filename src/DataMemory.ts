@@ -1,20 +1,22 @@
-import Component from "Component";
-import Graphics from "Graphics";
-import Config from "Config";
-import CircuitNode from "CircutNode";
+import CircuitNode from "./CircutNode";
+import Graphics from "./Graphics";
+import Config from "./Config";
+import Component from "./Component";
 import Val from "./Val";
 
-export default class InstructionMemory extends Component {
+export default class DataMemory extends Component {
     private readonly size: number = 32;
     private values: Val[] = [];
 
+    private _writeEnNode: CircuitNode;
     private _addressNode: CircuitNode;
+    private _inputDataNode: CircuitNode;
     private _outputDataNode: CircuitNode;
 
     constructor(x: number, y: number) {
         super(x, y);
         for (let i = 0; i < this.size; i++) {
-            this.values.push(Val.UnsignedInt(i+1));
+            this.values.push(Val.SignedInt(i + 1));
         }
     }
 
@@ -25,7 +27,7 @@ export default class InstructionMemory extends Component {
         for (let i = 0; i < this.size; i++) {
             g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15,
                 Config.memoryFillColor, Config.memoryStrokeColor);
-            g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15,  this.values[i].asHexString(),
+            g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(),
                 Config.fontColor, 12);
         }
     }
@@ -34,9 +36,18 @@ export default class InstructionMemory extends Component {
         this._outputDataNode.forwardSignal(this, this.values[value.asUnsignedInt() / 4]);
     }
 
+
+    set writeEnNode(value: CircuitNode) {
+        this._writeEnNode = value;
+    }
+
     set addressNode(node: CircuitNode) {
         this._addressNode = node;
         node.addNeighbour(this);
+    }
+
+    set inputDataNode(value: CircuitNode) {
+        this._inputDataNode = value;
     }
 
     set outputDataNode(node: CircuitNode) {
