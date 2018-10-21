@@ -226,8 +226,8 @@ export default class Simulator {
 
         /* Op2Sel */
         path = this.createPath([[862.5, 790], [862.5, 557.5]]);
-
-
+        controlUnit.Op2Sel = path[0];
+        op2SelMux.selInputNode = path[path.length - 1];
     }
 
     draw() {
