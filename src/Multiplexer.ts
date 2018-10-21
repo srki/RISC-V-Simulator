@@ -66,7 +66,7 @@ export default class Multiplexer extends Component {
             }
         }
 
-        if (this.selValue && this.inputValues[this.selValue]) {
+        if (this.selValue != undefined && this.inputValues[this.selValue]) {
             this._outNode.forwardSignal(this, this.inputValues[this.selValue]);
         }
     }

@@ -41,6 +41,18 @@ export default class InstructionHelper {
         return this.toBitString(inst).substr(this.INSTR_SIZE - this.OP_CODE_SIZE);
     }
 
+    static getRd(instr: Val): number {
+        return parseInt(instr.asBinaryString().substr(20, 5), 2);
+    }
+
+    static getRs1(instr: Val): number {
+        return parseInt(instr.asBinaryString().substr(12, 5), 2);
+    }
+
+    static getRs2(instr: Val): number {
+        return parseInt(instr.asBinaryString().substr(7, 5), 2);
+    }
+
     static createRType(opCode: string, funct: string, rd: number, rs1: number, rs2: number): Val {
         let funct7 = funct.substr(0, 7);
         let funct3 = funct.substr(7, 3);

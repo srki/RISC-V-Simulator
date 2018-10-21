@@ -137,13 +137,13 @@ export default class Simulator {
         path = this.createPath([[430, 390], [550, 390]]);
         instrNode.addNeighbour(path[0]);
         let instrNodeTop = path[0];
-        registerFile.inputReadSel2Node = path[path.length - 1];
+        registerFile.readSel2Node = path[path.length - 1];
 
         /* instrNode -> ReadSel1 */
         path = this.createPath([[430, 370], [550, 370]]);
         instrNodeTop.addNeighbour(path[0]);
         instrNodeTop = path[0];
-        registerFile.inputReadSel1Node = path[path.length - 1];
+        registerFile.readSel1Node = path[path.length - 1];
 
         /* ImmSelect -> op2SelMux */
         path = this.createPath([[770, 575], [790, 575], [790, 550], [850, 550]]);
@@ -152,13 +152,13 @@ export default class Simulator {
 
         /* RF ReadData2 -> op2SelMux */
         path = this.createPath([[650, 390], [670, 390], [670, 525], [830, 525], [850, 525]]);
-        registerFile.outputReadData2Node = path[0];
+        registerFile.readData2Node = path[0];
         op2SelMux.setInputNodes(0, path[path.length - 1]);
         let readData2Node = path[path.length - 2];
 
         /* RF ReadData1 -> ALU */
         path = this.createPath([[650, 370], [885, 370], [885, 415], [895, 415]]);
-        registerFile.outputReadData1Node = path[0];
+        registerFile.readData1Node = path[0];
         ALU.input1Node = path[path.length - 1];
 
         /* op2SelMux -> ALU */
@@ -179,7 +179,7 @@ export default class Simulator {
         /* WBSel Mux -> RF WriteData */
         path = this.createPath([[1160, 640], [1180, 640], [1180, 730], [530, 730], [530, 590], [550, 590]]);
         WBSelMux.outNode = path[0];
-        registerFile.inputWriteNode = path[path.length - 1];
+        registerFile.inputWriteDataNode = path[path.length - 1];
 
         /* RF ReadData2 -> DataMemory */
         path = this.createPath([[830, 610], [985, 610]]);

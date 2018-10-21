@@ -3,6 +3,7 @@ import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
 import Val, {VAL_ZERO_32b} from "Val";
+import InstructionHelper from "./InstructionHelper";
 
 export default class InstructionMemory extends Component {
     private readonly size: number = 32;
@@ -16,6 +17,11 @@ export default class InstructionMemory extends Component {
         for (let i = 0; i < this.size; i++) {
             this.values.push(VAL_ZERO_32b);
         }
+
+        for (let i = 0; i < 5; i++) {
+            this.values[i] = InstructionHelper.createRType(InstructionHelper.OP_CODE_ALU,
+                InstructionHelper.FUNCT_ADD, i + 2, i + 1, i + 1);
+        }
     }
 
     draw(g: Graphics): void {
@@ -25,7 +31,7 @@ export default class InstructionMemory extends Component {
         for (let i = 0; i < this.size; i++) {
             g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15,
                 Config.memoryFillColor, Config.memoryStrokeColor);
-            g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15,  this.values[i].asHexString(),
+            g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(),
                 Config.fontColor, 12);
         }
     }
