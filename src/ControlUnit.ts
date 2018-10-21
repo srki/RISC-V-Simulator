@@ -6,6 +6,15 @@ import CircuitNode from "CircutNode";
 export default class ControlUnit extends Component{
     private _inputNode : CircuitNode;
 
+    private _PCSelNode: CircuitNode;
+    private _RegWriteEn: CircuitNode;
+    private _MemWrite: CircuitNode;
+    private _WBSel: CircuitNode;
+    private _WASel: CircuitNode;
+    private _ImmSel: CircuitNode;
+    private _FuncSel: CircuitNode;
+    private _Op2Sel: CircuitNode;
+
     constructor(x: number, y: number) {
         super(x, y);
     }
@@ -22,7 +31,40 @@ export default class ControlUnit extends Component{
     }
 
 
-    set inputNode(value: CircuitNode) {
-        this._inputNode = value;
+    set inputNode(node: CircuitNode) {
+        this._inputNode = node;
+        node.addNeighbour(this);
+    }
+
+    set PCSelNode(node: CircuitNode) {
+        this._PCSelNode = node;
+    }
+
+    set RegWriteEn(node: CircuitNode) {
+        this._RegWriteEn = node;
+    }
+
+    set MemWrite(node: CircuitNode) {
+        this._MemWrite = node;
+    }
+
+    set WBSel(node: CircuitNode) {
+        this._WBSel = node;
+    }
+
+    set WASel(node: CircuitNode) {
+        this._WASel = node;
+    }
+
+    set ImmSel(node: CircuitNode) {
+        this._ImmSel = node;
+    }
+
+    set FuncSel(node: CircuitNode) {
+        this._FuncSel = node;
+    }
+
+    set Op2Sel(node: CircuitNode) {
+        this._Op2Sel = node;
     }
 }
