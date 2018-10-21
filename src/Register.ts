@@ -2,7 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import CircuitNode from "CircutNode";
 import Config from "Config";
-import Val, {ZERO_VAL_0, ZERO_VAL_32} from "./Val";
+import Val, {ZERO_VAL_0, ZERO_VAL_32} from "Val";
 
 export enum RegisterOrientation {
     HORIZONTAL,

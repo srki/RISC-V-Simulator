@@ -2,6 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
+import Val from "Val";
 
 export default class ControlUnit extends Component{
     private _inputNode : CircuitNode;
@@ -30,6 +31,10 @@ export default class ControlUnit extends Component{
             Config.fontColor, Config.fontSize);
     }
 
+
+    forwardSignal(signaler: Component, value: Val): void {
+        super.forwardSignal(signaler, value);
+    }
 
     set inputNode(node: CircuitNode) {
         this._inputNode = node;

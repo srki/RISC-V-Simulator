@@ -1,8 +1,8 @@
-import CircuitNode from "./CircutNode";
-import Graphics from "./Graphics";
-import Config from "./Config";
-import Component from "./Component";
-import Val from "./Val";
+import CircuitNode from "CircutNode";
+import Graphics from "Graphics";
+import Config from "Config";
+import Component from "Component";
+import Val from "Val";
 
 export default class DataMemory extends Component {
     private readonly size: number = 32;

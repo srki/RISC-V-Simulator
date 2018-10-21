@@ -17,5 +17,3 @@ export default class Container extends Component {
         this.elements.forEach(el => el.onRisingEdge());
     }
 }
-
-export {Container}

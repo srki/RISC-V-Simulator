@@ -1,5 +1,5 @@
 import Graphics from "Graphics";
-import Val from "./Val";
+import Val from "Val";
 
 export default abstract class Component {
     public readonly x: number;

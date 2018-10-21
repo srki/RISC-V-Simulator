@@ -1,7 +1,7 @@
 import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
-import Val, {ZERO_VAL_0, ZERO_VAL_32} from "./Val";
+import Val, {ZERO_VAL_0, ZERO_VAL_32} from "Val";
 
 export default class CircuitNode extends Component{
     public static cnt = 0;

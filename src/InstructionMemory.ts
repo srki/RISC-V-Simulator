@@ -2,7 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
-import Val from "./Val";
+import Val from "Val";
 
 export default class InstructionMemory extends Component {
     private readonly size: number = 32;

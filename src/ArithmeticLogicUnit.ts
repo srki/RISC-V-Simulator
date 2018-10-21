@@ -2,7 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import CircuitNode from "CircutNode";
 import Config from "Config";
-import Val, {ZERO_VAL_32, ZERO_VAL_5} from "./Val";
+import Val, {ZERO_VAL_32, ZERO_VAL_5} from "Val";
 
 export default class ArithmeticLogicUnit extends Component {
     private _outputNode: CircuitNode = null;

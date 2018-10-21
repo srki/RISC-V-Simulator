@@ -12,7 +12,7 @@ import RegisterFile from "RegisterFile";
 import ImmSelect from "ImmSelect";
 import ALUControl from "ALUControl";
 import DataMemory from "./DataMemory";
-import Val from "./Val";
+import Val from "Val";
 
 export default class Simulator {
     protected elements: Component[] = [];
