@@ -42,6 +42,14 @@ export default class Val {
         return "0x" + str.toUpperCase();
     }
 
+    asBinaryString(): string {
+        let str = this.asUnsignedInt().toString(2);
+        while (str.length < this.num_bits) {
+            str = "0" + str;
+        }
+        return str;
+    }
+
     asShortHexString(): string {
         return this.asUnsignedInt().toString(16).toLocaleUpperCase();
     }

@@ -2,7 +2,7 @@ import CircuitNode from "CircutNode";
 import Graphics from "Graphics";
 import Config from "Config";
 import Component from "Component";
-import Val from "Val";
+import Val, {VAL_ZERO_32b} from "Val";
 
 export default class DataMemory extends Component {
     public static readonly WRITE_NO = Val.UnsignedInt(0, 1);
@@ -19,7 +19,7 @@ export default class DataMemory extends Component {
     constructor(x: number, y: number) {
         super(x, y);
         for (let i = 0; i < this.size; i++) {
-            this.values.push(Val.SignedInt(i + 1));
+            this.values.push(VAL_ZERO_32b);
         }
     }
 

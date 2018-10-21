@@ -2,7 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
-import Val from "Val";
+import Val, {VAL_ZERO_32b} from "Val";
 
 export default class InstructionMemory extends Component {
     private readonly size: number = 32;
@@ -14,7 +14,7 @@ export default class InstructionMemory extends Component {
     constructor(x: number, y: number) {
         super(x, y);
         for (let i = 0; i < this.size; i++) {
-            this.values.push(Val.UnsignedInt(i+1));
+            this.values.push(VAL_ZERO_32b);
         }
     }
 
