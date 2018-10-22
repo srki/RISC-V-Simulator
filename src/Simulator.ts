@@ -21,9 +21,7 @@ export default class Simulator {
     constructor(canvas: HTMLCanvasElement) {
         this.g = new Graphics(canvas, 1200, 800);
 
-        this.create();
-
-        this.elements.forEach(el => el.onFallingEdge());
+        this.reset();
     }
 
     create() {
@@ -261,5 +259,17 @@ export default class Simulator {
         pathNodes.forEach(el => this.elements.push(el));
 
         return pathNodes;
+    }
+
+    load() {
+
+    }
+
+    reset() {
+
+        this.create();
+
+        this.elements.forEach(el => el.onFallingEdge());
+        this.draw();
     }
 }
