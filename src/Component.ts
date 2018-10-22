@@ -17,8 +17,10 @@ export default abstract class Component {
 
     abstract draw(g: Graphics): void;
 
-    forwardSignal(signaler: Component, value: Val): void {
+    reset(): void {
+    }
 
+    forwardSignal(signaler: Component, value: Val): void {
     }
 
     onRisingEdge(): void {

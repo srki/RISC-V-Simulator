@@ -1,21 +1,28 @@
 import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
-import Val, {VAL_ONE_32b} from "Val";
+import Val from "Val";
 
 export default class CircuitNode extends Component{
+    private readonly defaultValue: Val;
+
     private neighbours: Component[] = [];
     private neighbourNodes: CircuitNode[] = [];
     private _value: Val;
 
-    constructor(x: number, y: number, value: Val = VAL_ONE_32b) {
+    constructor(x: number, y: number, defaultValue: Val = undefined) {
         super(x, y);
-        this._value = value;
+        this.defaultValue = defaultValue;
+        this.reset();
     }
 
     draw(g: Graphics): void {
         g.fillCircle(this.x, this.y, 2, Config.signalColor);
         this.neighbourNodes.forEach(el => g.line(this.x, this.y, el.x, el.y, Config.lineColor));
+    }
+
+    reset(): void {
+        this._value = this.defaultValue;
     }
 
     forwardSignal(signaler: Component, value: Val): void {

@@ -22,6 +22,9 @@ export default class InstructionMemory extends Component {
             this.values[i] = InstructionHelper.createRType(InstructionHelper.OP_CODE_ALU,
                 InstructionHelper.FUNCT_ADD, i + 2, i + 1, i + 1);
         }
+
+        this.values[5] = InstructionHelper.createRType(InstructionHelper.OP_CODE_ALU,
+            InstructionHelper.FUNCT_SUB, 6, 6, 5);
     }
 
     draw(g: Graphics): void {

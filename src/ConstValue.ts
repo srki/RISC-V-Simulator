@@ -21,7 +21,6 @@ export default class ConstValue extends Component {
 
     onFallingEdge(): void {
         this._outNode.forwardSignal(this, this.value);
-
     }
 
     set outNode(value: CircuitNode) {

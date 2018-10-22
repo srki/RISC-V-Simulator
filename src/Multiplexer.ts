@@ -71,12 +71,12 @@ export default class Multiplexer extends Component {
         }
     }
 
-    onFallingEdge(): void {
+    reset(): void {
         this.selValue = undefined;
         this.inputValues = [];
     }
 
-    setInputNodes(idx: number, node: CircuitNode){
+    setInputNodes(idx: number, node: CircuitNode) {
         this._inputNodes[idx] = node;
         node.addNeighbour(this);
     }

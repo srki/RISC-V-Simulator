@@ -10,7 +10,7 @@ import InstructionHelper from "InstructionHelper";
 import ImmSelect from "ImmSelect";
 
 export default class ControlUnit extends Component {
-    private _inputNode: CircuitNode;
+    private _instrNode: CircuitNode;
 
     private _PCSelNode: CircuitNode;
     private _RegWriteEn: CircuitNode;
@@ -21,8 +21,11 @@ export default class ControlUnit extends Component {
     private _FuncSel: CircuitNode;
     private _Op2Sel: CircuitNode;
 
+    private instrValue: Val;
+
     constructor(x: number, y: number) {
         super(x, y);
+        this.reset();
     }
 
     draw(g: Graphics): void {
@@ -32,18 +35,26 @@ export default class ControlUnit extends Component {
 
         g.fillRect(this.x + 10, this.y + 90, 150, 25,
             Config.memoryFillColor, Config.memoryStrokeColor);
-        g.drawText(this.x + 20, this.y + 90 + 21, this._inputNode.value.asHexString(),
+        g.drawText(this.x + 20, this.y + 90 + 21, this._instrNode.value.asHexString(),
             Config.fontColor, Config.fontSize);
     }
 
+    reset(): void {
+        this.instrValue = undefined;
+    }
 
     forwardSignal(signaler: Component, value: Val): void {
-        if (signaler != this._inputNode) {
-            console.error("Error");
-            return;
+        switch (signaler) {
+            case this._instrNode: {
+                this.instrValue = value;
+                break;
+            }
+            default: {
+                console.error("Error");
+            }
         }
 
-        let opcode = InstructionHelper.getOpCodeStr(value);
+        let opcode = InstructionHelper.getOpCodeStr(this.instrValue);
         let ImmSel, Op2Sel, FuncSel, MemWr, RFWen, WBSel, WASel, PCSel: Val;
 
         switch (opcode) {
@@ -141,8 +152,8 @@ export default class ControlUnit extends Component {
         if (PCSel) this._PCSelNode.forwardSignal(this, PCSel);
     }
 
-    set inputNode(node: CircuitNode) {
-        this._inputNode = node;
+    set instrNode(node: CircuitNode) {
+        this._instrNode = node;
         node.addNeighbour(this);
     }
 

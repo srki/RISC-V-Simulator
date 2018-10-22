@@ -4,18 +4,21 @@ import Config from "Config";
 import CircuitNode from "CircutNode";
 import Val from "Val";
 
-export default class ImmSelect extends Component{
+export default class ImmSelect extends Component {
     public static readonly ITYPE = Val.UnsignedInt(0, 2);
     public static readonly BRTYPE = Val.UnsignedInt(1, 2);
     public static readonly BSTYPE = Val.UnsignedInt(2, 2);
 
-
-    private _inputInstrNode: CircuitNode;
+    private _instrNode: CircuitNode;
     private _outNode: CircuitNode;
     private _controlNode: CircuitNode;
 
+    private instructionValue: Val;
+    private controlValue: Val;
+
     constructor(x: number, y: number) {
         super(x, y);
+        this.reset();
     }
 
     draw(g: Graphics): void {
@@ -24,16 +27,22 @@ export default class ImmSelect extends Component{
         g.drawText(this.x + 15, this.y + 43, "Select", Config.fontColor, Config.fontSize);
     }
 
+    reset(): void {
+        this.instructionValue = undefined;
+        this.controlValue = undefined;
+    }
 
-    set inputInstrNode(node: CircuitNode) {
-        this._inputInstrNode = node;
+    set instrNode(node: CircuitNode) {
+        this._instrNode = node;
+        node.addNeighbour(this);
+    }
+
+    set controlNode(node: CircuitNode) {
+        this._controlNode = node;
+        node.addNeighbour(this);
     }
 
     set outNode(node: CircuitNode) {
         this._outNode = node;
-    }
-
-    set controlNode(value: CircuitNode) {
-        this._controlNode = value;
     }
 }

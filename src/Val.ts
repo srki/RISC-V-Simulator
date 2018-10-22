@@ -58,6 +58,39 @@ export default class Val {
         return this.num_bits;
     }
 
+    // TODO: check if the implementations are correct
+    static add(lhs: Val, rhs: Val): Val {
+        return new Val(lhs.asUnsignedInt() + rhs.asUnsignedInt(), 32);
+    }
+
+    static sub(lhs: Val, rhs: Val): Val {
+        return new Val(lhs.asUnsignedInt() - rhs.asUnsignedInt(), 32);
+    }
+
+    static and(lhs: Val, rhs: Val): Val {
+        return new Val(lhs.asUnsignedInt() & rhs.asUnsignedInt(), 32);
+    }
+
+    static or(lhs: Val, rhs: Val): Val {
+        return new Val(lhs.asUnsignedInt() | rhs.asUnsignedInt(), 32);
+    }
+
+    static xor(lhs: Val, rhs: Val): Val {
+        return new Val(lhs.asUnsignedInt() ^ rhs.asUnsignedInt(), 32);
+    }
+
+    static shiftLeftLogical(lhs: Val, rhs: Val): Val {
+        return new Val(lhs.asUnsignedInt() << rhs.asUnsignedInt(), 32);
+    }
+
+    static shiftRightLogical(lhs: Val, rhs: Val): Val {
+        return new Val(lhs.asUnsignedInt() >>> rhs.asUnsignedInt(), 32);
+    }
+
+    static shiftRightArithmetic(lhs: Val, rhs: Val): Val {
+        return new Val(lhs.asUnsignedInt() >> rhs.asUnsignedInt(), 32);
+    }
+
     static main() {
         console.log("hello world");
 

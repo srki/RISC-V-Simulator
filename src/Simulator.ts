@@ -30,7 +30,7 @@ export default class Simulator {
         let PCRegister = new Register(35, 230);
         let instrMemory = new InstructionMemory(60, 285);
         let PCStep = new ConstValue(150, 135, Val.UnsignedInt(4));
-        let PCAdder = new ArithmeticLogicUnit(205, 135);
+        let PCAdder = new ArithmeticLogicUnit(205, 135, ArithmeticLogicUnit.ADD);
         let PCSelMux = new Multiplexer(210, 25, 4, MultiplexerOrientation.LEFT);
         let controlUnit = new ControlUnit(250, 450);
 
@@ -97,7 +97,7 @@ export default class Simulator {
         /* instrNode -> Control unit */
         path = this.createPath([[335, 412.5], [335, 450]]);
         instrNode.addNeighbour(path[0]);
-        controlUnit.inputNode = path[path.length - 1];
+        controlUnit.instrNode = path[path.length - 1];
 
         /* Extend instruction wire */
         node = new CircuitNode(430, 412.5);
@@ -125,13 +125,13 @@ export default class Simulator {
         path = this.createPath([[430, 620], [660, 620], [660, 575], [670, 575]]);
         instrNodeBottom.addNeighbour(path[0]);
         instrNodeBottom = path[0];
-        immSelect.inputInstrNode = path[path.length - 1];
+        immSelect.instrNode = path[path.length - 1];
 
         /* instrNode -> ALU Control */
         path = this.createPath([[430, 655], [740, 655]]);
         instrNodeBottom.addNeighbour(path[0]);
         instrNodeBottom = path[0];
-        immSelect.inputInstrNode = path[path.length - 1];
+        ALUCtrl.instrNode = path[path.length - 1];
 
         /* instrNode -> ReadSel2 */
         path = this.createPath([[430, 390], [550, 390]]);
@@ -169,7 +169,7 @@ export default class Simulator {
         /* ALU Control -> ALU */
         path = this.createPath([[840, 655], [915, 655], [915, 467.5]]);
         ALUCtrl.outNode = path[0];
-        ALU.opInput = path[path.length - 1];
+        ALU.selOpNode = path[path.length - 1];
 
         /* ALU -> WBSel Mux */
         path = this.createPath([[935, 437.5], [960, 437.5], [960, 710], [1110, 710], [1110, 655], [1135, 655]]);
@@ -239,6 +239,7 @@ export default class Simulator {
 
     step() {
         this.elements.forEach(el => el.onRisingEdge());
+        this.elements.forEach(el => el.reset());
         this.elements.forEach(el => el.onFallingEdge());
         this.draw();
     }
