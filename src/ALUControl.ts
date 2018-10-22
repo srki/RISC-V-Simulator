@@ -126,7 +126,62 @@ export default class ALUControl extends Component {
     }
 
     private handleOp() {
+        let func7 = this.instructionValue.asBinaryString().substr(0, 7);
+        let func3 = this.instructionValue.asBinaryString().substr(17, 3);
 
+        let result: Val;
+
+        switch (func3) {
+            case InstructionHelper.FUNCT_ADDI: {
+                result = ArithmeticLogicUnit.ADD;
+                break;
+            }
+            case InstructionHelper.FUNCT_SLTI: {
+                result = ArithmeticLogicUnit.SLT;
+                break;
+            }
+            case InstructionHelper.FUNCT_SLTIU: {
+                result = ArithmeticLogicUnit.SLTU;
+                break;
+            }
+            case InstructionHelper.FUNCT_XORI: {
+                result = ArithmeticLogicUnit.XOR;
+                break;
+            }
+            case InstructionHelper.FUNCT_ORI: {
+                result = ArithmeticLogicUnit.OR;
+                break;
+            }
+            case InstructionHelper.FUNCT_ANDI: {
+                result = ArithmeticLogicUnit.AND;
+                break;
+            }
+        }
+
+        if (result != undefined) {
+            this._outNode.forwardSignal(this, result);
+            return;
+        }
+
+        switch (func7 + func3) {
+            case InstructionHelper.FUNCT_SLLI: {
+                result = ArithmeticLogicUnit.SLL;
+                break;
+            }
+            case InstructionHelper.FUNCT_SRLI: {
+                result = ArithmeticLogicUnit.SRL;
+                break;
+            }
+            case InstructionHelper.FUNCT_SRAI: {
+                result = ArithmeticLogicUnit.SRA;
+                break;
+            }
+            default: {
+                console.log("Error");
+            }
+        }
+
+        this._outNode.forwardSignal(this, result);
     }
 
     private handleAdd() {

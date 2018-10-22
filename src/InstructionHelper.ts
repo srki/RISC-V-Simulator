@@ -24,9 +24,23 @@ export default class InstructionHelper {
     static readonly FUNCT_SRA  = "0100000101";
     static readonly FUNCT_OR   = "0000000110";
     static readonly FUNCT_AND  = "0000000111";
+
+    /* ALUi Functs */
+    static readonly FUNCT_ADDI   = "000";
+    static readonly FUNCT_SLTI   = "010";
+    static readonly FUNCT_SLTIU  = "011";
+    static readonly FUNCT_XORI   = "100";
+    static readonly FUNCT_ORI    = "110";
+    static readonly FUNCT_ANDI   = "111";
+
+    static readonly FUNCT_SLLI  = "0000000001";
+    static readonly FUNCT_SRLI  = "0000000101";
+    static readonly FUNCT_SRAI  = "0100000101";
+
     /* @formatter:on */
 
-    private static padWithZeroes(str: String, len: number = 32) {
+    private static convertAndPad(num: Number, len: number = 32) {
+        let str = num.toString(2);
         while (str.length < len) {
             str = "0" + str;
         }
@@ -34,7 +48,7 @@ export default class InstructionHelper {
     }
 
     static toBitString(instr: Val) {
-        return this.padWithZeroes(instr.asUnsignedInt().toString(2));
+        return this.convertAndPad(instr.asUnsignedInt());
     }
 
     static getOpCodeStr(inst: Val) {
@@ -57,12 +71,26 @@ export default class InstructionHelper {
         let funct7 = funct.substr(0, 7);
         let funct3 = funct.substr(7, 3);
 
-        let instr = funct7 +
-            this.padWithZeroes(rs2.toString(2), 5) +
-            this.padWithZeroes(rs1.toString(2), 5) +
-            funct3 +
-            this.padWithZeroes(rd.toString(2), 5) +
-            opCode;
+        let instr = funct7 + this.convertAndPad(rs2, 5) + this.convertAndPad(rs1, 5) + funct3 +
+            this.convertAndPad(rd, 5) + opCode;
+
+        return new Val(parseInt(instr, 2), 32);
+    }
+
+    static createIType(opCode: string, funct: string, rd: number, rs1: number, imm: number) {
+        let instr = this.convertAndPad(imm, 12) + this.convertAndPad(rs1, 5) + funct +
+            this.convertAndPad(rd, 5) + opCode;
+
+        return new Val(parseInt(instr, 2), 32);
+    }
+
+    static createITypeShift(opCode: string, funct: string, rd: number, rs1: number, shamt: number) {
+        let funct7 = funct.substr(0, 7);
+        let funct3 = funct.substr(7, 3);
+
+        let instr = funct7 + this.convertAndPad(shamt, 5) + this.convertAndPad(rs1, 5) + funct3 +
+            this.convertAndPad(rd, 5) + opCode;
+
         return new Val(parseInt(instr, 2), 32);
     }
 
