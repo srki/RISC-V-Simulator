@@ -53,139 +53,112 @@ export default class ALUControl extends Component {
             return;
         }
 
+        let result: Val;
+
         switch (this.controlValue) {
             case ALUControl.FUNC: {
-                this.handleFunc();
+                result = this.handleFunc();
                 break;
             }
             case ALUControl.OP: {
-                this.handleOp();
+                result = this.handleOp();
                 break;
             }
             case ALUControl.ADD: {
-                this.handleAdd();
+                result = ALUControl.ADD;
                 break;
             }
             default: {
-                console.log("Error");
+                console.log("Unsupported control signal");
             }
+        }
+
+        if (result == undefined) {
+            console.log("Unsupported operation")
+        } else {
+            this._outNode.forwardSignal(this, result);
         }
 
     }
 
-    private handleFunc() {
+    private handleFunc(): Val {
         let func7 = this.instructionValue.asBinaryString().substr(0, 7);
         let func3 = this.instructionValue.asBinaryString().substr(17, 3);
         let func = func7 + func3;
 
-        let result: Val;
-
         switch (func) {
-            case InstructionHelper.FUNCT_ADD: {
-                result = ArithmeticLogicUnit.ADD;
-                break;
-            }
-            case InstructionHelper.FUNCT_SUB: {
-                result = ArithmeticLogicUnit.SUB;
-                break;
-            }
-            case InstructionHelper.FUNCT_SLL: {
-                result = ArithmeticLogicUnit.SLL;
-                break;
-            }
-            case InstructionHelper.FUNCT_SLT: {
-                result = ArithmeticLogicUnit.SLT;
-                break;
-            }
-            case InstructionHelper.FUNCT_SLTU: {
-                result = ArithmeticLogicUnit.SLTU;
-                break;
-            }
-            case InstructionHelper.FUNCT_XOR: {
-                result = ArithmeticLogicUnit.XOR;
-                break;
-            }
-            case InstructionHelper.FUNCT_SRL: {
-                result = ArithmeticLogicUnit.XOR;
-                break;
-            }
-            case InstructionHelper.FUNCT_SRA: {
-                result = ArithmeticLogicUnit.SRA;
-                break;
-            }
-            case InstructionHelper.FUNCT_OR: {
-                result = ArithmeticLogicUnit.OR;
-                break;
-            }
-            case InstructionHelper.FUNCT_AND: {
-                result = ArithmeticLogicUnit.AND;
-                break;
-            }
+            case InstructionHelper.FUNCT_ADD:
+                return ArithmeticLogicUnit.ADD;
+
+            case InstructionHelper.FUNCT_SUB:
+                return ArithmeticLogicUnit.SUB;
+
+            case InstructionHelper.FUNCT_SLL:
+                return ArithmeticLogicUnit.SLL;
+
+            case InstructionHelper.FUNCT_SLT:
+                return ArithmeticLogicUnit.SLT;
+
+            case InstructionHelper.FUNCT_SLTU:
+                return ArithmeticLogicUnit.SLTU;
+
+            case InstructionHelper.FUNCT_XOR:
+                return ArithmeticLogicUnit.XOR;
+
+            case InstructionHelper.FUNCT_SRL:
+                return ArithmeticLogicUnit.XOR;
+
+            case InstructionHelper.FUNCT_SRA:
+                return ArithmeticLogicUnit.SRA;
+
+            case InstructionHelper.FUNCT_OR:
+                return ArithmeticLogicUnit.OR;
+
+            case InstructionHelper.FUNCT_AND:
+                return ArithmeticLogicUnit.AND;
+
+            default:
+                return null;
         }
-        this._outNode.forwardSignal(this, result);
     }
 
-    private handleOp() {
+    private handleOp(): Val {
         let func7 = this.instructionValue.asBinaryString().substr(0, 7);
         let func3 = this.instructionValue.asBinaryString().substr(17, 3);
 
-        let result: Val;
-
         switch (func3) {
-            case InstructionHelper.FUNCT_ADDI: {
-                result = ArithmeticLogicUnit.ADD;
-                break;
-            }
-            case InstructionHelper.FUNCT_SLTI: {
-                result = ArithmeticLogicUnit.SLT;
-                break;
-            }
-            case InstructionHelper.FUNCT_SLTIU: {
-                result = ArithmeticLogicUnit.SLTU;
-                break;
-            }
-            case InstructionHelper.FUNCT_XORI: {
-                result = ArithmeticLogicUnit.XOR;
-                break;
-            }
-            case InstructionHelper.FUNCT_ORI: {
-                result = ArithmeticLogicUnit.OR;
-                break;
-            }
-            case InstructionHelper.FUNCT_ANDI: {
-                result = ArithmeticLogicUnit.AND;
-                break;
-            }
-        }
+            case InstructionHelper.FUNCT_ADDI:
+                return ArithmeticLogicUnit.ADD;
 
-        if (result != undefined) {
-            this._outNode.forwardSignal(this, result);
-            return;
+            case InstructionHelper.FUNCT_SLTI:
+                return ArithmeticLogicUnit.SLT;
+
+            case InstructionHelper.FUNCT_SLTIU:
+                return ArithmeticLogicUnit.SLTU;
+
+            case InstructionHelper.FUNCT_XORI:
+                return ArithmeticLogicUnit.XOR;
+
+            case InstructionHelper.FUNCT_ORI:
+                return ArithmeticLogicUnit.OR;
+
+            case InstructionHelper.FUNCT_ANDI:
+                return ArithmeticLogicUnit.AND;
         }
 
         switch (func7 + func3) {
-            case InstructionHelper.FUNCT_SLLI: {
-                result = ArithmeticLogicUnit.SLL;
-                break;
-            }
-            case InstructionHelper.FUNCT_SRLI: {
-                result = ArithmeticLogicUnit.SRL;
-                break;
-            }
-            case InstructionHelper.FUNCT_SRAI: {
-                result = ArithmeticLogicUnit.SRA;
-                break;
-            }
-            default: {
-                console.log("Error");
-            }
+            case InstructionHelper.FUNCT_SLLI:
+                return ArithmeticLogicUnit.SLL;
+
+            case InstructionHelper.FUNCT_SRLI:
+                return ArithmeticLogicUnit.SRL;
+
+            case InstructionHelper.FUNCT_SRAI:
+                return ArithmeticLogicUnit.SRA;
+
+            default:
+                return undefined;
         }
-
-        this._outNode.forwardSignal(this, result);
-    }
-
-    private handleAdd() {
-        this._outNode.forwardSignal(this, ArithmeticLogicUnit.ADD);
     }
 
     set instrNode(node: CircuitNode) {
