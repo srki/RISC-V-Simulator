@@ -184,6 +184,7 @@ export default class Simulator {
         /* RF ReadData2 -> DataMemory */
         path = this.createPath([[830, 610], [985, 610]]);
         readData2Node.addNeighbour(path[0]);
+        dataMemory.inputDataNode = path[path.length - 1];
 
         /*
          *Control signals
