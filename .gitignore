@@ -3,3 +3,6 @@
 
 # WebStorm
 **/.idea
+
+*.js
+*.js.map

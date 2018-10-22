@@ -12,21 +12,22 @@ import RegisterFile from "RegisterFile";
 import ImmSelect from "ImmSelect";
 import ALUControl from "ALUControl";
 import DataMemory from "./DataMemory";
-import Val from "Val";
+import Val, {VAL_ZERO_32b} from "Val";
+import InstructionHelper from "./InstructionHelper";
 
 export default class Simulator {
     protected elements: Component[] = [];
-    g: Graphics;
+    private readonly g: Graphics;
+    private initialInstruct : Val[];
 
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement, parsed: Val[]) {
         this.g = new Graphics(canvas, 1200, 800);
-
-        this.reset();
+        this.load(parsed);
     }
 
     create() {
         let PCRegister = new Register(35, 230);
-        let instrMemory = new InstructionMemory(60, 285);
+        let instrMemory = new InstructionMemory(60, 285, this.initialInstruct);
         let PCStep = new ConstValue(150, 135, Val.UnsignedInt(4));
         let PCAdder = new ArithmeticLogicUnit(205, 135, ArithmeticLogicUnit.ADD);
         let PCSelMux = new Multiplexer(210, 25, 4, MultiplexerOrientation.LEFT);
@@ -228,20 +229,6 @@ export default class Simulator {
         op2SelMux.selInputNode = path[path.length - 1];
     }
 
-    draw() {
-        this.g.rescale();
-        this.g.clear(Config.backgroundColor);
-
-        this.elements.forEach(el => el.draw(this.g))
-    }
-
-    step() {
-        this.elements.forEach(el => el.onRisingEdge());
-        this.elements.forEach(el => el.reset());
-        this.elements.forEach(el => el.onFallingEdge());
-        this.draw();
-    }
-
     private createPath(path: number[][]): CircuitNode[] {
         let pathNodes: CircuitNode[] = [];
 
@@ -260,14 +247,28 @@ export default class Simulator {
         return pathNodes;
     }
 
-    load() {
+    draw() {
+        this.g.rescale();
+        this.g.clear(Config.backgroundColor);
 
+        this.elements.forEach(el => el.draw(this.g))
+    }
+
+    step() {
+        console.log("Step");
+        this.elements.forEach(el => el.onRisingEdge());
+        this.elements.forEach(el => el.reset());
+        this.elements.forEach(el => el.onFallingEdge());
+        this.draw();
+    }
+
+    load(parsed: Val[]) {
+        this.initialInstruct = parsed;
+        this.reset();
     }
 
     reset() {
-
         this.create();
-
         this.elements.forEach(el => el.onFallingEdge());
         this.draw();
     }

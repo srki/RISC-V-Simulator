@@ -113,6 +113,9 @@ export default class Val {
 
     }
 
+    static HexString(s: string, num_bits : number = 32) {
+        return Val.UnsignedInt(parseInt(s, 16), num_bits);
+    }
 }
 
 export const VAL_ZERO_32b = Val.UnsignedInt(0, 32);

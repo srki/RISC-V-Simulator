@@ -28,13 +28,32 @@
             position:relative;
             top:1px;
         }
+        button:disabled,button[disabled]{
+            border: 1px solid #999999;
+            background-color: #cccccc;
+            color: #666666;
+        }
+
     </style>
 </head>
-<button id="btn-load">load</button>
-<button id="btn-reset">reset</button>
-<button id="btn-step">step</button>
-<button id="btn-play">play</button>
 <body>
-    <canvas id="sim-canvas" width="1200" height="800" style="float: left; margin-right: 10px"></canvas>
+    <button id="btn-load">load</button>
+    <button id="btn-reset">reset</button>
+    <button id="btn-step">step</button>
+    <button id="btn-play">play</button>
+    <button disabled id="btn-pause">pause</button>
+    <p>
+        Enter a single supported RISC-V instructon or hex code per line
+        this assmelber does not support absolute addressing or any psuedo instructions, or assembly instructions
+    </p>
+    <textarea id="txt-code" rows="32" cols="30">
+0x00108133
+0x002101B3
+0x00318233
+0x004202B3
+0x00528333
+0x40530333
+    </textarea>
+    <canvas id="sim-canvas" width="1000" height="800" style="float: left; margin-right: 10px"></canvas>
 </body>
 </html>

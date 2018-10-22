@@ -1,22 +1,23 @@
 import Simulator from "Simulator";
 import Val from "./Val";
+import Parser from "./Parser";
 
 let canvas = <HTMLCanvasElement> document.getElementById("sim-canvas");
-let sim = new Simulator(canvas);
-sim.draw();
-
 let btnStep = <HTMLButtonElement> document.getElementById("btn-step");
-btnStep.addEventListener("click", evt => sim.step());
-
+let btnPlay = <HTMLButtonElement> document.getElementById("btn-play");
+let btnPause = <HTMLButtonElement> document.getElementById("btn-pause");
+let txtCode = <HTMLTextAreaElement> document.getElementById("txt-code");
+let btnLoad = <HTMLButtonElement> document.getElementById("btn-load");
+let btnReset = <HTMLButtonElement> document.getElementById("btn-reset");
+let sim = new Simulator(canvas, Parser.parse(txtCode.textContent));
 let play = false;
 
-let btnPlay = <HTMLButtonElement> document.getElementById("btn-play");
-btnPlay.addEventListener("click", evt => play=!play);
+sim.draw();
 
-let btnLoad = <HTMLButtonElement> document.getElementById("btn-load");
-btnLoad.addEventListener("click", evt => sim.load());
-
-let btnReset = <HTMLButtonElement> document.getElementById("btn-reset");
+btnStep.addEventListener("click", evt => {sim.step(); btnPause.click() });
+btnPlay.addEventListener("click", evt => {play=true; btnPlay.disabled = true; btnPause.disabled = false});
+btnPause.addEventListener("click", evt => {play=false; btnPlay.disabled = false; btnPause.disabled = true});
+btnLoad.addEventListener("click", evt => {let parsed = Parser.parse(txtCode.textContent); if(parsed) sim.load(parsed)});
 btnReset.addEventListener("click", evt => sim.reset());
 
 setInterval(() => {

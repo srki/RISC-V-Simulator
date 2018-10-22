@@ -3,35 +3,24 @@ import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
 import Val, {VAL_ZERO_32b} from "Val";
-import InstructionHelper from "./InstructionHelper";
 
 export default class InstructionMemory extends Component {
-    private readonly size: number = 32;
-    private values: Val[] = [];
+    public static readonly SIZE: number = 32;
+    private readonly values: Val[] = [];
 
     private _addressNode: CircuitNode;
     private _outputDataNode: CircuitNode;
 
-    constructor(x: number, y: number) {
+    constructor(x: number, y: number, values: Val[]) {
         super(x, y);
-        for (let i = 0; i < this.size; i++) {
-            this.values.push(VAL_ZERO_32b);
-        }
-
-        for (let i = 0; i < 5; i++) {
-            this.values[i] = InstructionHelper.createRType(InstructionHelper.OP_CODE_ALU,
-                InstructionHelper.FUNCT_ADD, i + 2, i + 1, i + 1);
-        }
-
-        this.values[5] = InstructionHelper.createRType(InstructionHelper.OP_CODE_ALU,
-            InstructionHelper.FUNCT_SUB, 6, 6, 5);
+        this.values = values;
     }
 
     draw(g: Graphics): void {
-        g.fillRect(this.x, this.y, 100, this.size * 15 + 20,
+        g.fillRect(this.x, this.y, 100, InstructionMemory.SIZE * 15 + 20,
             Config.elementFillColor, Config.elementStrokeColor);
 
-        for (let i = 0; i < this.size; i++) {
+        for (let i = 0; i < InstructionMemory.SIZE; i++) {
             g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15,
                 Config.memoryFillColor, Config.memoryStrokeColor);
             g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(),
