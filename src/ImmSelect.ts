@@ -3,6 +3,7 @@ import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
 import Val from "Val";
+import InstructionHelper from "InstructionHelper";
 
 export default class ImmSelect extends Component {
     public static readonly ITYPE = Val.UnsignedInt(0, 2);
@@ -32,7 +33,6 @@ export default class ImmSelect extends Component {
         this.controlValue = undefined;
     }
 
-
     forwardSignal(signaler: Component, value: Val): void {
         switch (signaler) {
             case this._instrNode: {
@@ -52,50 +52,28 @@ export default class ImmSelect extends Component {
             return;
         }
 
-        let result: Val;
+        let result: number;
 
         switch (this.controlValue) {
             case ImmSelect.ITYPE: {
-                result = this.handleIType();
+                result = InstructionHelper.getImmIType(this.instrValue);
                 break;
             }
             case ImmSelect.BRTYPE: {
-                result = this.handleBType();
+                result = InstructionHelper.getImmBType(this.instrValue);
                 break;
             }
             case ImmSelect.BSTYPE: {
-                result = this.handleSType();
+                result = InstructionHelper.getImmSType(this.instrValue);
                 break;
             }
             default: {
+                result = 0;
                 console.log("Unsupported control signal");
             }
         }
 
-        this._outNode.forwardSignal(this, result);
-    }
-
-    handleIType(): Val {
-        let imm = this.instrValue.asBinaryString().substr(0, 12);
-        return new Val(parseInt(imm, 2), 32);
-    }
-
-    handleBType(): Val {
-        let instr = this.instrValue.asBinaryString();
-        let imm12 = instr.substr(0, 1);
-        let imm10 = instr.substr(1, 6);
-        let imm4 = instr.substr(20, 4);
-        let imm11 = instr.substr(24, 1);
-
-        return new Val(parseInt(imm12 + imm11 + imm10 + imm4  + "0", 2), 32);
-    }
-
-    handleSType(): Val {
-        let instr = this.instrValue.asBinaryString();
-        let imm11 = instr.substr(0, 7);
-        let imm4 = instr.substr(20, 5);
-
-        return new Val(parseInt(imm11 + imm4, 2), 32);
+        this._outNode.forwardSignal(this, new Val(result, 32));
     }
 
     set instrNode(node: CircuitNode) {
