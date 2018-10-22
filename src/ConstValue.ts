@@ -23,6 +23,10 @@ export default class ConstValue extends Component {
         this._outNode.forwardSignal(this, this.value);
     }
 
+    mark(caller: Component): void {
+        // TODO: change color
+    }
+
     set outNode(value: CircuitNode) {
         this._outNode = value;
     }

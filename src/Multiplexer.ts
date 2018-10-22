@@ -71,9 +71,18 @@ export default class Multiplexer extends Component {
         }
     }
 
-    reset(): void {
+    refresh(): void {
         this.selValue = undefined;
         this.inputValues = [];
+    }
+
+    mark(caller: Component): void {
+        this._selInputNode.mark(this);
+        if (this._inputNodes[this.selValue]) {
+            this._inputNodes[this.selValue].mark(this);
+        } else {
+            console.log("Error");
+        }
     }
 
     setInputNodes(idx: number, node: CircuitNode) {

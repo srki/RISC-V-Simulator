@@ -18,10 +18,12 @@ export default class Register extends Component {
 
     private value: Val = VAL_ZERO_32b;
 
+    private nextValue: Val = undefined;
+
     constructor(x: number, y: number, orientation: RegisterOrientation = RegisterOrientation.HORIZONTAL) {
         super(x, y);
-
         this.orientation = orientation;
+        this.nextValue = undefined;
     }
 
     draw(g: Graphics): void {
@@ -33,14 +35,22 @@ export default class Register extends Component {
         }
     }
 
-    onRisingEdge(): void {
-        if (this._writeEnable && this._writeEnable.value.asUnsignedInt() != 0) {
-            this.value = this._inputNode.value;
+    refresh(): void {
+        if (this.nextValue) {
+            this.value = this.nextValue;
         }
+        this.nextValue = undefined;
     }
 
     onFallingEdge(): void {
         this._outNode.forwardSignal(this, this.value);
+    }
+
+    onRisingEdge(): void {
+        if (this._writeEnable && this._writeEnable.value.asUnsignedInt() != 0) {
+            this.nextValue = this._inputNode.value;
+            this._inputNode.mark(this);
+        }
     }
 
     set inputNode(node: CircuitNode) {

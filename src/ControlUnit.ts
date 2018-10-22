@@ -21,11 +21,11 @@ export default class ControlUnit extends Component {
     private _FuncSel: CircuitNode;
     private _Op2Sel: CircuitNode;
 
-    private instrValue: Val;
+    private instrValue: Val = VAL_ZERO_32b;
 
     constructor(x: number, y: number) {
         super(x, y);
-        this.reset();
+        this.refresh();
     }
 
     draw(g: Graphics): void {
@@ -35,11 +35,11 @@ export default class ControlUnit extends Component {
 
         g.fillRect(this.x + 10, this.y + 90, 150, 25,
             Config.memoryFillColor, Config.memoryStrokeColor);
-        g.drawText(this.x + 20, this.y + 90 + 21, this._instrNode.value.asHexString(),
+        g.drawText(this.x + 20, this.y + 90 + 21, this.instrValue.asHexString(),
             Config.fontColor, Config.fontSize);
     }
 
-    reset(): void {
+    refresh(): void {
         this.instrValue = undefined;
     }
 
@@ -150,6 +150,10 @@ export default class ControlUnit extends Component {
         if (WBSel) this._WBSel.forwardSignal(this, WBSel);
         if (WASel) this._WASel.forwardSignal(this, WASel);
         if (PCSel) this._PCSelNode.forwardSignal(this, PCSel);
+    }
+
+    mark(caller: Component): void {
+        this._instrNode.mark(this);
     }
 
     set instrNode(node: CircuitNode) {

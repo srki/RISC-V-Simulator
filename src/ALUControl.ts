@@ -3,8 +3,8 @@ import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
 import Val from "Val";
-import ArithmeticLogicUnit from "./ArithmeticLogicUnit";
-import InstructionHelper from "./InstructionHelper";
+import ArithmeticLogicUnit from "ArithmeticLogicUnit";
+import InstructionHelper from "InstructionHelper";
 
 export default class ALUControl extends Component {
     public static readonly FUNC = Val.UnsignedInt(0, 2);
@@ -12,15 +12,15 @@ export default class ALUControl extends Component {
     public static readonly ADD = Val.UnsignedInt(2, 2);
 
     private _instrNode: CircuitNode;
-    private _outNode: CircuitNode;
     private _controlNode: CircuitNode;
+    private _outNode: CircuitNode;
 
-    private instructionValue: Val;
-    private controlValue: Val;
+    private instrValue: Val;
+    private ctrlValue: Val;
 
     constructor(x: number, y: number) {
         super(x, y);
-        this.reset();
+        this.refresh();
     }
 
     draw(g: Graphics): void {
@@ -29,19 +29,19 @@ export default class ALUControl extends Component {
         g.drawText(this.x + 10, this.y + 43, "Control", Config.fontColor, Config.fontSize);
     }
 
-    reset(): void {
-        this.instructionValue = undefined;
-        this.controlValue = undefined;
+    refresh(): void {
+        this.instrValue = undefined;
+        this.ctrlValue = undefined;
     }
 
     forwardSignal(signaler: Component, value: Val): void {
         switch (signaler) {
             case this._instrNode: {
-                this.instructionValue = value;
+                this.instrValue = value;
                 break;
             }
             case this._controlNode: {
-                this.controlValue = value;
+                this.ctrlValue = value;
                 break;
             }
             default: {
@@ -49,13 +49,13 @@ export default class ALUControl extends Component {
             }
         }
 
-        if (this.instructionValue == undefined || this.controlValue == undefined) {
+        if (this.instrValue == undefined || this.ctrlValue == undefined) {
             return;
         }
 
         let result: Val;
 
-        switch (this.controlValue) {
+        switch (this.ctrlValue) {
             case ALUControl.FUNC: {
                 result = this.handleFunc();
                 break;
@@ -82,8 +82,8 @@ export default class ALUControl extends Component {
     }
 
     private handleFunc(): Val {
-        let func7 = this.instructionValue.asBinaryString().substr(0, 7);
-        let func3 = this.instructionValue.asBinaryString().substr(17, 3);
+        let func7 = this.instrValue.asBinaryString().substr(0, 7);
+        let func3 = this.instrValue.asBinaryString().substr(17, 3);
         let func = func7 + func3;
 
         switch (func) {
@@ -123,8 +123,8 @@ export default class ALUControl extends Component {
     }
 
     private handleOp(): Val {
-        let func7 = this.instructionValue.asBinaryString().substr(0, 7);
-        let func3 = this.instructionValue.asBinaryString().substr(17, 3);
+        let func7 = this.instrValue.asBinaryString().substr(0, 7);
+        let func3 = this.instrValue.asBinaryString().substr(17, 3);
 
         switch (func3) {
             case InstructionHelper.FUNCT_ADDI:
@@ -159,6 +159,11 @@ export default class ALUControl extends Component {
             default:
                 return undefined;
         }
+    }
+
+    mark(caller: Component): void {
+        this._instrNode.mark(this);
+        this._controlNode.mark(this);
     }
 
     set instrNode(node: CircuitNode) {

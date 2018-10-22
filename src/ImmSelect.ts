@@ -11,15 +11,15 @@ export default class ImmSelect extends Component {
     public static readonly BSTYPE = Val.UnsignedInt(2, 2);
 
     private _instrNode: CircuitNode;
-    private _outNode: CircuitNode;
     private _controlNode: CircuitNode;
+    private _outNode: CircuitNode;
 
     private instrValue: Val;
-    private controlValue: Val;
+    private ctrlValue: Val;
 
     constructor(x: number, y: number) {
         super(x, y);
-        this.reset();
+        this.refresh();
     }
 
     draw(g: Graphics): void {
@@ -28,9 +28,9 @@ export default class ImmSelect extends Component {
         g.drawText(this.x + 15, this.y + 43, "Select", Config.fontColor, Config.fontSize);
     }
 
-    reset(): void {
+    refresh(): void {
         this.instrValue = undefined;
-        this.controlValue = undefined;
+        this.ctrlValue = undefined;
     }
 
     forwardSignal(signaler: Component, value: Val): void {
@@ -40,7 +40,7 @@ export default class ImmSelect extends Component {
                 break;
             }
             case this._controlNode: {
-                this.controlValue = value;
+                this.ctrlValue = value;
                 break;
             }
             default: {
@@ -48,13 +48,13 @@ export default class ImmSelect extends Component {
             }
         }
 
-        if (this.instrValue == undefined || this.controlValue == undefined) {
+        if (this.instrValue == undefined || this.ctrlValue == undefined) {
             return;
         }
 
         let result: number;
 
-        switch (this.controlValue) {
+        switch (this.ctrlValue) {
             case ImmSelect.ITYPE: {
                 result = InstructionHelper.getImmIType(this.instrValue);
                 break;
@@ -74,6 +74,11 @@ export default class ImmSelect extends Component {
         }
 
         this._outNode.forwardSignal(this, new Val(result, 32));
+    }
+
+    mark(caller: Component): void {
+        this._instrNode.mark(this);
+        this._controlNode.mark(this);
     }
 
     set instrNode(node: CircuitNode) {

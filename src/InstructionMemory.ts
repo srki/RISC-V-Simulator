@@ -2,7 +2,7 @@ import Component from "Component";
 import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
-import Val, {VAL_ZERO_32b} from "Val";
+import Val from "Val";
 
 export default class InstructionMemory extends Component {
     public static readonly SIZE: number = 32;
@@ -30,6 +30,10 @@ export default class InstructionMemory extends Component {
 
     forwardSignal(signaler: Component, value: Val): void {
         this._outputDataNode.forwardSignal(this, this.values[value.asUnsignedInt() / 4]);
+    }
+
+    mark(caller: Component): void {
+        this._addressNode.mark(this);
     }
 
     set addressNode(node: CircuitNode) {

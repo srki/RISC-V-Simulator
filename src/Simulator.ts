@@ -79,7 +79,7 @@ export default class Simulator {
 
         /* PC Adder -> PCSelMux */
         path = this.createPath([[245, 172.5], [255, 172.5], [255, 95], [235, 95]]);
-        PCAdder.outputNode = path[0];
+        PCAdder.resultNode = path[0];
         PCSelMux.setInputNodes(3, path[path.length - 1]);
 
         /* PC Register -> Instruction memory */
@@ -172,7 +172,7 @@ export default class Simulator {
 
         /* ALU -> WBSel Mux */
         path = this.createPath([[935, 437.5], [960, 437.5], [960, 710], [1110, 710], [1110, 655], [1135, 655]]);
-        ALU.outputNode = path[0];
+        ALU.resultNode = path[0];
         WBSelMux.setInputNodes(2, path[path.length - 1]);
 
         /* WBSel Mux -> RF WriteData */
@@ -257,9 +257,9 @@ export default class Simulator {
 
     step() {
         console.log("Step");
-        this.elements.forEach(el => el.onRisingEdge());
-        this.elements.forEach(el => el.reset());
+        this.elements.forEach(el => el.refresh());
         this.elements.forEach(el => el.onFallingEdge());
+        this.elements.forEach(el => el.onRisingEdge());
         this.draw();
     }
 
@@ -270,7 +270,6 @@ export default class Simulator {
 
     reset() {
         this.create();
-        this.elements.forEach(el => el.onFallingEdge());
-        this.draw();
+        this.step();
     }
 }

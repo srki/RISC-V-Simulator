@@ -21,7 +21,7 @@ export default class ArithmeticLogicUnit extends Component {
 
     private readonly defaultOp: Val;
 
-    private _outputNode: CircuitNode = null;
+    private _resultNode: CircuitNode = null;
     private _input1Node: CircuitNode = null;
     private _input2Node: CircuitNode = null;
     private _selOpNode: CircuitNode = null;
@@ -33,7 +33,7 @@ export default class ArithmeticLogicUnit extends Component {
     constructor(x: number, y: number, defaultOp: Val = undefined) {
         super(x, y);
         this.defaultOp = defaultOp;
-        this.reset();
+        this.refresh();
     }
 
     draw(g: Graphics): void {
@@ -41,12 +41,11 @@ export default class ArithmeticLogicUnit extends Component {
             this.x, this.y), Config.elementFillColor, Config.elementStrokeColor);
     }
 
-    reset(): void {
+    refresh(): void {
         this.input1Value = undefined;
         this.input2Value = undefined;
         this.selOpValue = this.defaultOp;
     }
-
 
     forwardSignal(signaler: Component, value: Val): void {
         switch (signaler) {
@@ -115,11 +114,20 @@ export default class ArithmeticLogicUnit extends Component {
             }
         }
 
-        this._outputNode.forwardSignal(this, result);
+        this._resultNode.forwardSignal(this, result);
     }
 
-    set outputNode(node: CircuitNode) {
-        this._outputNode = node;
+    mark(caller: Component): void {
+        this._input1Node.mark(this);
+        this._input2Node.mark(this);
+
+        if (this.defaultOp == null) {
+            this._selOpNode.mark(this);
+        }
+    }
+
+    set resultNode(node: CircuitNode) {
+        this._resultNode = node;
     }
 
     set input1Node(node: CircuitNode) {

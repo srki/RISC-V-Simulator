@@ -12,6 +12,9 @@ export default class RegisterFile extends Component {
     private readonly size: number = 16;
     private values: Val[] = [];
 
+    private nextValue: Val;
+    private nextSel: number;
+
     private _readSel1Node: CircuitNode;
     private _readSel2Node: CircuitNode;
     private _inputWriteSelNode: CircuitNode;
@@ -30,6 +33,9 @@ export default class RegisterFile extends Component {
 
         this.values[0] = VAL_ZERO_32b;
         this.values[1] = VAL_ONE_32b;
+
+        this.nextValue = undefined;
+        this.nextSel = undefined;
     }
 
     draw(g: Graphics): void {
@@ -44,6 +50,15 @@ export default class RegisterFile extends Component {
         }
     }
 
+    refresh() : void {
+        if (this.nextSel && this.nextValue) {
+            this.values[this.nextSel] = this.nextValue;
+        }
+
+        this.nextValue = undefined;
+        this.nextSel = undefined;
+    }
+
     forwardSignal(signaler: Component, value: Val): void {
         if (signaler == this._readSel1Node) {
             this._readData1Node.forwardSignal(this, this.values[InstructionHelper.getRs1(value)]);
@@ -54,14 +69,35 @@ export default class RegisterFile extends Component {
         }
     }
 
-
     onRisingEdge(): void {
         if (this._inputWriteEnNode.value == RegisterFile.WRITE_YES) {
-            let sel = InstructionHelper.getRd(this._inputWriteSelNode.value);
-            if (sel == 0) {
-                console.log("Ignoring write to register 0");
-            } else  {
-                this.values[sel] = this._inputWriteDataNode.value;
+            this.nextSel = InstructionHelper.getRd(this._inputWriteSelNode.value);
+
+            if (this._inputWriteDataNode.value == null) {
+                console.log("Error");
+                return;
+            }
+
+            this.nextValue = this._inputWriteDataNode.value;
+            this._inputWriteEnNode.mark();
+            this._inputWriteSelNode.mark();
+            this._inputWriteDataNode.mark();
+        }
+    }
+
+
+    mark(caller: Component): void {
+        switch (caller) {
+            case this._readData1Node: {
+                this._readSel1Node.mark();
+                break;
+            }
+            case this._readData2Node: {
+                this._readSel2Node.mark();
+                break;
+            }
+            default: {
+                console.error("Error");
             }
         }
     }

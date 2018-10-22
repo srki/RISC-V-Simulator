@@ -17,15 +17,18 @@ export default abstract class Component {
 
     abstract draw(g: Graphics): void;
 
-    reset(): void {
+    refresh(): void {
     }
 
     forwardSignal(signaler: Component, value: Val): void {
     }
 
-    onRisingEdge(): void {
+    mark(caller: Component): void {
     }
 
     onFallingEdge(): void {
+    }
+
+    onRisingEdge(): void {
     }
 }
