@@ -3,6 +3,7 @@ import Graphics from "Graphics";
 import Config from "Config";
 import CircuitNode from "CircutNode";
 import Val from "Val";
+import InstructionHelper from "./InstructionHelper";
 
 export default class InstructionMemory extends Component {
     public static readonly SIZE: number = 32;
@@ -14,6 +15,27 @@ export default class InstructionMemory extends Component {
     constructor(x: number, y: number, values: Val[]) {
         super(x, y);
         this.values = values;
+
+        this.values[0] = InstructionHelper.createIType(InstructionHelper.OP_CODE_ALUI,
+            InstructionHelper.FUNCT_ADDI, 1, 0, 5);
+
+        this.values[1] = InstructionHelper.createIType(InstructionHelper.OP_CODE_ALUI,
+            InstructionHelper.FUNCT_ADDI, 2, 0, 7);
+
+        this.values[2] = InstructionHelper.createRType(InstructionHelper.OP_CODE_ALU,
+            InstructionHelper.FUNCT_ADD, 3, 1, 2);
+
+        this.values[3] = InstructionHelper.createIType(InstructionHelper.OP_CODE_ALUI,
+            InstructionHelper.FUNCT_ADDI, 3, 3, 4);
+
+        this.values[4] = InstructionHelper.createRType(InstructionHelper.OP_CODE_ALU,
+            InstructionHelper.FUNCT_SUB, 4, 3, 1);
+
+        this.values[5] = InstructionHelper.createRType(InstructionHelper.OP_CODE_ALU,
+            InstructionHelper.FUNCT_ADD, 5, 4, 2);
+
+        this.values[6] = InstructionHelper.createITypeShift(InstructionHelper.OP_CODE_ALUI,
+            InstructionHelper.FUNCT_SRLI, 6, 5, 1);
     }
 
     draw(g: Graphics): void {

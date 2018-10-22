@@ -31,7 +31,7 @@ export default class Simulator {
         let PCStep = new ConstValue(150, 135, Val.UnsignedInt(4));
         let PCAdder = new ArithmeticLogicUnit(205, 135, ArithmeticLogicUnit.ADD);
         let PCSelMux = new Multiplexer(210, 25, 4, MultiplexerOrientation.LEFT);
-        let controlUnit = new ControlUnit(250, 450);
+        let controlUnit = new ControlUnit(170, 450);
 
         this.elements.push(PCRegister, instrMemory, PCStep, PCSelMux, PCAdder, controlUnit);
 
@@ -94,7 +94,7 @@ export default class Simulator {
         let instrNode = path[path.length - 1];
 
         /* instrNode -> Control unit */
-        path = this.createPath([[335, 412.5], [335, 450]]);
+        path = this.createPath([[295, 412.5], [295, 450]]);
         instrNode.addNeighbour(path[0]);
         controlUnit.instrNode = path[path.length - 1];
 

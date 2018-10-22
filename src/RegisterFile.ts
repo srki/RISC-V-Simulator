@@ -31,9 +31,6 @@ export default class RegisterFile extends Component {
             this.values.push(VAL_ZERO_32b);
         }
 
-        this.values[0] = VAL_ZERO_32b;
-        this.values[1] = VAL_ONE_32b;
-
         this.nextValue = undefined;
         this.nextSel = undefined;
     }
@@ -79,9 +76,9 @@ export default class RegisterFile extends Component {
             }
 
             this.nextValue = this._inputWriteDataNode.value;
-            this._inputWriteEnNode.mark();
-            this._inputWriteSelNode.mark();
-            this._inputWriteDataNode.mark();
+            this._inputWriteEnNode.mark(this);
+            this._inputWriteSelNode.mark(this);
+            this._inputWriteDataNode.mark(this);
         }
     }
 
@@ -89,11 +86,11 @@ export default class RegisterFile extends Component {
     mark(caller: Component): void {
         switch (caller) {
             case this._readData1Node: {
-                this._readSel1Node.mark();
+                this._readSel1Node.mark(this);
                 break;
             }
             case this._readData2Node: {
-                this._readSel2Node.mark();
+                this._readSel2Node.mark(this);
                 break;
             }
             default: {

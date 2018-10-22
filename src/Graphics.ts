@@ -94,6 +94,16 @@ export default class Graphics {
         this.ctx.fillText(text, this.rescaleOffsetX + x * this.scale, this.rescaleOffsetY + y * this.scale);
     }
 
+    drawTextCentered(x: number, y: number, width: number, text: string, fontColor: string, fontSize: number) {
+        this.ctx.font = fontSize * this.scale + "px Monospace";
+        this.ctx.fillStyle = fontColor;
+
+        let textWidth = this.ctx.measureText(text).width;
+
+        this.ctx.fillText(text, this.rescaleOffsetX + (x + (width - textWidth) / 2) * this.scale,
+            this.rescaleOffsetY + y * this.scale);
+    }
+
     static addOffset(points: number[][], xOffset: number, yOffset: number): number[][] {
         let updated: number[][] = [];
 
