@@ -21,6 +21,8 @@ export default class Multiplexer extends Component {
     private selValue: number = undefined;
     private inputValues: Val[] = [];
 
+    private marked = false;
+
     constructor(x: number, y: number, ninputs: number,
                 orientation: MultiplexerOrientation = MultiplexerOrientation.RIGHT, inputDistance: number = 15) {
         super(x, y);
@@ -39,6 +41,19 @@ export default class Multiplexer extends Component {
         } else {
             g.fillPolygon(Graphics.addOffset([[0, 15], [25, 0], [25, height], [0, height - 15]], this.x, this.y),
                 Config.elementFillColor, Config.elementStrokeColor);
+        }
+
+        if (this.marked) {
+            let y = this._inputNodes[this.selValue].y;
+            let xCenter = this.x + 12.5;
+            let yCenter = this.y + height / 2;
+            if (this.orientation == MultiplexerOrientation.RIGHT) {
+                g.drawPath([[this.x, y], [xCenter, y], [xCenter, yCenter], [this.x + 25, yCenter]],
+                    Config.signalColor);
+            } else {
+                g.drawPath([[this.x + 25, y], [xCenter, y], [xCenter, yCenter], [this.x, yCenter]],
+                    Config.signalColor);
+            }
         }
 
         // if (this.orientation == MultiplexerOrientation.RIGHT) {
@@ -74,9 +89,12 @@ export default class Multiplexer extends Component {
     refresh(): void {
         this.selValue = undefined;
         this.inputValues = [];
+        this.marked = false;
     }
 
     mark(caller: Component): void {
+        this.marked = true;
+
         this._selInputNode.mark(this);
         if (this._inputNodes[this.selValue]) {
             this._inputNodes[this.selValue].mark(this);

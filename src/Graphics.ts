@@ -34,7 +34,7 @@ export default class Graphics {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    line(x1: number, y1: number, x2: number, y2: number, color: string) {
+    drawLine(x1: number, y1: number, x2: number, y2: number, color: string) {
         this.ctx.strokeStyle = color;
         this.ctx.beginPath();
         this.ctx.moveTo(this.rescaleOffsetX + x1 * this.scale, this.rescaleOffsetY + y1 * this.scale);
@@ -42,9 +42,25 @@ export default class Graphics {
         this.ctx.stroke();
     }
 
+    drawPath(path: number[][], strokeStyle: string) {
+        this.ctx.strokeStyle = strokeStyle;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.rescaleOffsetX + path[0][0] * this.scale,
+            this.rescaleOffsetY + path[0][1] * this.scale);
+
+        for (let i = 1; i < path.length; i++) {
+            this.ctx.lineTo(this.rescaleOffsetX + path[i][0] * this.scale,
+                this.rescaleOffsetY + path[i][1] * this.scale);
+        }
+
+        this.ctx.stroke();
+    }
+
+
     fillRect(x: number, y: number, w: number, h: number,
              fillStyle: string, strokeStyle: string) {
-        this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y +h]], fillStyle, strokeStyle);
+        this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], fillStyle, strokeStyle);
     }
 
     fillPolygon(point: number[][], fillStyle: string, strokeStyle: string) {

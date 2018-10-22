@@ -22,7 +22,7 @@ export default class CircuitNode extends Component {
     draw(g: Graphics): void {
         // g.fillCircle(this.x, this.y, 2, Config.signalColor);
         this.neighbourNodes.forEach(el =>
-            g.line(this.x, this.y, el.x, el.y, el.marked ? Config.signalColor : Config.lineColor)
+            g.drawLine(this.x, this.y, el.x, el.y, el.marked ? Config.signalColor : Config.lineColor)
         );
     }
 
