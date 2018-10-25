@@ -5,7 +5,7 @@ export default class Config {
     static readonly memoryFillColor: string = "#fffed0";
     static readonly memoryStrokeColor: string = "#000000";
     static readonly lineColor: string = "#000000";
-    static readonly signalColor: string = "#4a484e";
+    static readonly signalColor: string = "#FF0000";
     static readonly fontColor: string = "#000000";
 
     static readonly fontSize: number = 20;

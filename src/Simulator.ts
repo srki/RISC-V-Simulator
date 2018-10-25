@@ -268,6 +268,7 @@ export default class Simulator {
     }
 
     reset() {
+        this.elements = [];
         this.create();
         this.step();
     }
