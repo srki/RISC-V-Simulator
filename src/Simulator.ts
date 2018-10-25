@@ -88,7 +88,7 @@ export default class Simulator {
         instrMemory.addressNode = path[path.length - 1];
 
         /* Instruction memory -> instrNode */
-        path = this.createPath([[160, 412.5], [335, 412.5]]);
+        path = this.createPath([[160, 412.5], [295, 412.5]]);
         instrMemory.outputDataNode = path[0];
 
         let instrNode = path[path.length - 1];
