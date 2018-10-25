@@ -272,7 +272,7 @@ function () {
   Config.memoryFillColor = "#fffed0";
   Config.memoryStrokeColor = "#000000";
   Config.lineColor = "#000000";
-  Config.signalColor = "#4a484e";
+  Config.signalColor = "#FF0000";
   Config.fontColor = "#000000";
   Config.fontSize = 20;
   return Config;
@@ -3077,6 +3077,7 @@ function () {
   };
 
   Simulator.prototype.reset = function () {
+    this.elements = [];
     this.create();
     this.step();
   };
@@ -3300,7 +3301,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55123" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60828" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
