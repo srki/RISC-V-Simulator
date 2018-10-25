@@ -6,42 +6,46 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="main"></script>
 
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
         button {
-            background-color:#44c767;
-            -moz-border-radius:12px;
-            -webkit-border-radius:12px;
-            border-radius:12px;
-            border:1px solid #18ab29;
-            display:inline-block;
-            cursor:pointer;
-            color:#ffffff;
-            font-family:Arial;
-            font-size:17px;
-            padding:16px 31px;
-            text-decoration:none;
-            text-shadow:0px 1px 0px #2f6627;
+            background-color: #44c767;
+            -moz-border-radius: 12px;
+            -webkit-border-radius: 12px;
+            border-radius: 12px;
+            border: 1px solid #18ab29;
+            display: inline-block;
+            cursor: pointer;
+            color: #ffffff;
+            font-family: Arial;
+            font-size: 17px;
+            padding: 16px 31px;
+            text-decoration: none;
+            text-shadow: 0px 1px 0px #2f6627;
         }
+
         button:hover {
-            background-color:#5cbf2a;
+            background-color: #5cbf2a;
         }
+
         button:active {
-            position:relative;
-            top:1px;
+            position: relative;
+            top: 1px;
         }
-        button:disabled,button[disabled]{
+
+        button:disabled, button[disabled] {
             border: 1px solid #999999;
             background-color: #cccccc;
             color: #666666;
         }
-
     </style>
 </head>
 <body>
-    <button id="btn-load">load</button>
-    <button id="btn-reset">reset</button>
-    <button id="btn-step">step</button>
-    <button id="btn-play">play</button>
-    <button disabled id="btn-pause">pause</button>
+<div style="display: none">
+
     <p>
         Enter a single supported RISC-V instructon or hex code per line
         this assmelber does not support absolute addressing or any psuedo instructions, or assembly instructions
@@ -54,6 +58,16 @@
 0x00528333
 0x40530333
     </textarea>
-    <canvas id="sim-canvas" width="1000" height="800" style="float: left; margin-right: 10px"></canvas>
+</div>
+
+<div id="menu" style="padding: 4px;">
+    <button id="btn-load">load</button>
+    <button id="btn-reset">reset</button>
+    <button id="btn-step">step</button>
+    <button id="btn-play">play</button>
+    <button disabled id="btn-pause">pause</button>
+</div>
+<canvas id="sim-canvas" style="position: absolute"></canvas>
+
 </body>
 </html>
