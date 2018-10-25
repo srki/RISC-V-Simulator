@@ -1,5 +1,5 @@
-import Simulator from "Simulator";
-import Parser from "Parser";
+import Simulator from "./Simulator";
+import Parser from "./Parser";
 import {toggleFullScreen} from "./util";
 
 let canvas = <HTMLCanvasElement> document.getElementById("sim-canvas");

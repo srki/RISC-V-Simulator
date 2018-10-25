@@ -1,8 +1,8 @@
-import Component from "Component";
-import Graphics from "Graphics";
-import Config from "Config";
-import CircuitNode from "CircutNode";
-import Val from "Val";
+import Component from "./Component";
+import Graphics from "./Graphics";
+import Config from "./Config";
+import CircuitNode from "./CircutNode";
+import Val from "./Val";
 import InstructionHelper from "./InstructionHelper";
 
 export default class InstructionMemory extends Component {

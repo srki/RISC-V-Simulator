@@ -1,13 +1,13 @@
-import Component from "Component";
-import Graphics from "Graphics";
-import Config from "Config";
-import CircuitNode from "CircutNode";
-import Val, {VAL_ONE_32b, VAL_THREE_32b, VAL_TWO_32b, VAL_ZERO_32b} from "Val";
-import ALUControl from "ALUControl";
-import DataMemory from "DataMemory";
-import RegisterFile from "RegisterFile";
-import InstructionHelper from "InstructionHelper";
-import ImmSelect from "ImmSelect";
+import Component from "./Component";
+import Graphics from "./Graphics";
+import Config from "./Config";
+import CircuitNode from "./CircutNode";
+import Val, {VAL_ONE_32b, VAL_THREE_32b, VAL_TWO_32b, VAL_ZERO_32b} from "./Val";
+import ALUControl from "./ALUControl";
+import DataMemory from "./DataMemory";
+import RegisterFile from "./RegisterFile";
+import InstructionHelper from "./InstructionHelper";
+import ImmSelect from "./ImmSelect";
 
 export default class ControlUnit extends Component {
     private _instrNode: CircuitNode;

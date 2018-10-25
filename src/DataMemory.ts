@@ -1,8 +1,8 @@
-import CircuitNode from "CircutNode";
-import Graphics from "Graphics";
-import Config from "Config";
-import Component from "Component";
-import Val, {VAL_ZERO_32b} from "Val";
+import CircuitNode from "./CircutNode";
+import Graphics from "./Graphics";
+import Config from "./Config";
+import Component from "./Component";
+import Val, {VAL_ZERO_32b} from "./Val";
 
 export default class DataMemory extends Component {
     public static readonly WRITE_NO = Val.UnsignedInt(0, 1);

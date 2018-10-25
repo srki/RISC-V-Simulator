@@ -1,4 +1,4 @@
-import Val from "Val";
+import Val from "./Val";
 
 export default class InstructionHelper {
     static readonly INSTR_SIZE = 32;

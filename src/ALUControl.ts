@@ -1,10 +1,10 @@
-import Component from "Component";
-import Graphics from "Graphics";
-import Config from "Config";
-import CircuitNode from "CircutNode";
-import Val from "Val";
-import ArithmeticLogicUnit from "ArithmeticLogicUnit";
-import InstructionHelper from "InstructionHelper";
+import Component from "./Component";
+import Graphics from "./Graphics";
+import Config from "./Config";
+import CircuitNode from "./CircutNode";
+import Val from "./Val";
+import ArithmeticLogicUnit from "./ArithmeticLogicUnit";
+import InstructionHelper from "./InstructionHelper";
 
 export default class ALUControl extends Component {
     public static readonly FUNC = Val.UnsignedInt(0, 2);

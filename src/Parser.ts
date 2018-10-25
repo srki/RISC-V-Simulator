@@ -1,4 +1,4 @@
-import Val, {VAL_ZERO_32b} from "./Val";
+import Val, {VAL_ZERO_32b} from "././Val";
 import InstructionMemory from "./InstructionMemory";
 import InstructionHelper from "./InstructionHelper";
 

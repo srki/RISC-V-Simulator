@@ -1,8 +1,8 @@
-import Component from "Component";
-import Graphics from "Graphics";
-import Config from "Config";
-import CircuitNode from "CircutNode";
-import Val, {VAL_ONE_32b, VAL_ZERO_32b} from "Val";
+import Component from "./Component";
+import Graphics from "./Graphics";
+import Config from "./Config";
+import CircuitNode from "./CircutNode";
+import Val, {VAL_ZERO_32b} from "./Val";
 import InstructionHelper from "./InstructionHelper";
 
 export default class RegisterFile extends Component {

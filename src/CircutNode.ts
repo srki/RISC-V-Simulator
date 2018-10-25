@@ -1,7 +1,7 @@
-import Component from "Component";
-import Graphics from "Graphics";
-import Config from "Config";
-import Val from "Val";
+import Component from "./Component";
+import Graphics from "./Graphics";
+import Config from "./Config";
+import Val from "./Val";
 
 export default class CircuitNode extends Component {
     private readonly defaultValue: Val;

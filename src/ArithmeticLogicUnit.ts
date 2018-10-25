@@ -1,8 +1,8 @@
-import Component from "Component";
-import Graphics from "Graphics";
-import CircuitNode from "CircutNode";
-import Config from "Config";
-import Val, {VAL_ZERO_0b, VAL_ZERO_32b, VAL_ZERO_5b} from "Val";
+import Component from "./Component";
+import Graphics from "./Graphics";
+import CircuitNode from "./CircutNode";
+import Config from "./Config";
+import Val, {VAL_ZERO_0b, VAL_ZERO_32b, VAL_ZERO_5b} from "./Val";
 
 export default class ArithmeticLogicUnit extends Component {
     /* @formatter:off */

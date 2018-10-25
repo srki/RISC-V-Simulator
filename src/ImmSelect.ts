@@ -1,9 +1,9 @@
-import Component from "Component";
-import Graphics from "Graphics";
-import Config from "Config";
-import CircuitNode from "CircutNode";
-import Val from "Val";
-import InstructionHelper from "InstructionHelper";
+import Component from "./Component";
+import Graphics from "./Graphics";
+import Config from "./Config";
+import CircuitNode from "./CircutNode";
+import Val from "./Val";
+import InstructionHelper from "./InstructionHelper";
 
 export default class ImmSelect extends Component {
     public static readonly ITYPE = Val.UnsignedInt(0, 2);
