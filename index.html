@@ -1,0 +1,8 @@
+<!DOCTYPE html><html lang="en"> <head> <meta charset="UTF-8"> <title>RISC-V Simulator</title> <style>body,html{height:100%;margin:0}button{background-color:#44c767;-moz-border-radius:12px;-webkit-border-radius:12px;border-radius:12px;border:1px solid #18ab29;display:inline-block;cursor:pointer;color:#fff;font-family:Arial;font-size:17px;padding:16px 31px;text-decoration:none;text-shadow:0 1px 0 #2f6627}button:hover{background-color:#5cbf2a}button:active{position:relative;top:1px}button:disabled,button[disabled]{border:1px solid #999;background-color:#ccc;color:#666}</style> </head> <body> <div style="display:none"> <p> Enter a single supported RISC-V instructon or hex code per line this assmelber does not support absolute addressing or any psuedo instructions, or assembly instructions </p> <textarea id="txt-code" rows="32" cols="30">
+0x00108133
+0x002101B3
+0x00318233
+0x004202B3
+0x00528333
+0x40530333
+    </textarea> </div> <div id="menu" style="padding:4px;"> <button id="btn-load">load</button> <button id="btn-reset">reset</button> <button id="btn-step">step</button> <button id="btn-play">play</button> <button disabled id="btn-pause">pause</button> </div> <canvas id="sim-canvas" style="position:absolute"></canvas> <script src="main.c0117ea7.js"></script> </body> </html>
