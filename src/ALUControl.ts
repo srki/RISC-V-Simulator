@@ -65,7 +65,7 @@ export default class ALUControl extends Component {
                 break;
             }
             case ALUControl.ADD: {
-                result = ALUControl.ADD;
+                result = ArithmeticLogicUnit.ADD;
                 break;
             }
             default: {

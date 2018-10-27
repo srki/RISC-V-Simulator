@@ -17,7 +17,7 @@ import Val from "./Val";
 export default class Simulator {
     protected elements: Component[] = [];
     private readonly g: Graphics;
-    private initialInstruct : Val[];
+    private initialInstruct: Val[];
 
     constructor(canvas: HTMLCanvasElement, parsed: Val[]) {
         this.g = new Graphics(canvas, 1200, 800);
@@ -131,6 +131,11 @@ export default class Simulator {
         instrNodeBottom = path[0];
         ALUCtrl.instrNode = path[path.length - 1];
 
+        /* instrNode -> DataMemory */
+        path = this.createPath([[430, 690], [985, 690]]);
+        instrNodeBottom.addNeighbour(path[0]);
+        dataMemory.instrNode = path[path.length - 1];
+
         /* instrNode -> ReadSel2 */
         path = this.createPath([[430, 390], [550, 390]]);
         instrNode.addNeighbour(path[0]);
@@ -173,6 +178,17 @@ export default class Simulator {
         path = this.createPath([[935, 437.5], [960, 437.5], [960, 710], [1110, 710], [1110, 655], [1135, 655]]);
         ALU.resultNode = path[0];
         WBSelMux.setInputNodes(2, path[path.length - 1]);
+        let ALUoutNode = path[1];
+
+        /* ALU -> DataMemory */
+        path = this.createPath([[960, 300], [985, 300]]);
+        ALUoutNode.addNeighbour(path[0]);
+        dataMemory.addressNode = path[path.length - 1];
+
+        /* DataMemory - > WBSel Mux */
+        path = this.createPath([[1085, 640], [1135, 640]]);
+        dataMemory.outputDataNode = path[0];
+        WBSelMux.setInputNodes(1, path[path.length - 1]);
 
         /* WBSel Mux -> RF WriteData */
         path = this.createPath([[1160, 640], [1180, 640], [1180, 730], [530, 730], [530, 590], [550, 590]]);

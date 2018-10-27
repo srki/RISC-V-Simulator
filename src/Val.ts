@@ -58,6 +58,28 @@ export default class Val {
         return this.num_bits;
     }
 
+    getByteBinary(byteIdx: number): string {
+        if (this.num_bits != 32) {
+            console.log("Error");
+            return null;
+        }
+
+        return this.asBinaryString().substr((3 - byteIdx) * 8, 8)
+    }
+
+    writeByte(byteIdx: number, byte: string): Val {
+        if (this.num_bits != 32) {
+            console.log("Error");
+            return null;
+        }
+
+        byteIdx = 3 - byteIdx;
+        let str = this.asBinaryString();
+        str = str.substring(0, byteIdx * 8) + byte + str.substr((byteIdx + 1) * 8);
+
+        return new Val(parseInt(str, 2), 32);
+    }
+
     // TODO: check if the implementations are correct
     static add(lhs: Val, rhs: Val): Val {
         return new Val(lhs.asUnsignedInt() + rhs.asUnsignedInt(), 32);
@@ -113,7 +135,7 @@ export default class Val {
 
     }
 
-    static HexString(s: string, num_bits : number = 32) {
+    static HexString(s: string, num_bits: number = 32) {
         return Val.UnsignedInt(parseInt(s, 16), num_bits);
     }
 }

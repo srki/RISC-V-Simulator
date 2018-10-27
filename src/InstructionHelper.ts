@@ -42,7 +42,7 @@ export default class InstructionHelper {
     static readonly FUNCT_LH  = "001";
     static readonly FUNCT_LW  = "010";
     static readonly FUNCT_LBU = "100";
-    static readonly FUNCT_LHU = "10";
+    static readonly FUNCT_LHU = "101";
 
     /* Store Functions */
     static readonly FUNCT_SB = "000";
@@ -107,6 +107,14 @@ export default class InstructionHelper {
         let imm4 = str.substr(20, 5);
 
         return parseInt(imm11 + imm4, 2);
+    }
+
+    static getFuncLType(instr: Val): string {
+        return instr.asBinaryString().substr(17, 3);
+    }
+
+    static getFuncSType(instr: Val): string {
+        return instr.asBinaryString().substr(17, 3);
     }
 
     static createRType(opCode: string, funct: string, rd: number, rs1: number, rs2: number): Val {
@@ -328,11 +336,11 @@ export default class InstructionHelper {
         let name = "-";
         switch (func) {
             case this.FUNCT_SB: {
-                name = "SW";
+                name = "SB";
                 break;
             }
             case this.FUNCT_SH: {
-                name = "SW";
+                name = "SH";
                 break;
             }
             case this.FUNCT_SW: {
@@ -341,7 +349,7 @@ export default class InstructionHelper {
             }
         }
 
-        return name + " x" + this.getRs1(instr) + ", 0x" + this.getImmIType(instr).toString(16).toUpperCase() +
+        return name + " x" + this.getRs1(instr) + ", 0x" + this.getImmSType(instr).toString(16).toUpperCase() +
             "(x" + this.getRs2(instr) + ")";
     }
 

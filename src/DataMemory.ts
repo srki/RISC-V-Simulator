@@ -3,6 +3,7 @@ import Graphics from "./Graphics";
 import Config from "./Config";
 import Component from "./Component";
 import Val, {VAL_ZERO_32b} from "./Val";
+import InstructionHelper from "./InstructionHelper";
 
 export default class DataMemory extends Component {
     public static readonly WRITE_NO = Val.UnsignedInt(0, 1);
@@ -11,16 +12,25 @@ export default class DataMemory extends Component {
     private readonly size: number = 32;
     private values: Val[] = [];
 
+    private _instrNode: CircuitNode;
     private _writeEnNode: CircuitNode;
     private _addressNode: CircuitNode;
     private _inputDataNode: CircuitNode;
     private _outputDataNode: CircuitNode;
 
+    private instrValue: Val;
+    private writeEnValue: Val;
+    private addressValue: Val;
+
+    private nextValue: Val[] = [];
+
     constructor(x: number, y: number) {
         super(x, y);
-        for (let i = 0; i < this.size; i++) {
+        for (let i = 0; i < this.size + 1; i++) {
             this.values.push(VAL_ZERO_32b);
         }
+
+        this.values[31] = (new Val(0x76543210, 32));
     }
 
     draw(g: Graphics): void {
@@ -35,12 +45,157 @@ export default class DataMemory extends Component {
         }
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
-        this._outputDataNode.forwardSignal(this, this.values[value.asUnsignedInt() / 4]);
+
+    refresh(): void {
+        this.instrValue = undefined;
+        this.writeEnValue = undefined;
+        this.addressValue = undefined;
+
+        for (let i in this.nextValue) {
+            this.values[i] = this.nextValue[i];
+        }
+
+        this.nextValue = [];
     }
 
-    set writeEnNode(value: CircuitNode) {
-        this._writeEnNode = value;
+    forwardSignal(signaler: Component, value: Val): void {
+        switch (signaler) {
+            case this._instrNode: {
+                this.instrValue = value;
+                break;
+            }
+            case this._writeEnNode: {
+                this.writeEnValue = value;
+                break;
+            }
+            case this._addressNode: {
+                this.addressValue = value;
+                break;
+            }
+            default: {
+                console.log("Error");
+            }
+        }
+
+        if (this.instrValue == undefined || this.writeEnValue == undefined || this.addressValue == undefined) {
+            return;
+        }
+
+        if (InstructionHelper.getOpCodeStr(this.instrValue) != InstructionHelper.OP_CODE_LW) {
+            return;
+        }
+
+        let funct = InstructionHelper.getFuncLType(this.instrValue);
+        let nbytes: number;
+
+        switch (funct) {
+            case InstructionHelper.FUNCT_LB:
+            case InstructionHelper.FUNCT_LBU: {
+                nbytes = 1;
+                break;
+            }
+            case InstructionHelper.FUNCT_LH:
+            case InstructionHelper.FUNCT_LHU: {
+                nbytes = 2;
+                break;
+            }
+            case InstructionHelper.FUNCT_LW: {
+                nbytes = 4;
+                break;
+            }
+            default: {
+                console.log("Error");
+            }
+        }
+
+        let address = this.addressValue.asUnsignedInt();
+        let wordIdx = Math.floor(address / 4);
+        let byteIdx = address % 4;
+
+        let result = "";
+
+        for (let i = 0; i < nbytes; i++) {
+            result = this.values[wordIdx].getByteBinary(byteIdx) + result;
+            if (++byteIdx == 4) {
+                byteIdx = 0;
+                wordIdx++;
+            }
+        }
+
+        /* Sign extend */
+        if (funct == InstructionHelper.FUNCT_LBU || funct == InstructionHelper.FUNCT_LHU || true) {
+            let signBit = result[0];
+            while (result.length < 32) {
+                result = signBit + result;
+            }
+        }
+
+        this._outputDataNode.forwardSignal(this, new Val(parseInt(result, 2), 32));
+    }
+
+    mark(caller: Component): void {
+        this._instrNode.mark(this);
+        this._writeEnNode.mark(this);
+        this._addressNode.mark(this);
+    }
+
+    onRisingEdge(): void {
+        if (this._writeEnNode.value == DataMemory.WRITE_YES) {
+            if (this._addressNode.value == null || this._inputDataNode.value == null) {
+                console.log("Error");
+            }
+
+            let funct = InstructionHelper.getFuncSType(this.instrValue);
+            let nbytes;
+
+            switch (funct) {
+                case InstructionHelper.FUNCT_SB: {
+                    nbytes = 1;
+                    break;
+                }
+                case InstructionHelper.FUNCT_SH: {
+                    nbytes = 2;
+                    break;
+                }
+                case InstructionHelper.FUNCT_SW: {
+                    nbytes = 4;
+                    break;
+                }
+                default: {
+                    console.log("Error");
+                }
+            }
+
+            let address = this._addressNode.value.asUnsignedInt();
+            let wordIdx = Math.floor(address / 4);
+            let byteIdx = address % 4;
+            let writeValue = this._inputDataNode.value;
+
+            this.nextValue[wordIdx] = this.values[wordIdx];
+            this.nextValue[wordIdx + 1] = this.values[wordIdx + 1];
+
+            for (let i = 0; i < nbytes; i++) {
+                this.nextValue[wordIdx] = this.nextValue[wordIdx].writeByte(byteIdx, writeValue.getByteBinary(i));
+                if (++byteIdx == 4) {
+                    byteIdx = 0;
+                    wordIdx++;
+                }
+            }
+
+            this._writeEnNode.mark(this);
+            this._addressNode.mark(this);
+            this._inputDataNode.mark(this);
+        }
+    }
+
+    set instrNode(node: CircuitNode) {
+        this._instrNode = node;
+        node.addNeighbour(this);
+    }
+
+    set writeEnNode(node: CircuitNode) {
+        this._writeEnNode = node;
+        node.addNeighbour(this);
     }
 
     set addressNode(node: CircuitNode) {
@@ -48,8 +203,8 @@ export default class DataMemory extends Component {
         node.addNeighbour(this);
     }
 
-    set inputDataNode(value: CircuitNode) {
-        this._inputDataNode = value;
+    set inputDataNode(node: CircuitNode) {
+        this._inputDataNode = node;
     }
 
     set outputDataNode(node: CircuitNode) {
