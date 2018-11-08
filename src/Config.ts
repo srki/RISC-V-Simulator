@@ -7,6 +7,8 @@ export default class Config {
     static readonly lineColor: string = "#000000";
     static readonly signalColor: string = "#FF0000";
     static readonly fontColor: string = "#000000";
+    static readonly readFontColor: string = "#0000FF";
+    static readonly writeFontColor: string = "#FF0000";
 
     static readonly fontSize: number = 20;
 }

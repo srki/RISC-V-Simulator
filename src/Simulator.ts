@@ -25,14 +25,15 @@ export default class Simulator {
     }
 
     create() {
-        let PCRegister = new Register(35, 230);
-        let instrMemory = new InstructionMemory(60, 285, this.initialInstruct);
-        let PCStep = new ConstValue(150, 135, Val.UnsignedInt(4));
-        let PCAdder = new ArithmeticLogicUnit(205, 135, ArithmeticLogicUnit.ADD);
-        let PCSelMux = new Multiplexer(210, 25, 4, MultiplexerOrientation.LEFT);
-        let controlUnit = new ControlUnit(170, 450);
+        let controlUnit = new ControlUnit(0, 0);
 
-        this.elements.push(PCRegister, instrMemory, PCStep, PCSelMux, PCAdder, controlUnit);
+        let PCRegister = new Register(50, 50);
+        let instrMemory = new InstructionMemory(10, 100, this.initialInstruct);
+        let PCStepVal = new ConstValue(350, 135, Val.UnsignedInt(4));
+        let PCAdder = new ArithmeticLogicUnit(405, 135, ArithmeticLogicUnit.ADD);
+        let PCSelMux = new Multiplexer(410, 25, 4, MultiplexerOrientation.LEFT);
+
+        this.elements.push(PCRegister, instrMemory, PCStepVal, PCSelMux, PCAdder, controlUnit);
 
         let WASel1 = new ConstValue(450, 520, Val.UnsignedInt(1));
         let WASelMux = new Multiplexer(485, 520, 2);
@@ -53,55 +54,46 @@ export default class Simulator {
         this.elements.push(dataMemory, WBSelMux);
 
         /* PC enable write */
-        let node = new CircuitNode(65, 230, Val.UnsignedInt(1));
+        let node = new CircuitNode(70, 50, Val.UnsignedInt(1));
         PCRegister.writeEnable = node;
         this.elements.push(node); // Not required
 
         let path: CircuitNode[];
 
         /* PCSelMux ->  PC */
-        path = this.createPath([[210, 72.5], [25, 72.5], [25, 242.5], [35, 242.5]]);
+        path = this.createPath([[410, 72.5], [375, 72.5], [375, 40], [30, 40], [30, 62.5], [50, 62.5]]);
         PCSelMux.outNode = path[0];
         PCRegister.inputNode = path[path.length - 1];
 
         /* PC Step -> PC Adder */
-        path = this.createPath([[175, 147.5], [205, 147.5]]);
-        PCStep.outNode = path[0];
+        path = this.createPath([[375, 147.5], [405, 147.5]]);
+        PCStepVal.outNode = path[0];
         PCAdder.input1Node = path[path.length - 1];
 
         /* PC Register -> PC Adder */
-        path = this.createPath([[185, 242.5], [195, 242.5], [195, 197.5], [205, 197.5]]);
+        path = this.createPath([[200, 62.5], [220, 62.5], [325, 62.5], [325, 197.5], [405, 197.5]]);
         PCRegister.outNode = path[0];
         PCAdder.input2Node = path[path.length - 1];
 
         let PCRegisterNode = path[1];
 
         /* PC Adder -> PCSelMux */
-        path = this.createPath([[245, 172.5], [255, 172.5], [255, 95], [235, 95]]);
+        path = this.createPath([[445, 172.5], [455, 172.5], [455, 95], [435, 95]]);
         PCAdder.resultNode = path[0];
         PCSelMux.setInputNodes(3, path[path.length - 1]);
 
         /* PC Register -> Instruction memory */
-        path = this.createPath([[195, 242.5], [195, 275], [110, 275], [110, 285]]);
+        path = this.createPath([[220, 85], [125, 85], [125, 100]]);
         PCRegisterNode.addNeighbour(path[0]);
         instrMemory.addressNode = path[path.length - 1];
 
         /* Instruction memory -> instrNode */
-        path = this.createPath([[160, 412.5], [295, 412.5]]);
+        path = this.createPath([[240, 412.5], [430, 412.5]]);
         instrMemory.outputDataNode = path[0];
-
         let instrNode = path[path.length - 1];
 
-        /* instrNode -> Control unit */
-        path = this.createPath([[295, 412.5], [295, 450]]);
-        instrNode.addNeighbour(path[0]);
-        controlUnit.instrNode = path[path.length - 1];
-
-        /* Extend instruction wire */
-        node = new CircuitNode(430, 412.5);
-        this.elements.push(node);
-        instrNode.addNeighbour(node);
-        instrNode = node;
+        /* Instr node for Control unit */
+        controlUnit.instrNode = instrNode;
 
         /* WASel1 -> WASelMux */
         path = this.createPath([[475, 532.5], [485, 532.5]]);
@@ -205,7 +197,7 @@ export default class Simulator {
          */
 
         /* PCSel */
-        path = this.createPath([[222.5, 10], [222.5, 32.5]]);
+        path = this.createPath([[422.5, 10], [422.5, 32.5]]);
         controlUnit.PCSelNode = path[0];
         PCSelMux.selInputNode = path[path.length - 1];
 
@@ -266,6 +258,7 @@ export default class Simulator {
     draw() {
         this.g.rescale();
         this.g.clear(Config.backgroundColor);
+        this.g.fillRect(0, 0, 1200, 800, "#00000000", "red");
 
         this.elements.forEach(el => el.draw(this.g))
     }
@@ -289,3 +282,4 @@ export default class Simulator {
         this.step();
     }
 }
+

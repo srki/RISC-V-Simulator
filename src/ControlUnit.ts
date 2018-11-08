@@ -29,14 +29,7 @@ export default class ControlUnit extends Component {
     }
 
     draw(g: Graphics): void {
-        g.fillRect(this.x, this.y, 250, 125, Config.elementFillColor, Config.elementStrokeColor);
-        g.drawTextCentered(this.x, this.y + 45, 250, "Control", Config.fontColor, Config.fontSize);
-        g.drawTextCentered(this.x, this.y + 70, 250, "Unit", Config.fontColor, Config.fontSize);
-
-        g.fillRect(this.x + 10, this.y + 90, 230, 25,
-            Config.memoryFillColor, Config.memoryStrokeColor);
-        g.drawText(this.x + 20, this.y + 90 + 21, InstructionHelper.decode(this.instrValue),
-            Config.fontColor, Config.fontSize);
+        // g.fillRect(this.x - 5, this.y - 5, 10, 10, Config.signalColor, Config.signalColor);
     }
 
     refresh(): void {
