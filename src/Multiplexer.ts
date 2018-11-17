@@ -103,7 +103,7 @@ export default class Multiplexer extends Component {
         }
     }
 
-    setInputNodes(idx: number, node: CircuitNode) {
+    setInputNode(idx: number, node: CircuitNode) {
         this._inputNodes[idx] = node;
         node.addNeighbour(this);
     }

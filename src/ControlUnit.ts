@@ -8,9 +8,11 @@ import DataMemory from "./DataMemory";
 import RegisterFile from "./RegisterFile";
 import InstructionHelper from "./InstructionHelper";
 import ImmSelect from "./ImmSelect";
+import BranchLogic from "./BranchLogic";
 
 export default class ControlUnit extends Component {
     private _instrNode: CircuitNode;
+    private _branchNode: CircuitNode;
 
     private _PCSelNode: CircuitNode;
     private _RegWriteEn: CircuitNode;
@@ -22,6 +24,8 @@ export default class ControlUnit extends Component {
     private _Op2Sel: CircuitNode;
 
     private instrValue: Val = VAL_ZERO_32b;
+    private branchValue: Val;
+    private markBranch: boolean;
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -34,6 +38,8 @@ export default class ControlUnit extends Component {
 
     refresh(): void {
         this.instrValue = undefined;
+        this.branchValue = undefined;
+        this.markBranch = undefined;
     }
 
     forwardSignal(signaler: Component, value: Val): void {
@@ -42,9 +48,17 @@ export default class ControlUnit extends Component {
                 this.instrValue = value;
                 break;
             }
+            case this._branchNode: {
+                this.branchValue = value;
+                break;
+            }
             default: {
                 console.error("Error");
             }
+        }
+
+        if (this.instrValue == undefined || this.branchValue == undefined) {
+            return;
         }
 
         let opcode = InstructionHelper.getOpCodeStr(this.instrValue);
@@ -60,7 +74,7 @@ export default class ControlUnit extends Component {
                 WBSel = VAL_TWO_32b;
                 WASel = VAL_ONE_32b;
                 PCSel = VAL_THREE_32b;
-                break
+                break;
             }
             case InstructionHelper.OP_CODE_ALUI : {
                 ImmSel = ImmSelect.ITYPE;
@@ -71,7 +85,7 @@ export default class ControlUnit extends Component {
                 WBSel = VAL_TWO_32b;
                 WASel = VAL_ONE_32b;
                 PCSel = VAL_THREE_32b;
-                break
+                break;
             }
             case InstructionHelper.OP_CODE_LW : {
                 ImmSel = ImmSelect.ITYPE;
@@ -82,7 +96,7 @@ export default class ControlUnit extends Component {
                 WBSel = VAL_ONE_32b;
                 WASel = VAL_ONE_32b;
                 PCSel = VAL_THREE_32b;
-                break
+                break;
             }
             case InstructionHelper.OP_CODE_SW : {
                 ImmSel = ImmSelect.BSTYPE;
@@ -93,7 +107,7 @@ export default class ControlUnit extends Component {
                 WBSel = undefined;
                 WASel = undefined;
                 PCSel = VAL_THREE_32b;
-                break
+                break;
             }
             case InstructionHelper.OP_CODE_BRANCH : {
                 ImmSel = ImmSelect.BRTYPE;
@@ -103,8 +117,9 @@ export default class ControlUnit extends Component {
                 RFWen = RegisterFile.WRITE_NO;
                 WBSel = undefined;
                 WASel = undefined;
-                PCSel = true ? VAL_ZERO_32b : VAL_THREE_32b; // TODO
-                break
+                PCSel = this.branchValue == BranchLogic.BRANCH_TRUE ? VAL_ZERO_32b : VAL_THREE_32b;
+                this.markBranch = true;
+                break;
             }
             case InstructionHelper.OP_CODE_JAL : {
                 ImmSel = undefined;
@@ -115,7 +130,7 @@ export default class ControlUnit extends Component {
                 WBSel = VAL_ZERO_32b;
                 WASel = VAL_ZERO_32b;
                 PCSel = VAL_TWO_32b;
-                break
+                break;
             }
             case InstructionHelper.OP_CODE_JALR : {
                 ImmSel = undefined;
@@ -126,7 +141,7 @@ export default class ControlUnit extends Component {
                 WBSel = VAL_ZERO_32b;
                 WASel = VAL_ONE_32b;
                 PCSel = VAL_ONE_32b;
-                break
+                break;
             }
 
             default: {
@@ -147,10 +162,19 @@ export default class ControlUnit extends Component {
 
     mark(caller: Component): void {
         this._instrNode.mark(this);
+
+        if (this.markBranch) {
+            this._branchNode.mark(this);
+        }
     }
 
     set instrNode(node: CircuitNode) {
         this._instrNode = node;
+        node.addNeighbour(this);
+    }
+
+    set branchNode(node: CircuitNode) {
+        this._branchNode = node;
         node.addNeighbour(this);
     }
 

@@ -20,50 +20,15 @@ export default class InstructionMemory extends Component {
         super(x, y);
         this.values = values;
 
-        this.values[0] = InstructionHelper.createIType(InstructionHelper.OP_CODE_LW, InstructionHelper.FUNCT_LW,
-            1, 0, 31 * 4);
+        this.values[0] = InstructionHelper.createIType(InstructionHelper.OP_CODE_ALUI, InstructionHelper.FUNCT_ADDI, 1, 0, 10);
+        this.values[1] = InstructionHelper.createIType(InstructionHelper.OP_CODE_ALUI, InstructionHelper.FUNCT_ADDI, 2, 0, 20);
+        this.values[2] = InstructionHelper.createIType(InstructionHelper.OP_CODE_ALUI, InstructionHelper.FUNCT_ADDI, 3, 0, 20);
 
-        this.values[1] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SB,
-            0, 1, 0);
-
-        this.values[2] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SB,
-            0, 1, 1);
-
-        this.values[3] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SB,
-            0, 1, 2);
-
-        this.values[4] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SB,
-            0, 1, 3);
-
-        this.values[5] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SB,
-            0, 1, 4);
-
-        this.values[6] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SH,
-            0, 1, 8);
-
-        this.values[7] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SH,
-            0, 1, 9);
-
-        this.values[8] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SH,
-            0, 1, 10);
-
-        this.values[9] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SH,
-            0, 1, 11);
-
-        this.values[10] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SW,
-            0, 1, 16);
-
-        this.values[11] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SW,
-            0, 1, 17);
-
-        this.values[12] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SW,
-            0, 1, 18);
-
-        this.values[13] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SW,
-            0, 1, 19);
-
-        this.values[14] = InstructionHelper.createSType(InstructionHelper.OP_CODE_SW, InstructionHelper.FUNCT_SW,
-            0, 1, 20);
+        this.values[3] = InstructionHelper.createBType(InstructionHelper.OP_CODE_BRANCH, InstructionHelper.FUNCT_BEQ, 1, 2, 4);
+        this.values[4] = InstructionHelper.createBType(InstructionHelper.OP_CODE_BRANCH, InstructionHelper.FUNCT_BEQ, 1, 1, 8);
+        this.values[5] = InstructionHelper.createBType(InstructionHelper.OP_CODE_BRANCH, InstructionHelper.FUNCT_BEQ, 1, 2, 4);
+        this.values[6] = InstructionHelper.createBType(InstructionHelper.OP_CODE_BRANCH, InstructionHelper.FUNCT_BEQ, 1, 2, 4);
+        this.values[6] = InstructionHelper.createBType(InstructionHelper.OP_CODE_BRANCH, InstructionHelper.FUNCT_BEQ, 1, 2, 4);
     }
 
 

@@ -9,6 +9,7 @@ export default class RegisterFile extends Component {
     public static readonly WRITE_NO = Val.UnsignedInt(0, 1);
     public static readonly WRITE_YES = Val.UnsignedInt(1, 1);
 
+    private readonly maxSize: number = 32;
     private readonly size: number = 16;
     private values: Val[] = [];
 
@@ -27,7 +28,7 @@ export default class RegisterFile extends Component {
 
     constructor(x: number, y: number) {
         super(x, y);
-        for (let i = 0; i < this.size; i++) {
+        for (let i = 0; i < this.maxSize; i++) {
             this.values.push(VAL_ZERO_32b);
         }
 

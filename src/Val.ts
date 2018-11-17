@@ -8,7 +8,7 @@ export default class Val {
 
     constructor(val: number = 0, num_bits: number) {
         this.num_bits = num_bits;
-        this.val = val;
+        this.val = Val.mod(val, 2 ** this.num_bits);
     }
 
     static UnsignedInt(val: number, num_bits: number = 32): Val {
@@ -113,25 +113,108 @@ export default class Val {
         return new Val(lhs.asUnsignedInt() >> rhs.asUnsignedInt(), 32);
     }
 
+    static cmp(lhs: Val, rhs: Val, signed: boolean): number {
+        if (lhs.num_bits != rhs.num_bits) {
+            console.error("The nuber of bits do not match");
+            return null;
+        }
+
+        let a = lhs.asBinaryString();
+        let b = rhs.asBinaryString();
+
+        if (signed && (a[0]) != b[0]) {
+            return a[0] == '1' ? -1 : 1;
+        }
+
+        for (let i = 0; i < a.length; i++) {
+            if (a[i] != b[i]) {
+                return a[i] == '0' ? -1 : 1;
+            }
+        }
+
+        return 0;
+    }
+
+    static cmpEQ(lhs: Val, rhs: Val): boolean {
+        return this.cmp(lhs, rhs, false) == 0;
+    }
+
+    static cmpNE(lhs: Val, rhs: Val): boolean {
+        return this.cmp(lhs, rhs, false) != 0;
+    }
+
+    static cmpLT(lhs: Val, rhs: Val): boolean {
+        return this.cmp(lhs, rhs, true) == -1;
+    }
+
+    static cmpGE(lhs: Val, rhs: Val): boolean {
+        return this.cmp(lhs, rhs, true) != -1;
+    }
+
+    static cmpLTU(lhs: Val, rhs: Val): boolean {
+        return this.cmp(lhs, rhs, false) == -1;
+    }
+
+    static cmpGEU(lhs: Val, rhs: Val): boolean {
+        return this.cmp(lhs, rhs, false) != -1;
+    }
+
     static main() {
-        console.log("hello world");
+        //@formatter:off
+        console.log(this.cmpEQ(new Val(-10, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpEQ(new Val( 10, 32), new Val(-10, 32)) == false);
+        console.log(this.cmpEQ(new Val( 10, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpEQ(new Val(-10, 32), new Val(-10, 32)) == true);
+        console.log(this.cmpEQ(new Val(  9, 32), new Val(-10, 32)) == false);
+        console.log(this.cmpEQ(new Val(  9, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpEQ(new Val( 11, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpEQ(new Val(-11, 32), new Val( 10, 32)) == false);
 
-        console.log(this.UnsignedInt(12345).asSignedInt());
-        console.log(this.UnsignedInt(-123).asSignedInt());
-        console.log(this.UnsignedInt(123231).asSignedInt());
-        console.log(this.UnsignedInt(123412).asSignedInt());
-        console.log(this.UnsignedInt(2 ** 32).asSignedInt());
-        console.log(this.UnsignedInt(2 ** 32 - 1).asSignedInt());
-        console.log(this.UnsignedInt(2 ** 32 + 1).asSignedInt());
+        console.log("--");
 
-        console.log(this.SignedInt(1).asSignedInt());
-        console.log(this.SignedInt(0).asSignedInt());
-        console.log(this.SignedInt(-1).asSignedInt());
+        console.log(this.cmpNE(new Val(-10, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpNE(new Val( 10, 32), new Val(-10, 32)) == true);
+        console.log(this.cmpNE(new Val( 10, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpNE(new Val(-10, 32), new Val(-10, 32)) == false);
+        console.log(this.cmpNE(new Val(  9, 32), new Val(-10, 32)) == true);
+        console.log(this.cmpNE(new Val(  9, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpNE(new Val( 11, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpNE(new Val(-11, 32), new Val( 10, 32)) == true);
 
-        console.log(this.SignedInt(-1234567).asSignedInt());
-        console.log(this.SignedInt(7654321).asSignedInt());
-        console.log(this.SignedInt(999999999999999).asHexString());
+        console.log("--");
 
+        console.log(this.cmpLT(new Val(-10, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpLT(new Val( 10, 32), new Val(-10, 32)) == false);
+        console.log(this.cmpLT(new Val( 10, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpLT(new Val(-10, 32), new Val(-10, 32)) == false);
+        console.log(this.cmpLT(new Val(  9, 32), new Val(-10, 32)) == false);
+        console.log(this.cmpLT(new Val(  9, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpLT(new Val( 11, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpLT(new Val(-11, 32), new Val( 10, 32)) == true);
+
+        console.log("--");
+
+        console.log(this.cmpGE(new Val(-10, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpGE(new Val( 10, 32), new Val(-10, 32)) == true);
+        console.log(this.cmpGE(new Val( 10, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpGE(new Val(-10, 32), new Val(-10, 32)) == true);
+        console.log(this.cmpGE(new Val(  9, 32), new Val(-10, 32)) == true);
+        console.log(this.cmpGE(new Val(  9, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpGE(new Val( 11, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpGE(new Val(-11, 32), new Val( 10, 32)) == false);
+
+        console.log("--");
+
+        console.log(this.cmpLTU(new Val( 10, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpLTU(new Val(  9, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpLTU(new Val( 11, 32), new Val( 10, 32)) == false);
+
+        console.log("--");
+
+        console.log(this.cmpGEU(new Val( 10, 32), new Val( 10, 32)) == true);
+        console.log(this.cmpGEU(new Val(  9, 32), new Val( 10, 32)) == false);
+        console.log(this.cmpGEU(new Val( 11, 32), new Val( 10, 32)) == true);
+        //@formatter:on
 
     }
 

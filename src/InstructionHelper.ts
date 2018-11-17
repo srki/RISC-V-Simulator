@@ -59,7 +59,11 @@ export default class InstructionHelper {
 
     /* @formatter:on */
 
-    private static convertAndPad(num: Number, len: number = 32) {
+    private static convertAndPad(num: number, len: number = 32) {
+        if (num < 0) {
+            num += 2 ** len;
+        }
+
         let str = num.toString(2);
         while (str.length < len) {
             str = "0" + str;
@@ -117,6 +121,10 @@ export default class InstructionHelper {
         return instr.asBinaryString().substr(17, 3);
     }
 
+    static getFuncBType(instr: Val): string {
+        return instr.asBinaryString().substr(17, 3);
+    }
+
     static createRType(opCode: string, funct: string, rd: number, rs1: number, rs2: number): Val {
         let funct7 = funct.substr(0, 7);
         let funct3 = funct.substr(7, 3);
@@ -155,6 +163,13 @@ export default class InstructionHelper {
     }
 
     static createBType(opCode: string, funct: string, rs1: number, rs2: number, imm: number) {
+        if (imm % 4 != 0) {
+            console.error("Imm should be divisible by 4!");
+            imm -= imm / 4;
+        }
+
+        imm /= 2;
+
         let immStr = this.convertAndPad(imm, 12);
         let imm12 = immStr.substr(0, 1);
         let imm10 = immStr.substr(2, 6);
@@ -193,7 +208,7 @@ export default class InstructionHelper {
                 return this.decodeJALR(instr);
 
             default:
-                console.error("Unsupported OP Code: " + opCode);
+                // console.error("Unsupported OP Code: " + opCode);
                 return instr.asHexString();
         }
     }

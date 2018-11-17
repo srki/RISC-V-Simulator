@@ -13,6 +13,7 @@ import ImmSelect from "./ImmSelect";
 import ALUControl from "./ALUControl";
 import DataMemory from "./DataMemory";
 import Val from "./Val";
+import BranchLogic from "./BranchLogic";
 
 export default class Simulator {
     protected elements: Component[] = [];
@@ -53,6 +54,11 @@ export default class Simulator {
 
         this.elements.push(dataMemory, WBSelMux);
 
+        let branchAdder = new ArithmeticLogicUnit(800, 210, ArithmeticLogicUnit.ADD);
+        let branchLogic = new BranchLogic(670, 275);
+
+        this.elements.push(branchAdder, branchLogic);
+
         /* PC enable write */
         let node = new CircuitNode(70, 50, Val.UnsignedInt(1));
         PCRegister.writeEnable = node;
@@ -71,20 +77,21 @@ export default class Simulator {
         PCAdder.input1Node = path[path.length - 1];
 
         /* PC Register -> PC Adder */
-        path = this.createPath([[200, 62.5], [220, 62.5], [325, 62.5], [325, 197.5], [405, 197.5]]);
+        path = this.createPath([[200, 62.5], [220, 62.5], [275, 62.5], [325, 62.5], [325, 197.5], [405, 197.5]]);
         PCRegister.outNode = path[0];
         PCAdder.input2Node = path[path.length - 1];
 
-        let PCRegisterNode = path[1];
+        let PCRegisterNode1 = path[1];
+        let PCRegisterNode2 = path[2];
 
         /* PC Adder -> PCSelMux */
         path = this.createPath([[445, 172.5], [455, 172.5], [455, 95], [435, 95]]);
         PCAdder.resultNode = path[0];
-        PCSelMux.setInputNodes(3, path[path.length - 1]);
+        PCSelMux.setInputNode(3, path[path.length - 1]);
 
         /* PC Register -> Instruction memory */
         path = this.createPath([[220, 85], [125, 85], [125, 100]]);
-        PCRegisterNode.addNeighbour(path[0]);
+        PCRegisterNode1.addNeighbour(path[0]);
         instrMemory.addressNode = path[path.length - 1];
 
         /* Instruction memory -> instrNode */
@@ -98,7 +105,7 @@ export default class Simulator {
         /* WASel1 -> WASelMux */
         path = this.createPath([[475, 532.5], [485, 532.5]]);
         WASel1.outNode = path[1];
-        WASelMux.setInputNodes(0, path[path.length - 1]);
+        WASelMux.setInputNode(0, path[path.length - 1]);
 
         /* WASelMux -> Register File */
         path = this.createPath([[510, 552.5], [550, 552.5]]);
@@ -109,7 +116,7 @@ export default class Simulator {
         path = this.createPath([[430, 570], [485, 570]]);
         instrNode.addNeighbour(path[0]);
         let instrNodeBottom = path[0];
-        WASelMux.setInputNodes(1, path[path.length - 1]);
+        WASelMux.setInputNode(1, path[path.length - 1]);
 
         /* instrNode -> ImmSelect */
         path = this.createPath([[430, 620], [660, 620], [660, 575], [670, 575]]);
@@ -143,18 +150,23 @@ export default class Simulator {
         /* ImmSelect -> op2SelMux */
         path = this.createPath([[770, 575], [790, 575], [790, 550], [850, 550]]);
         immSelect.outNode = path[0];
-        op2SelMux.setInputNodes(1, path[path.length - 1]);
+        op2SelMux.setInputNode(1, path[path.length - 1]);
+
+        let immSelectNode = path[2];
 
         /* RF ReadData2 -> op2SelMux */
-        path = this.createPath([[650, 390], [670, 390], [670, 525], [830, 525], [850, 525]]);
+        path = this.createPath([[650, 390], [670, 390], [670, 525], [745, 525], [830, 525], [850, 525]]);
         registerFile.readData2Node = path[0];
-        op2SelMux.setInputNodes(0, path[path.length - 1]);
+        op2SelMux.setInputNode(0, path[path.length - 1]);
         let readData2Node = path[path.length - 2];
+        let readData2BranchNode = path[3];
 
         /* RF ReadData1 -> ALU */
-        path = this.createPath([[650, 370], [885, 370], [885, 415], [895, 415]]);
+        path = this.createPath([[650, 370], [695, 370], [885, 370], [885, 415], [895, 415]]);
         registerFile.readData1Node = path[0];
         ALU.input1Node = path[path.length - 1];
+
+        let readData1BranchNode = path[1];
 
         /* op2SelMux -> ALU */
         path = this.createPath([[875, 532.5], [885, 532.5], [885, 460], [895, 460]]);
@@ -169,7 +181,7 @@ export default class Simulator {
         /* ALU -> WBSel Mux */
         path = this.createPath([[935, 437.5], [960, 437.5], [960, 710], [1110, 710], [1110, 655], [1135, 655]]);
         ALU.resultNode = path[0];
-        WBSelMux.setInputNodes(2, path[path.length - 1]);
+        WBSelMux.setInputNode(2, path[path.length - 1]);
         let ALUoutNode = path[1];
 
         /* ALU -> DataMemory */
@@ -180,7 +192,7 @@ export default class Simulator {
         /* DataMemory - > WBSel Mux */
         path = this.createPath([[1085, 640], [1135, 640]]);
         dataMemory.outputDataNode = path[0];
-        WBSelMux.setInputNodes(1, path[path.length - 1]);
+        WBSelMux.setInputNode(1, path[path.length - 1]);
 
         /* WBSel Mux -> RF WriteData */
         path = this.createPath([[1160, 640], [1180, 640], [1180, 730], [530, 730], [530, 590], [550, 590]]);
@@ -191,6 +203,39 @@ export default class Simulator {
         path = this.createPath([[830, 610], [985, 610]]);
         readData2Node.addNeighbour(path[0]);
         dataMemory.inputDataNode = path[path.length - 1];
+
+        /* PC -> branchAdder */
+        path = this.createPath([[275, 222.5], [800, 222.5]]);
+        PCRegisterNode2.addNeighbour(path[0]);
+        branchAdder.input1Node = path[path.length - 1];
+
+        /* ImmSelect -> branchAdder */
+        path = this.createPath([[790, 272.5], [800, 272.5]]);
+        immSelectNode.addNeighbour(path[0]);
+        branchAdder.input2Node = path[path.length - 1];
+
+        /* branchAdder -> PCSel */
+        path = this.createPath([[840, 247.5], [850, 247.5], [850, 50], [435, 50]]);
+        branchAdder.resultNode = path[0];
+        PCSelMux.setInputNode(0, path[path.length - 1]);
+
+        /* readData1 -> Branch Logic */
+        node = new CircuitNode(695, 325);
+        readData1BranchNode.addNeighbour(node);
+        branchLogic.data1Node = node;
+
+        /* readData2 -> Branch Logic */
+        node = new CircuitNode(745, 325);
+        readData2BranchNode.addNeighbour(node);
+        branchLogic.data2Node = node;
+
+        /* instrNode -> Branch Select */
+        branchLogic.instrNode = instrNodeTop;
+
+        /* Branch Logic -> Control Unit */
+        node = new CircuitNode(770, 300);
+        branchLogic.outNode = node;
+        controlUnit.branchNode = node;
 
         /*
          *Control signals
