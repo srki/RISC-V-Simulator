@@ -1,9 +1,9 @@
 import Component from "./Component";
-import Graphics from "./Graphics";
-import Config from "./Config";
+import Graphics from "../util/Graphics";
+import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val, {VAL_ZERO_32b} from "./Val";
-import InstructionHelper from "./InstructionHelper";
+import Val, {VAL_ZERO_32b} from "../util/Val";
+import InstructionHelper from "../instructions/InstructionHelper";
 
 export default class RegisterFile extends Component {
     public static readonly WRITE_NO = Val.UnsignedInt(0, 1);

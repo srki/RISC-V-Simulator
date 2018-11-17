@@ -1,9 +1,10 @@
 import CircuitNode from "./CircutNode";
-import Graphics from "./Graphics";
-import Config from "./Config";
+import Graphics from "../util/Graphics";
+import Config from "../util/Config";
 import Component from "./Component";
-import Val, {VAL_ZERO_32b} from "./Val";
-import InstructionHelper from "./InstructionHelper";
+import Val, {VAL_ZERO_32b} from "../util/Val";
+import InstructionHelper from "../instructions/InstructionHelper";
+import InstructionConstants from "../instructions/InstructionConstants";
 
 export default class DataMemory extends Component {
     public static readonly WRITE_NO = Val.UnsignedInt(0, 1);
@@ -81,7 +82,7 @@ export default class DataMemory extends Component {
             return;
         }
 
-        if (InstructionHelper.getOpCodeStr(this.instrValue) != InstructionHelper.OP_CODE_LW) {
+        if (InstructionHelper.getOpCodeStr(this.instrValue) != InstructionConstants.OP_CODE_LW) {
             return;
         }
 
@@ -89,17 +90,17 @@ export default class DataMemory extends Component {
         let nbytes: number;
 
         switch (funct) {
-            case InstructionHelper.FUNCT_LB:
-            case InstructionHelper.FUNCT_LBU: {
+            case InstructionConstants.FUNCT_LB:
+            case InstructionConstants.FUNCT_LBU: {
                 nbytes = 1;
                 break;
             }
-            case InstructionHelper.FUNCT_LH:
-            case InstructionHelper.FUNCT_LHU: {
+            case InstructionConstants.FUNCT_LH:
+            case InstructionConstants.FUNCT_LHU: {
                 nbytes = 2;
                 break;
             }
-            case InstructionHelper.FUNCT_LW: {
+            case InstructionConstants.FUNCT_LW: {
                 nbytes = 4;
                 break;
             }
@@ -123,7 +124,7 @@ export default class DataMemory extends Component {
         }
 
         /* Sign extend */
-        if (funct == InstructionHelper.FUNCT_LBU || funct == InstructionHelper.FUNCT_LHU || true) {
+        if (funct == InstructionConstants.FUNCT_LBU || funct == InstructionConstants.FUNCT_LHU || true) {
             let signBit = result[0];
             while (result.length < 32) {
                 result = signBit + result;
@@ -149,15 +150,15 @@ export default class DataMemory extends Component {
             let nbytes;
 
             switch (funct) {
-                case InstructionHelper.FUNCT_SB: {
+                case InstructionConstants.FUNCT_SB: {
                     nbytes = 1;
                     break;
                 }
-                case InstructionHelper.FUNCT_SH: {
+                case InstructionConstants.FUNCT_SH: {
                     nbytes = 2;
                     break;
                 }
-                case InstructionHelper.FUNCT_SW: {
+                case InstructionConstants.FUNCT_SW: {
                     nbytes = 4;
                     break;
                 }

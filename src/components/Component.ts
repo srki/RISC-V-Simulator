@@ -1,5 +1,5 @@
-import Graphics from "./Graphics";
-import Val from "./Val";
+import Graphics from "../util/Graphics";
+import Val from "../util/Val";
 
 export default abstract class Component {
     private static cnt = 0;

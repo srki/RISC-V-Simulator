@@ -1,10 +1,10 @@
 import Component from "./Component";
-import Graphics from "./Graphics";
-import Config from "./Config";
+import Graphics from "../util/Graphics";
+import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val from "./Val";
+import Val from "../util/Val";
 import ArithmeticLogicUnit from "./ArithmeticLogicUnit";
-import InstructionHelper from "./InstructionHelper";
+import InstructionConstants from "../instructions/InstructionConstants";
 
 export default class ALUControl extends Component {
     public static readonly FUNC = Val.UnsignedInt(0, 2);
@@ -87,34 +87,34 @@ export default class ALUControl extends Component {
         let func = func7 + func3;
 
         switch (func) {
-            case InstructionHelper.FUNCT_ADD:
+            case InstructionConstants.FUNCT_ADD:
                 return ArithmeticLogicUnit.ADD;
 
-            case InstructionHelper.FUNCT_SUB:
+            case InstructionConstants.FUNCT_SUB:
                 return ArithmeticLogicUnit.SUB;
 
-            case InstructionHelper.FUNCT_SLL:
+            case InstructionConstants.FUNCT_SLL:
                 return ArithmeticLogicUnit.SLL;
 
-            case InstructionHelper.FUNCT_SLT:
+            case InstructionConstants.FUNCT_SLT:
                 return ArithmeticLogicUnit.SLT;
 
-            case InstructionHelper.FUNCT_SLTU:
+            case InstructionConstants.FUNCT_SLTU:
                 return ArithmeticLogicUnit.SLTU;
 
-            case InstructionHelper.FUNCT_XOR:
+            case InstructionConstants.FUNCT_XOR:
                 return ArithmeticLogicUnit.XOR;
 
-            case InstructionHelper.FUNCT_SRL:
+            case InstructionConstants.FUNCT_SRL:
                 return ArithmeticLogicUnit.XOR;
 
-            case InstructionHelper.FUNCT_SRA:
+            case InstructionConstants.FUNCT_SRA:
                 return ArithmeticLogicUnit.SRA;
 
-            case InstructionHelper.FUNCT_OR:
+            case InstructionConstants.FUNCT_OR:
                 return ArithmeticLogicUnit.OR;
 
-            case InstructionHelper.FUNCT_AND:
+            case InstructionConstants.FUNCT_AND:
                 return ArithmeticLogicUnit.AND;
 
             default:
@@ -127,33 +127,33 @@ export default class ALUControl extends Component {
         let func3 = this.instrValue.asBinaryString().substr(17, 3);
 
         switch (func3) {
-            case InstructionHelper.FUNCT_ADDI:
+            case InstructionConstants.FUNCT_ADDI:
                 return ArithmeticLogicUnit.ADD;
 
-            case InstructionHelper.FUNCT_SLTI:
+            case InstructionConstants.FUNCT_SLTI:
                 return ArithmeticLogicUnit.SLT;
 
-            case InstructionHelper.FUNCT_SLTIU:
+            case InstructionConstants.FUNCT_SLTIU:
                 return ArithmeticLogicUnit.SLTU;
 
-            case InstructionHelper.FUNCT_XORI:
+            case InstructionConstants.FUNCT_XORI:
                 return ArithmeticLogicUnit.XOR;
 
-            case InstructionHelper.FUNCT_ORI:
+            case InstructionConstants.FUNCT_ORI:
                 return ArithmeticLogicUnit.OR;
 
-            case InstructionHelper.FUNCT_ANDI:
+            case InstructionConstants.FUNCT_ANDI:
                 return ArithmeticLogicUnit.AND;
         }
 
         switch (func7 + func3) {
-            case InstructionHelper.FUNCT_SLLI:
+            case InstructionConstants.FUNCT_SLLI:
                 return ArithmeticLogicUnit.SLL;
 
-            case InstructionHelper.FUNCT_SRLI:
+            case InstructionConstants.FUNCT_SRLI:
                 return ArithmeticLogicUnit.SRL;
 
-            case InstructionHelper.FUNCT_SRAI:
+            case InstructionConstants.FUNCT_SRAI:
                 return ArithmeticLogicUnit.SRA;
 
             default:

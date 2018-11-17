@@ -1,19 +1,19 @@
-import Graphics from "./Graphics";
-import ArithmeticLogicUnit from "./ArithmeticLogicUnit";
-import Register from "./Register";
-import CircuitNode from "./CircutNode";
-import Config from "./Config";
-import Component from "./Component";
-import InstructionMemory from "./InstructionMemory";
-import Multiplexer, {MultiplexerOrientation} from "./Multiplexer";
-import ControlUnit from "./ControlUnit";
-import ConstValue from "./ConstValue";
-import RegisterFile from "./RegisterFile";
-import ImmSelect from "./ImmSelect";
-import ALUControl from "./ALUControl";
-import DataMemory from "./DataMemory";
-import Val from "./Val";
-import BranchLogic from "./BranchLogic";
+import Graphics from "./util/Graphics";
+import ArithmeticLogicUnit from "./components/ArithmeticLogicUnit";
+import Register from "./components/Register";
+import CircuitNode from "./components/CircutNode";
+import Config from "./util/Config";
+import Component from "./components/Component";
+import InstructionMemory from "./components/InstructionMemory";
+import Multiplexer, {MultiplexerOrientation} from "./components/Multiplexer";
+import ControlUnit from "./components/ControlUnit";
+import ConstValue from "./components/ConstValue";
+import RegisterFile from "./components/RegisterFile";
+import ImmSelect from "./components/ImmSelect";
+import ALUControl from "./components/ALUControl";
+import DataMemory from "./components/DataMemory";
+import Val from "./util/Val";
+import BranchLogic from "./components/BranchLogic";
 
 export default class Simulator {
     protected elements: Component[] = [];

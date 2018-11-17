@@ -1,9 +1,10 @@
 import Component from "./Component";
-import Graphics from "./Graphics";
-import Config from "./Config";
+import Graphics from "../util/Graphics";
+import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val from "./Val";
-import InstructionHelper from "./InstructionHelper";
+import Val from "../util/Val";
+import InstructionHelper from "../instructions/InstructionHelper";
+import InstructionConstants from "../instructions/InstructionConstants";
 
 export default class BranchLogic extends Component {
     public static readonly BRANCH_TRUE = new Val(0, 1);
@@ -50,27 +51,27 @@ export default class BranchLogic extends Component {
         let result: boolean;
 
         switch (func) {
-            case InstructionHelper.FUNCT_BEQ: {
+            case InstructionConstants.FUNCT_BEQ: {
                 result = Val.cmpEQ(this.data1Value, this.data2Value);
                 break;
             }
-            case InstructionHelper.FUNCT_BNE: {
+            case InstructionConstants.FUNCT_BNE: {
                 result = Val.cmpNE(this.data1Value, this.data2Value);
                 break;
             }
-            case InstructionHelper.FUNCT_BLT: {
+            case InstructionConstants.FUNCT_BLT: {
                 result = Val.cmpLT(this.data1Value, this.data2Value);
                 break;
             }
-            case InstructionHelper.FUNCT_BGE: {
+            case InstructionConstants.FUNCT_BGE: {
                 result = Val.cmpGE(this.data1Value, this.data2Value);
                 break;
             }
-            case InstructionHelper.FUNCT_BLTU: {
+            case InstructionConstants.FUNCT_BLTU: {
                 result = Val.cmpLTU(this.data1Value, this.data2Value);
                 break;
             }
-            case InstructionHelper.FUNCT_BGEU: {
+            case InstructionConstants.FUNCT_BGEU: {
                 result = Val.cmpGEU(this.data1Value, this.data2Value);
                 break;
             }

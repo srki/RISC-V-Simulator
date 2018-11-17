@@ -6,7 +6,9 @@ export function toggleFullScreen() {
         if (documentBody.requestFullScreen) {
             // @ts-ignoreç
             documentBody.requestFullScreen();
+            // @ts-ignoreç
         } else if (documentBody.webkitRequestFullscreen) {
+            // @ts-ignoreç
             documentBody.webkitRequestFullscreen();
             // @ts-ignoreç
         } else if (documentBody.mozRequestFullScreen) {
@@ -29,7 +31,9 @@ export function toggleFullScreen() {
         } else if (document.mozCancelFullScreen) {
             // @ts-ignorec
             document.mozCancelFullScreen();
+            // @ts-ignoreç
         } else if (document.webkitExitFullscreen) {
+            // @ts-ignoreç
             document.webkitExitFullscreen();
         }
         this.isFullScreen = false;

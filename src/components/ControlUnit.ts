@@ -1,14 +1,15 @@
 import Component from "./Component";
-import Graphics from "./Graphics";
-import Config from "./Config";
+import Graphics from "../util/Graphics";
+import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val, {VAL_ONE_32b, VAL_THREE_32b, VAL_TWO_32b, VAL_ZERO_32b} from "./Val";
+import Val, {VAL_ONE_32b, VAL_THREE_32b, VAL_TWO_32b, VAL_ZERO_32b} from "../util/Val";
 import ALUControl from "./ALUControl";
 import DataMemory from "./DataMemory";
 import RegisterFile from "./RegisterFile";
-import InstructionHelper from "./InstructionHelper";
+import InstructionHelper from "../instructions/InstructionHelper";
 import ImmSelect from "./ImmSelect";
 import BranchLogic from "./BranchLogic";
+import InstructionConstants from "../instructions/InstructionConstants";
 
 export default class ControlUnit extends Component {
     private _instrNode: CircuitNode;
@@ -65,7 +66,7 @@ export default class ControlUnit extends Component {
         let ImmSel, Op2Sel, FuncSel, MemWr, RFWen, WBSel, WASel, PCSel: Val;
 
         switch (opcode) {
-            case InstructionHelper.OP_CODE_ALU : {
+            case InstructionConstants.OP_CODE_ALU : {
                 ImmSel = undefined;
                 Op2Sel = VAL_ZERO_32b;
                 FuncSel = ALUControl.FUNC;
@@ -76,7 +77,7 @@ export default class ControlUnit extends Component {
                 PCSel = VAL_THREE_32b;
                 break;
             }
-            case InstructionHelper.OP_CODE_ALUI : {
+            case InstructionConstants.OP_CODE_ALUI : {
                 ImmSel = ImmSelect.ITYPE;
                 Op2Sel = VAL_ONE_32b;
                 FuncSel = ALUControl.OP;
@@ -87,7 +88,7 @@ export default class ControlUnit extends Component {
                 PCSel = VAL_THREE_32b;
                 break;
             }
-            case InstructionHelper.OP_CODE_LW : {
+            case InstructionConstants.OP_CODE_LW : {
                 ImmSel = ImmSelect.ITYPE;
                 Op2Sel = VAL_ONE_32b;
                 FuncSel = ALUControl.ADD;
@@ -98,7 +99,7 @@ export default class ControlUnit extends Component {
                 PCSel = VAL_THREE_32b;
                 break;
             }
-            case InstructionHelper.OP_CODE_SW : {
+            case InstructionConstants.OP_CODE_SW : {
                 ImmSel = ImmSelect.BSTYPE;
                 Op2Sel = VAL_ONE_32b;
                 FuncSel = ALUControl.ADD;
@@ -109,7 +110,7 @@ export default class ControlUnit extends Component {
                 PCSel = VAL_THREE_32b;
                 break;
             }
-            case InstructionHelper.OP_CODE_BRANCH : {
+            case InstructionConstants.OP_CODE_BRANCH : {
                 ImmSel = ImmSelect.BRTYPE;
                 Op2Sel = undefined;
                 FuncSel = undefined;
@@ -121,7 +122,7 @@ export default class ControlUnit extends Component {
                 this.markBranch = true;
                 break;
             }
-            case InstructionHelper.OP_CODE_JAL : {
+            case InstructionConstants.OP_CODE_JAL : {
                 ImmSel = undefined;
                 Op2Sel = undefined;
                 FuncSel = undefined;
@@ -132,7 +133,7 @@ export default class ControlUnit extends Component {
                 PCSel = VAL_TWO_32b;
                 break;
             }
-            case InstructionHelper.OP_CODE_JALR : {
+            case InstructionConstants.OP_CODE_JALR : {
                 ImmSel = undefined;
                 Op2Sel = undefined;
                 FuncSel = undefined;

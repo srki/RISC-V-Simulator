@@ -1,8 +1,8 @@
 import Component from "./Component";
-import Graphics from "./Graphics";
+import Graphics from "../util/Graphics";
 import CircuitNode from "./CircutNode";
-import Config from "./Config";
-import Val from "./Val";
+import Config from "../util/Config";
+import Val from "../util/Val";
 
 export default class ConstValue extends Component {
     readonly value: Val;

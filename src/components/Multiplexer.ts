@@ -1,8 +1,8 @@
 import Component from "./Component";
-import Graphics from "./Graphics";
-import Config from "./Config";
+import Graphics from "../util/Graphics";
+import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val from "./Val";
+import Val from "../util/Val";
 
 export enum MultiplexerOrientation {
     LEFT,
