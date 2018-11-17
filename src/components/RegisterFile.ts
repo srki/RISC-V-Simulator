@@ -2,18 +2,18 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val, {VAL_ZERO_32b} from "../util/Val";
+import Value, {VAL_ZERO_32b} from "../util/Value";
 import InstructionHelper from "../instructions/InstructionHelper";
 
 export default class RegisterFile extends Component {
-    public static readonly WRITE_NO = Val.UnsignedInt(0, 1);
-    public static readonly WRITE_YES = Val.UnsignedInt(1, 1);
+    public static readonly WRITE_NO = Value.fromUnsignedInt(0, 1);
+    public static readonly WRITE_YES = Value.fromUnsignedInt(1, 1);
 
     private readonly maxSize: number = 32;
     private readonly size: number = 16;
-    private values: Val[] = [];
+    private values: Value[] = [];
 
-    private nextValue: Val;
+    private nextValue: Value;
     private nextSel: number;
 
     private _readSel1Node: CircuitNode;
@@ -57,7 +57,7 @@ export default class RegisterFile extends Component {
         this.nextSel = undefined;
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         if (signaler == this._readSel1Node) {
             this._readData1Node.forwardSignal(this, this.values[InstructionHelper.getRs1(value)]);
         } else if (signaler == this._readSel2Node) {

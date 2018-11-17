@@ -1,19 +1,19 @@
 import Component from "./Component";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
-import Val from "../util/Val";
+import Value from "../util/Value";
 
 export default class CircuitNode extends Component {
-    private readonly defaultValue: Val;
+    private readonly defaultValue: Value;
 
     private neighbours: Component[] = [];
     private neighbourNodes: CircuitNode[] = [];
 
-    private _value: Val;
+    private _value: Value;
     private signaler: Component;
     private marked: boolean;
 
-    constructor(x: number, y: number, defaultValue: Val = undefined) {
+    constructor(x: number, y: number, defaultValue: Value = undefined) {
         super(x, y);
         this.defaultValue = defaultValue;
         this.refresh();
@@ -32,7 +32,7 @@ export default class CircuitNode extends Component {
         this.marked = false;
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         this._value = value;
         this.signaler = signaler;
 
@@ -61,7 +61,7 @@ export default class CircuitNode extends Component {
     }
 
 
-    get value(): Val {
+    get value(): Value {
         return this._value;
     }
 }

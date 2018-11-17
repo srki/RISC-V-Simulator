@@ -1,5 +1,5 @@
 import Graphics from "../util/Graphics";
-import Val from "../util/Val";
+import Value from "../util/Value";
 
 export default abstract class Component {
     private static cnt = 0;
@@ -20,7 +20,7 @@ export default abstract class Component {
     refresh(): void {
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
     }
 
     mark(caller: Component): void {

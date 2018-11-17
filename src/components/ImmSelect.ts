@@ -2,20 +2,20 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val from "../util/Val";
+import Value from "../util/Value";
 import InstructionHelper from "../instructions/InstructionHelper";
 
 export default class ImmSelect extends Component {
-    public static readonly ITYPE = Val.UnsignedInt(0, 2);
-    public static readonly BRTYPE = Val.UnsignedInt(1, 2);
-    public static readonly BSTYPE = Val.UnsignedInt(2, 2);
+    public static readonly ITYPE = Value.fromUnsignedInt(0, 2);
+    public static readonly BRTYPE = Value.fromUnsignedInt(1, 2);
+    public static readonly BSTYPE = Value.fromUnsignedInt(2, 2);
 
     private _instrNode: CircuitNode;
     private _controlNode: CircuitNode;
     private _outNode: CircuitNode;
 
-    private instrValue: Val;
-    private ctrlValue: Val;
+    private instrValue: Value;
+    private ctrlValue: Value;
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -33,7 +33,7 @@ export default class ImmSelect extends Component {
         this.ctrlValue = undefined;
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         switch (signaler) {
             case this._instrNode: {
                 this.instrValue = value;
@@ -52,28 +52,28 @@ export default class ImmSelect extends Component {
             return;
         }
 
-        let result: number;
+        let result: Value;
 
         switch (this.ctrlValue) {
             case ImmSelect.ITYPE: {
-                result = InstructionHelper.getImmIType(this.instrValue);
+                result = Value.fromUnsignedInt(InstructionHelper.getImmIType(this.instrValue), 12);
                 break;
             }
             case ImmSelect.BRTYPE: {
-                result = InstructionHelper.getImmBType(this.instrValue);
+                result = Value.fromUnsignedInt(InstructionHelper.getImmBType(this.instrValue), 13);
                 break;
             }
             case ImmSelect.BSTYPE: {
-                result = InstructionHelper.getImmSType(this.instrValue);
+                result = Value.fromUnsignedInt(InstructionHelper.getImmSType(this.instrValue), 12);
                 break;
             }
             default: {
-                result = 0;
+                result = new Value("0", 12);
                 console.log("Unsupported control signal");
             }
         }
 
-        this._outNode.forwardSignal(this, new Val(result, 32));
+        this._outNode.forwardSignal(this, result.signExtend(32));
     }
 
     mark(caller: Component): void {

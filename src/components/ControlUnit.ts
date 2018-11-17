@@ -2,7 +2,7 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val, {VAL_ONE_32b, VAL_THREE_32b, VAL_TWO_32b, VAL_ZERO_32b} from "../util/Val";
+import Value, {VAL_ONE_32b, VAL_THREE_32b, VAL_TWO_32b, VAL_ZERO_32b} from "../util/Value";
 import ALUControl from "./ALUControl";
 import DataMemory from "./DataMemory";
 import RegisterFile from "./RegisterFile";
@@ -24,8 +24,8 @@ export default class ControlUnit extends Component {
     private _FuncSel: CircuitNode;
     private _Op2Sel: CircuitNode;
 
-    private instrValue: Val = VAL_ZERO_32b;
-    private branchValue: Val;
+    private instrValue: Value = VAL_ZERO_32b;
+    private branchValue: Value;
     private markBranch: boolean;
 
     constructor(x: number, y: number) {
@@ -43,7 +43,7 @@ export default class ControlUnit extends Component {
         this.markBranch = undefined;
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         switch (signaler) {
             case this._instrNode: {
                 this.instrValue = value;
@@ -63,7 +63,7 @@ export default class ControlUnit extends Component {
         }
 
         let opcode = InstructionHelper.getOpCodeStr(this.instrValue);
-        let ImmSel, Op2Sel, FuncSel, MemWr, RFWen, WBSel, WASel, PCSel: Val;
+        let ImmSel, Op2Sel, FuncSel, MemWr, RFWen, WBSel, WASel, PCSel: Value;
 
         switch (opcode) {
             case InstructionConstants.OP_CODE_ALU : {

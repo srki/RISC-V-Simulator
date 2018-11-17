@@ -2,16 +2,16 @@ import CircuitNode from "./CircutNode";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
 import Component from "./Component";
-import Val, {VAL_ZERO_32b} from "../util/Val";
+import Value, {VAL_ZERO_32b} from "../util/Value";
 import InstructionHelper from "../instructions/InstructionHelper";
 import InstructionConstants from "../instructions/InstructionConstants";
 
 export default class DataMemory extends Component {
-    public static readonly WRITE_NO = Val.UnsignedInt(0, 1);
-    public static readonly WRITE_YES = Val.UnsignedInt(1, 1);
+    public static readonly WRITE_NO = Value.fromUnsignedInt(0, 1);
+    public static readonly WRITE_YES = Value.fromUnsignedInt(1, 1);
 
     private readonly size: number = 32;
-    private values: Val[] = [];
+    private values: Value[] = [];
 
     private _instrNode: CircuitNode;
     private _writeEnNode: CircuitNode;
@@ -19,11 +19,11 @@ export default class DataMemory extends Component {
     private _inputDataNode: CircuitNode;
     private _outputDataNode: CircuitNode;
 
-    private instrValue: Val;
-    private writeEnValue: Val;
-    private addressValue: Val;
+    private instrValue: Value;
+    private writeEnValue: Value;
+    private addressValue: Value;
 
-    private nextValue: Val[] = [];
+    private nextValue: Value[] = [];
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -31,7 +31,7 @@ export default class DataMemory extends Component {
             this.values.push(VAL_ZERO_32b);
         }
 
-        this.values[31] = (new Val(0x76543210, 32));
+        this.values[31] = (new Value((0x76543210).toString(2), 32));
     }
 
     draw(g: Graphics): void {
@@ -59,7 +59,7 @@ export default class DataMemory extends Component {
         this.nextValue = [];
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         switch (signaler) {
             case this._instrNode: {
                 this.instrValue = value;
@@ -131,7 +131,7 @@ export default class DataMemory extends Component {
             }
         }
 
-        this._outputDataNode.forwardSignal(this, new Val(parseInt(result, 2), 32));
+        this._outputDataNode.forwardSignal(this, new Value(result, 32));
     }
 
     mark(caller: Component): void {

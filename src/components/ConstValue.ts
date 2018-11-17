@@ -2,13 +2,13 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import CircuitNode from "./CircutNode";
 import Config from "../util/Config";
-import Val from "../util/Val";
+import Value from "../util/Value";
 
 export default class ConstValue extends Component {
-    readonly value: Val;
+    readonly value: Value;
     private _outNode: CircuitNode;
 
-    constructor(x: number, y: number, value: Val) {
+    constructor(x: number, y: number, value: Value) {
         super(x, y);
         this.value = value;
     }

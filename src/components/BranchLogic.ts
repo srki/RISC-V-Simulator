@@ -2,22 +2,22 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val from "../util/Val";
+import Value from "../util/Value";
 import InstructionHelper from "../instructions/InstructionHelper";
 import InstructionConstants from "../instructions/InstructionConstants";
 
 export default class BranchLogic extends Component {
-    public static readonly BRANCH_TRUE = new Val(0, 1);
-    public static readonly BRANCH_FALSE = new Val(1, 1);
+    public static readonly BRANCH_TRUE = new Value("0", 1);
+    public static readonly BRANCH_FALSE = new Value("1", 1);
 
     private _data1Node: CircuitNode;
     private _data2Node: CircuitNode;
     private _instrNode: CircuitNode;
     private _outNode: CircuitNode;
 
-    private instrValue: Val;
-    private data1Value: Val;
-    private data2Value: Val;
+    private instrValue: Value;
+    private data1Value: Value;
+    private data2Value: Value;
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -30,7 +30,7 @@ export default class BranchLogic extends Component {
     }
 
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         switch (signaler) {
             case this._data1Node:
                 this.data1Value = value;
@@ -52,27 +52,27 @@ export default class BranchLogic extends Component {
 
         switch (func) {
             case InstructionConstants.FUNCT_BEQ: {
-                result = Val.cmpEQ(this.data1Value, this.data2Value);
+                result = Value.cmpEQ(this.data1Value, this.data2Value);
                 break;
             }
             case InstructionConstants.FUNCT_BNE: {
-                result = Val.cmpNE(this.data1Value, this.data2Value);
+                result = Value.cmpNE(this.data1Value, this.data2Value);
                 break;
             }
             case InstructionConstants.FUNCT_BLT: {
-                result = Val.cmpLT(this.data1Value, this.data2Value);
+                result = Value.cmpLT(this.data1Value, this.data2Value);
                 break;
             }
             case InstructionConstants.FUNCT_BGE: {
-                result = Val.cmpGE(this.data1Value, this.data2Value);
+                result = Value.cmpGE(this.data1Value, this.data2Value);
                 break;
             }
             case InstructionConstants.FUNCT_BLTU: {
-                result = Val.cmpLTU(this.data1Value, this.data2Value);
+                result = Value.cmpLTU(this.data1Value, this.data2Value);
                 break;
             }
             case InstructionConstants.FUNCT_BGEU: {
-                result = Val.cmpGEU(this.data1Value, this.data2Value);
+                result = Value.cmpGEU(this.data1Value, this.data2Value);
                 break;
             }
         }

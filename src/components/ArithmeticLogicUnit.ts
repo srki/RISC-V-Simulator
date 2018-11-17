@@ -2,35 +2,35 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import CircuitNode from "./CircutNode";
 import Config from "../util/Config";
-import Val, {VAL_ZERO_0b, VAL_ZERO_32b, VAL_ZERO_5b} from "../util/Val";
+import Value, {VAL_ZERO_1b, VAL_ZERO_32b, VAL_ZERO_5b} from "../util/Value";
 
 export default class ArithmeticLogicUnit extends Component {
     /* @formatter:off */
-    public static readonly ADD  = new Val(0, 4); /* Addition               */
-    public static readonly SUB  = new Val(1, 4); /* Subtraction            */
-    public static readonly AND  = new Val(2, 4); /* Bitwise AND            */
-    public static readonly OR   = new Val(3, 4); /* Bitwise OR             */
-    public static readonly XOR  = new Val(4, 4); /* Bitwise XOR            */
-    public static readonly SLL  = new Val(5, 4); /* Shift Left Logical     */
-    public static readonly SRL  = new Val(6, 4); /* Shift Right Logical    */
-    public static readonly SRA  = new Val(7, 4); /* Shift Right Arithmetic */
-    public static readonly SLT  = new Val(8, 4); /* Shift Right Arithmetic */
-    public static readonly SLTU = new Val(9, 4); /* Shift Right Arithmetic */
+    public static readonly ADD  = new Value("0", 4); /* Addition               */
+    public static readonly SUB  = new Value("1", 4); /* Subtraction            */
+    public static readonly AND  = new Value("2", 4); /* Bitwise AND            */
+    public static readonly OR   = new Value("3", 4); /* Bitwise OR             */
+    public static readonly XOR  = new Value("4", 4); /* Bitwise XOR            */
+    public static readonly SLL  = new Value("5", 4); /* Shift Left Logical     */
+    public static readonly SRL  = new Value("6", 4); /* Shift Right Logical    */
+    public static readonly SRA  = new Value("7", 4); /* Shift Right Arithmetic */
+    public static readonly SLT  = new Value("8", 4); /* Shift Right Arithmetic */
+    public static readonly SLTU = new Value("9", 4); /* Shift Right Arithmetic */
 
     /* @formatter:on */
 
-    private readonly defaultOp: Val;
+    private readonly defaultOp: Value;
 
     private _resultNode: CircuitNode = null;
     private _input1Node: CircuitNode = null;
     private _input2Node: CircuitNode = null;
     private _selOpNode: CircuitNode = null;
 
-    private input1Value: Val = VAL_ZERO_32b;
-    private input2Value: Val = VAL_ZERO_0b;
-    private selOpValue: Val = VAL_ZERO_5b;
+    private input1Value: Value = VAL_ZERO_32b;
+    private input2Value: Value = VAL_ZERO_1b;
+    private selOpValue: Value = VAL_ZERO_5b;
 
-    constructor(x: number, y: number, defaultOp: Val = undefined) {
+    constructor(x: number, y: number, defaultOp: Value = undefined) {
         super(x, y);
         this.defaultOp = defaultOp;
         this.refresh();
@@ -47,7 +47,7 @@ export default class ArithmeticLogicUnit extends Component {
         this.selOpValue = this.defaultOp;
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         switch (signaler) {
             case this._input1Node:
                 this.input1Value = value;
@@ -66,38 +66,38 @@ export default class ArithmeticLogicUnit extends Component {
             return;
         }
 
-        let result: Val;
+        let result: Value;
         switch (this.selOpValue) {
             case ArithmeticLogicUnit.ADD: {
-                result = Val.add(this.input1Value, this.input2Value);
+                result = Value.add(this.input1Value, this.input2Value);
                 break;
             }
             case ArithmeticLogicUnit.SUB: {
-                result = Val.sub(this.input1Value, this.input2Value);
+                result = Value.sub(this.input1Value, this.input2Value);
                 break;
             }
             case ArithmeticLogicUnit.AND: {
-                result = Val.and(this.input1Value, this.input2Value);
+                result = Value.and(this.input1Value, this.input2Value);
                 break;
             }
             case ArithmeticLogicUnit.OR: {
-                result = Val.or(this.input1Value, this.input2Value);
+                result = Value.or(this.input1Value, this.input2Value);
                 break;
             }
             case ArithmeticLogicUnit.XOR: {
-                result = Val.xor(this.input1Value, this.input2Value);
+                result = Value.xor(this.input1Value, this.input2Value);
                 break;
             }
             case ArithmeticLogicUnit.SLL: {
-                result = Val.shiftLeftLogical(this.input1Value, this.input2Value);
+                result = Value.shiftLeftLogical(this.input1Value, this.input2Value);
                 break;
             }
             case ArithmeticLogicUnit.SRL: {
-                result = Val.shiftRightLogical(this.input1Value, this.input2Value);
+                result = Value.shiftRightLogical(this.input1Value, this.input2Value);
                 break;
             }
             case ArithmeticLogicUnit.SRA: {
-                result = Val.shiftRightArithmetic(this.input1Value, this.input2Value);
+                result = Value.shiftRightArithmetic(this.input1Value, this.input2Value);
                 break;
             }
             case ArithmeticLogicUnit.SLT: {

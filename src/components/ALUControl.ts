@@ -2,21 +2,21 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val from "../util/Val";
+import Value from "../util/Value";
 import ArithmeticLogicUnit from "./ArithmeticLogicUnit";
 import InstructionConstants from "../instructions/InstructionConstants";
 
 export default class ALUControl extends Component {
-    public static readonly FUNC = Val.UnsignedInt(0, 2);
-    public static readonly OP = Val.UnsignedInt(1, 2);
-    public static readonly ADD = Val.UnsignedInt(2, 2);
+    public static readonly FUNC = Value.fromUnsignedInt(0, 2);
+    public static readonly OP = Value.fromUnsignedInt(1, 2);
+    public static readonly ADD = Value.fromUnsignedInt(2, 2);
 
     private _instrNode: CircuitNode;
     private _controlNode: CircuitNode;
     private _outNode: CircuitNode;
 
-    private instrValue: Val;
-    private ctrlValue: Val;
+    private instrValue: Value;
+    private ctrlValue: Value;
 
     constructor(x: number, y: number) {
         super(x, y);
@@ -34,7 +34,7 @@ export default class ALUControl extends Component {
         this.ctrlValue = undefined;
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         switch (signaler) {
             case this._instrNode: {
                 this.instrValue = value;
@@ -53,7 +53,7 @@ export default class ALUControl extends Component {
             return;
         }
 
-        let result: Val;
+        let result: Value;
 
         switch (this.ctrlValue) {
             case ALUControl.FUNC: {
@@ -81,7 +81,7 @@ export default class ALUControl extends Component {
 
     }
 
-    private handleFunc(): Val {
+    private handleFunc(): Value {
         let func7 = this.instrValue.asBinaryString().substr(0, 7);
         let func3 = this.instrValue.asBinaryString().substr(17, 3);
         let func = func7 + func3;
@@ -122,7 +122,7 @@ export default class ALUControl extends Component {
         }
     }
 
-    private handleOp(): Val {
+    private handleOp(): Value {
         let func7 = this.instrValue.asBinaryString().substr(0, 7);
         let func3 = this.instrValue.asBinaryString().substr(17, 3);
 

@@ -2,7 +2,7 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
 import CircuitNode from "./CircutNode";
-import Val from "../util/Val";
+import Value from "../util/Value";
 import InstructionHelper from "../instructions/InstructionHelper";
 import InstructionConstants from "../instructions/InstructionConstants";
 import {InstructionDecoder} from "../instructions/InstructionDecoder";
@@ -10,7 +10,7 @@ import InstructionFactory from "../instructions/InstructionFactory";
 
 export default class InstructionMemory extends Component {
     public static readonly SIZE: number = 32;
-    private readonly values: Val[] = [];
+    private readonly values: Value[] = [];
 
     private selectedInstr;
 
@@ -19,19 +19,20 @@ export default class InstructionMemory extends Component {
     private _addressNode: CircuitNode;
     private _outputDataNode: CircuitNode;
 
-    constructor(x: number, y: number, values: Val[]) {
+    constructor(x: number, y: number, values: Value[]) {
         super(x, y);
         this.values = values;
 
         this.values[0] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 1, 0, 10);
         this.values[1] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 2, 0, 20);
         this.values[2] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 3, 0, 20);
+        this.values[3] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 4, 0, -10);
 
-        this.values[3] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
-        this.values[4] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 1, 8);
-        this.values[5] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
+        this.values[4] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
+        this.values[5] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 1, -8);
         this.values[6] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
-        this.values[6] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
+        this.values[7] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
+        this.values[8] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
     }
 
     refresh(): void {
@@ -59,7 +60,7 @@ export default class InstructionMemory extends Component {
         }
     }
 
-    forwardSignal(signaler: Component, value: Val): void {
+    forwardSignal(signaler: Component, value: Value): void {
         this.selectedInstr = value.asUnsignedInt() / 4;
         this._outputDataNode.forwardSignal(this, this.values[this.selectedInstr]);
     }

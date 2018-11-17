@@ -2,7 +2,7 @@ import Component from "./Component";
 import Graphics from "../util/Graphics";
 import CircuitNode from "./CircutNode";
 import Config from "../util/Config";
-import Val, {VAL_ZERO_32b} from "../util/Val";
+import Value, {VAL_ZERO_32b} from "../util/Value";
 
 export enum RegisterOrientation {
     HORIZONTAL,
@@ -16,9 +16,9 @@ export default class Register extends Component {
     private _outNode: CircuitNode = null;
     private _writeEnable: CircuitNode = null;
 
-    private value: Val = VAL_ZERO_32b;
+    private value: Value = VAL_ZERO_32b;
 
-    private nextValue: Val = undefined;
+    private nextValue: Value = undefined;
 
     constructor(x: number, y: number, orientation: RegisterOrientation = RegisterOrientation.HORIZONTAL) {
         super(x, y);
