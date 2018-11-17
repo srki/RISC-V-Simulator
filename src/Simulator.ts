@@ -12,15 +12,15 @@ import RegisterFile from "./components/RegisterFile";
 import ImmSelect from "./components/ImmSelect";
 import ALUControl from "./components/ALUControl";
 import DataMemory from "./components/DataMemory";
-import Val from "./util/Val";
+import Value from "./util/Value";
 import BranchLogic from "./components/BranchLogic";
 
 export default class Simulator {
     protected elements: Component[] = [];
     private readonly g: Graphics;
-    private initialInstruct: Val[];
+    private initialInstruct: Value[];
 
-    constructor(canvas: HTMLCanvasElement, parsed: Val[]) {
+    constructor(canvas: HTMLCanvasElement, parsed: Value[]) {
         this.g = new Graphics(canvas, 1200, 800);
         this.load(parsed);
     }
@@ -30,13 +30,13 @@ export default class Simulator {
 
         let PCRegister = new Register(50, 50);
         let instrMemory = new InstructionMemory(10, 100, this.initialInstruct);
-        let PCStepVal = new ConstValue(350, 135, Val.UnsignedInt(4));
+        let PCStepVal = new ConstValue(350, 135, Value.fromUnsignedInt(4));
         let PCAdder = new ArithmeticLogicUnit(405, 135, ArithmeticLogicUnit.ADD);
         let PCSelMux = new Multiplexer(410, 25, 4, MultiplexerOrientation.LEFT);
 
         this.elements.push(PCRegister, instrMemory, PCStepVal, PCSelMux, PCAdder, controlUnit);
 
-        let WASel1 = new ConstValue(450, 520, Val.UnsignedInt(1));
+        let WASel1 = new ConstValue(450, 520, Value.fromUnsignedInt(1));
         let WASelMux = new Multiplexer(485, 520, 2);
         let registerFile = new RegisterFile(550, 350);
         let immSelect = new ImmSelect(670, 550);
@@ -60,7 +60,7 @@ export default class Simulator {
         this.elements.push(branchAdder, branchLogic);
 
         /* PC enable write */
-        let node = new CircuitNode(70, 50, Val.UnsignedInt(1));
+        let node = new CircuitNode(70, 50, Value.fromUnsignedInt(1));
         PCRegister.writeEnable = node;
         this.elements.push(node); // Not required
 
@@ -316,7 +316,7 @@ export default class Simulator {
         this.draw();
     }
 
-    load(parsed: Val[]) {
+    load(parsed: Value[]) {
         this.initialInstruct = parsed;
         this.reset();
     }

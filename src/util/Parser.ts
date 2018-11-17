@@ -1,15 +1,15 @@
-import Val, {VAL_ZERO_32b} from "./Val";
+import Value, {VAL_ZERO_32b} from "./Value";
 import InstructionMemory from "../components/InstructionMemory";
 import InstructionHelper from "../instructions/InstructionHelper";
 
 
 export default class Parser {
-    static parse(textContent : String) : Val[] {
+    static parse(textContent : String) : Value[] {
 
-        let ret : Val[] = [];
+        let ret : Value[] = [];
         let lines = textContent.split('\n');
         for(let i = 0; i < lines.length; i++) {
-             ret.push(Val.HexString(lines[i]));
+             ret.push(Value.HexString(lines[i]));
         }
 
         while(ret.length < InstructionMemory.SIZE)

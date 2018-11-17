@@ -1,9 +1,9 @@
-import Val from "../util/Val";
+import Value from "../util/Value";
 import InstructionConstants from "./InstructionConstants";
 import InstructionHelper from "./InstructionHelper";
 
 export class InstructionDecoder {
-    static decode(instr: Val): string {
+    static decode(instr: Value): string {
         let opCode = InstructionHelper.getOpCodeStr(instr);
 
         switch (opCode) {
@@ -34,7 +34,7 @@ export class InstructionDecoder {
         }
     }
 
-    static decodeALU(instr: Val): string {
+    static decodeALU(instr: Value): string {
         let func = instr.asBinaryString().substr(0, 7) + instr.asBinaryString().substr(17, 3);
 
         let name = "-";
@@ -85,7 +85,7 @@ export class InstructionDecoder {
             InstructionHelper.getRs1(instr) + ", x" + InstructionHelper.getRs2(instr);
     }
 
-    static decodeALUI(instr: Val): string {
+    static decodeALUI(instr: Value): string {
         let func7 = instr.asBinaryString().substr(0, 7);
         let func3 = instr.asBinaryString().substr(17, 3);
 
@@ -132,11 +132,16 @@ export class InstructionDecoder {
             }
         }
 
+        let imm = InstructionHelper.getImmIType(instr);
+        if (imm >= 1<< 11) {
+            imm -= (1 << 12);
+        }
+
         return name + " x" + InstructionHelper.getRd(instr) + ", x" + InstructionHelper.getRs1(instr) + ", " +
-            InstructionHelper.getImmIType(instr).toString(10);
+            imm.toString(10);
     }
 
-    static decodeLW(instr: Val): string {
+    static decodeLW(instr: Value): string {
         let func = instr.asBinaryString().substr(17, 3);
 
         let name = "-";
@@ -168,7 +173,7 @@ export class InstructionDecoder {
             "(x" + InstructionHelper.getRs1(instr) + ")";
     }
 
-    static decodeSW(instr: Val): string {
+    static decodeSW(instr: Value): string {
         let func = instr.asBinaryString().substr(17, 3);
 
         let name = "-";
@@ -192,7 +197,7 @@ export class InstructionDecoder {
             "(x" + InstructionHelper.getRs2(instr) + ")";
     }
 
-    static decodeBRANCH(instr: Val): string {
+    static decodeBRANCH(instr: Value): string {
         let func = instr.asBinaryString().substr(17, 3);
 
         let name = "-";
@@ -223,15 +228,20 @@ export class InstructionDecoder {
             }
         }
 
+        let imm = InstructionHelper.getImmBType(instr);
+        if (imm >= 1<< 12) {
+            imm -= (1 << 13);
+        }
+
         return name + " x" + InstructionHelper.getRs1(instr) + ", x" + InstructionHelper.getRs2(instr) +
-            ", 0x" + InstructionHelper.getImmBType(instr).toString(16).toUpperCase();
+            ", " + imm.toString(10);
     }
 
-    static decodeJAL(instr: Val): string {
+    static decodeJAL(instr: Value): string {
         return "JAL instruction";
     }
 
-    static decodeJALR(instr: Val): string {
+    static decodeJALR(instr: Value): string {
         return "JALR instruction";
     }
 }

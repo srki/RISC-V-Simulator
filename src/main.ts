@@ -1,6 +1,7 @@
 import Simulator from "./Simulator";
 import Parser from "./util/Parser";
 import {toggleFullScreen} from "./util/util";
+import Value from "./util/Value";
 
 let canvas = <HTMLCanvasElement> document.getElementById("sim-canvas");
 let menuBar = <HTMLDivElement> document.getElementById("menu");
@@ -23,6 +24,7 @@ resize();
 
 window.addEventListener("resize", () => resize());
 
+Value.main();
 
 window.addEventListener("keydown", evt => {
     switch (evt.key) {
