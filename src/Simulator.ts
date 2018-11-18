@@ -223,11 +223,13 @@ export default class Simulator {
         node = new CircuitNode(695, 325);
         readData1BranchNode.addNeighbour(node);
         branchLogic.data1Node = node;
+        this.elements.push(node);
 
         /* readData2 -> Branch Logic */
         node = new CircuitNode(745, 325);
         readData2BranchNode.addNeighbour(node);
         branchLogic.data2Node = node;
+        this.elements.push(node);
 
         /* instrNode -> Branch Select */
         branchLogic.instrNode = instrNodeTop;
@@ -236,6 +238,7 @@ export default class Simulator {
         node = new CircuitNode(770, 300);
         branchLogic.outNode = node;
         controlUnit.branchNode = node;
+        this.elements.push(node);
 
         /*
          *Control signals
@@ -303,7 +306,7 @@ export default class Simulator {
     draw() {
         this.g.rescale();
         this.g.clear(Config.backgroundColor);
-        this.g.fillRect(0, 0, 1200, 800, "#00000000", "red");
+        // this.g.fillRect(0, 0, 1200, 800, "#00000000", "red");
 
         this.elements.forEach(el => el.draw(this.g))
     }

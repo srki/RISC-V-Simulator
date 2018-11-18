@@ -246,6 +246,7 @@ export const VAL_ZERO_32b = Value.fromUnsignedInt(0, 32);
 export const VAL_ONE_32b = Value.fromUnsignedInt(1, 32);
 export const VAL_TWO_32b = Value.fromUnsignedInt(2, 32);
 export const VAL_THREE_32b = Value.fromUnsignedInt(3, 32);
+export const VAL_MAX_32b = new Value("11111111111111111111111111111111", 32);
 
 export const VAL_ZERO_1b = Value.fromUnsignedInt(0, 1);
 export const VAL_ZERO_5b = Value.fromUnsignedInt(0, 5);

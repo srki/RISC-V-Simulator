@@ -23,16 +23,32 @@ export default class InstructionMemory extends Component {
         super(x, y);
         this.values = values;
 
-        this.values[0] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 1, 0, 10);
-        this.values[1] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 2, 0, 20);
-        this.values[2] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 3, 0, 20);
-        this.values[3] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 4, 0, -10);
+        this.values[0] = InstructionFactory.createIType(InstructionConstants.OP_CODE_LW, InstructionConstants.FUNCT_LW, 1, 0, 124);
+        this.values[1] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 2, 0, 0);
+        this.values[2] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 3, 0, 0);
 
-        this.values[4] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
-        this.values[5] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 1, -8);
-        this.values[6] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
-        this.values[7] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
-        this.values[8] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BEQ, 1, 2, 4);
+        this.values[3] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BGE, 2, 1, 112);
+        this.values[4] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 4, 0, 0);
+        this.values[5] = InstructionFactory.createSType(InstructionConstants.OP_CODE_SW, InstructionConstants.FUNCT_SW, 3, 4, 0);
+        this.values[6] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 2, 2, 1);
+        this.values[7] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 3, 3, 4);
+
+        this.values[8] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BGE, 2, 1, 92);
+        this.values[9] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 5, 0, 1);
+        this.values[10] = InstructionFactory.createSType(InstructionConstants.OP_CODE_SW, InstructionConstants.FUNCT_SW, 3, 5, 0);
+        this.values[11] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 2, 2, 1);
+        this.values[12] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 3, 3, 4);
+
+        this.values[13] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BGE, 2, 1, 72);
+        this.values[14] = InstructionFactory.createRType(InstructionConstants.OP_CODE_ALU, InstructionConstants.FUNCT_ADD, 6, 5 ,0);
+        this.values[15] = InstructionFactory.createRType(InstructionConstants.OP_CODE_ALU, InstructionConstants.FUNCT_ADD, 5, 5 ,4);
+        this.values[16] = InstructionFactory.createRType(InstructionConstants.OP_CODE_ALU, InstructionConstants.FUNCT_ADD, 4, 6 ,0);
+        this.values[17] = InstructionFactory.createSType(InstructionConstants.OP_CODE_SW, InstructionConstants.FUNCT_SW, 3, 5, 0);
+        this.values[18] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 2, 2, 1);
+        this.values[19] = InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, InstructionConstants.FUNCT_ADDI, 3, 3, 4);
+        this.values[20] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BGE, 0, 0, -28);
+
+        this.values[31] = InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, InstructionConstants.FUNCT_BGE, 0, 0, 0);
     }
 
     refresh(): void {
