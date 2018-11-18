@@ -104,7 +104,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({"Graphics.ts":[function(require,module,exports) {
+})({"util/Graphics.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -150,16 +150,26 @@ function () {
     this.ctx.restore();
   };
 
-  Graphics.prototype.drawLine = function (x1, y1, x2, y2, color) {
+  Graphics.prototype.drawLine = function (x1, y1, x2, y2, color, lineWidth) {
+    if (lineWidth === void 0) {
+      lineWidth = 2;
+    }
+
     this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = lineWidth;
     this.ctx.beginPath();
     this.ctx.moveTo(x1, y1);
     this.ctx.lineTo(x2, y2);
     this.ctx.stroke();
   };
 
-  Graphics.prototype.drawPath = function (path, strokeStyle) {
+  Graphics.prototype.drawPath = function (path, strokeStyle, lineWidth) {
+    if (lineWidth === void 0) {
+      lineWidth = 2;
+    }
+
     this.ctx.strokeStyle = strokeStyle;
+    this.ctx.lineWidth = lineWidth;
     this.ctx.beginPath();
     this.ctx.moveTo(path[0][0], path[0][1]);
 
@@ -170,13 +180,22 @@ function () {
     this.ctx.stroke();
   };
 
-  Graphics.prototype.fillRect = function (x, y, w, h, fillStyle, strokeStyle) {
-    this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], fillStyle, strokeStyle);
+  Graphics.prototype.fillRect = function (x, y, w, h, fillStyle, strokeStyle, lineWidth) {
+    if (lineWidth === void 0) {
+      lineWidth = 2;
+    }
+
+    this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], fillStyle, strokeStyle, lineWidth);
   };
 
-  Graphics.prototype.fillPolygon = function (point, fillStyle, strokeStyle) {
+  Graphics.prototype.fillPolygon = function (point, fillStyle, strokeStyle, lineWidth) {
+    if (lineWidth === void 0) {
+      lineWidth = 2;
+    }
+
     this.ctx.fillStyle = fillStyle;
     this.ctx.strokeStyle = strokeStyle;
+    this.ctx.lineWidth = lineWidth;
     this.ctx.beginPath();
     this.ctx.moveTo(point[0][0], point[0][1]);
 
@@ -223,7 +242,7 @@ function () {
 }();
 
 exports.default = Graphics;
-},{}],"Component.ts":[function(require,module,exports) {
+},{}],"components/Component.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -254,7 +273,7 @@ function () {
 }();
 
 exports.default = Component;
-},{}],"Config.ts":[function(require,module,exports) {
+},{}],"util/Config.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -274,159 +293,287 @@ function () {
   Config.lineColor = "#000000";
   Config.signalColor = "#FF0000";
   Config.fontColor = "#000000";
+  Config.readFontColor = "#0000FF";
+  Config.writeFontColor = "#FF0000";
   Config.fontSize = 20;
   return Config;
 }();
 
 exports.default = Config;
-},{}],"Val.ts":[function(require,module,exports) {
+},{}],"util/Value.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Val =
+var Value =
 /** @class */
 function () {
-  function Val(val, num_bits) {
-    if (val === void 0) {
-      val = 0;
+  function Value(bitValue, numBits) {
+    if (bitValue.length > numBits) {
+      console.log("BitValue is too long");
     }
 
-    this.num_bits = num_bits;
-    this.val = val;
+    this.numBits = numBits;
+    this.bitValue = this.padWith(bitValue, "0", numBits);
   }
 
-  Val.mod = function (n, m) {
+  Value.mod = function (n, m) {
     return (n % m + m) % m;
   };
 
-  Val.UnsignedInt = function (val, num_bits) {
+  Value.fromUnsignedInt = function (val, num_bits) {
     if (num_bits === void 0) {
       num_bits = 32;
     }
 
-    return new Val(Val.mod(val, Math.pow(2, num_bits)), num_bits);
+    return new Value(Value.mod(val, Math.pow(2, num_bits)).toString(2), num_bits);
   };
 
-  Val.prototype.asUnsignedInt = function () {
-    return this.val;
-  };
-
-  Val.SignedInt = function (val, num_bits) {
-    if (num_bits === void 0) {
-      num_bits = 32;
+  Value.fromSignedInt = function (val, numBits) {
+    if (numBits === void 0) {
+      numBits = 32;
     }
 
-    var max_signed = Math.pow(2, num_bits - 1) - 1;
-    if (val >= 0) return new Val(Val.mod(val, max_signed), num_bits);
-    if (val < 0) return new Val(max_signed + 1 - Val.mod(val, max_signed), num_bits);
+    return new Value((val < 0 ? val + (1 << numBits) : val).toString(2), numBits);
   };
 
-  Val.prototype.asSignedInt = function () {
-    var max_signed = Math.pow(2, this.num_bits - 1) - 1;
-    if (this.val <= max_signed) return this.val;
-    return -(this.val - (max_signed + 1));
+  Value.prototype.asUnsignedInt = function () {
+    return parseInt(this.bitValue, 2);
   };
 
-  Val.prototype.asHexString = function () {
+  Value.prototype.asSignedInt = function () {
+    var str = this.padWith(this.bitValue, "0", this.numBits);
+
+    if (str[0] == "0") {
+      return parseInt(this.bitValue, 2);
+    }
+
+    var flippedStr = "";
+
+    for (var i = 1; i < str.length; i++) {
+      flippedStr += str[i] == "1" ? "0" : "1";
+    }
+
+    return -parseInt(flippedStr, 2) - 1;
+  };
+
+  Value.prototype.asHexString = function () {
     var str = this.asUnsignedInt().toString(16);
 
-    while (str.length < this.num_bits / 4) {
+    while (str.length < this.numBits / 4) {
       str = "0" + str;
     }
 
     return "0x" + str.toUpperCase();
   };
 
-  Val.prototype.asBinaryString = function () {
-    var str = this.asUnsignedInt().toString(2);
+  Value.prototype.asBinaryString = function () {
+    return this.bitValue;
+  };
 
-    while (str.length < this.num_bits) {
-      str = "0" + str;
+  Value.prototype.asShortHexString = function () {
+    return this.asUnsignedInt().toString(16).toUpperCase();
+  };
+
+  Value.prototype.signExtend = function (numBits) {
+    return new Value(this.padWith(this.bitValue, this.bitValue[0], numBits), numBits);
+  };
+
+  Value.prototype.getNumBits = function () {
+    return this.numBits;
+  };
+
+  Value.prototype.getByteBinary = function (byteIdx) {
+    if (this.numBits != 32) {
+      console.log("Error");
+      return null;
+    }
+
+    return this.asBinaryString().substr((3 - byteIdx) * 8, 8);
+  };
+
+  Value.prototype.writeByte = function (byteIdx, byte) {
+    if (this.numBits != 32) {
+      console.log("Error");
+      return null;
+    }
+
+    byteIdx = 3 - byteIdx;
+    var str = this.asBinaryString();
+    str = str.substring(0, byteIdx * 8) + byte + str.substr((byteIdx + 1) * 8);
+    return new Value(str, 32);
+  };
+
+  Value.prototype.padWith = function (str, padValue, length) {
+    while (str.length < length) {
+      str = padValue + str;
     }
 
     return str;
-  };
-
-  Val.prototype.asShortHexString = function () {
-    return this.asUnsignedInt().toString(16).toLocaleUpperCase();
-  };
-
-  Val.prototype.getNumBits = function () {
-    return this.num_bits;
   }; // TODO: check if the implementations are correct
 
 
-  Val.add = function (lhs, rhs) {
-    return new Val(lhs.asUnsignedInt() + rhs.asUnsignedInt(), 32);
+  Value.add = function (lhs, rhs) {
+    return Value.fromUnsignedInt(lhs.asUnsignedInt() + rhs.asUnsignedInt(), 32);
   };
 
-  Val.sub = function (lhs, rhs) {
-    return new Val(lhs.asUnsignedInt() - rhs.asUnsignedInt(), 32);
+  Value.sub = function (lhs, rhs) {
+    return Value.fromUnsignedInt(lhs.asUnsignedInt() - rhs.asUnsignedInt(), 32);
   };
 
-  Val.and = function (lhs, rhs) {
-    return new Val(lhs.asUnsignedInt() & rhs.asUnsignedInt(), 32);
+  Value.and = function (lhs, rhs) {
+    return Value.fromUnsignedInt(lhs.asUnsignedInt() & rhs.asUnsignedInt(), 32);
   };
 
-  Val.or = function (lhs, rhs) {
-    return new Val(lhs.asUnsignedInt() | rhs.asUnsignedInt(), 32);
+  Value.or = function (lhs, rhs) {
+    return Value.fromUnsignedInt(lhs.asUnsignedInt() | rhs.asUnsignedInt(), 32);
   };
 
-  Val.xor = function (lhs, rhs) {
-    return new Val(lhs.asUnsignedInt() ^ rhs.asUnsignedInt(), 32);
+  Value.xor = function (lhs, rhs) {
+    return Value.fromUnsignedInt(lhs.asUnsignedInt() ^ rhs.asUnsignedInt(), 32);
   };
 
-  Val.shiftLeftLogical = function (lhs, rhs) {
-    return new Val(lhs.asUnsignedInt() << rhs.asUnsignedInt(), 32);
+  Value.shiftLeftLogical = function (lhs, rhs) {
+    return Value.fromUnsignedInt(lhs.asUnsignedInt() << rhs.asUnsignedInt(), 32);
   };
 
-  Val.shiftRightLogical = function (lhs, rhs) {
-    return new Val(lhs.asUnsignedInt() >>> rhs.asUnsignedInt(), 32);
+  Value.shiftRightLogical = function (lhs, rhs) {
+    return Value.fromUnsignedInt(lhs.asUnsignedInt() >>> rhs.asUnsignedInt(), 32);
   };
 
-  Val.shiftRightArithmetic = function (lhs, rhs) {
-    return new Val(lhs.asUnsignedInt() >> rhs.asUnsignedInt(), 32);
+  Value.shiftRightArithmetic = function (lhs, rhs) {
+    return Value.fromUnsignedInt(lhs.asUnsignedInt() >> rhs.asUnsignedInt(), 32);
   };
 
-  Val.main = function () {
-    console.log("hello world");
-    console.log(this.UnsignedInt(12345).asSignedInt());
-    console.log(this.UnsignedInt(-123).asSignedInt());
-    console.log(this.UnsignedInt(123231).asSignedInt());
-    console.log(this.UnsignedInt(123412).asSignedInt());
-    console.log(this.UnsignedInt(Math.pow(2, 32)).asSignedInt());
-    console.log(this.UnsignedInt(Math.pow(2, 32) - 1).asSignedInt());
-    console.log(this.UnsignedInt(Math.pow(2, 32) + 1).asSignedInt());
-    console.log(this.SignedInt(1).asSignedInt());
-    console.log(this.SignedInt(0).asSignedInt());
-    console.log(this.SignedInt(-1).asSignedInt());
-    console.log(this.SignedInt(-1234567).asSignedInt());
-    console.log(this.SignedInt(7654321).asSignedInt());
-    console.log(this.SignedInt(999999999999999).asHexString());
+  Value.cmp = function (lhs, rhs, signed) {
+    if (lhs.numBits != rhs.numBits) {
+      console.error("The nuber of bits do not match");
+      return null;
+    }
+
+    var a = lhs.asBinaryString();
+    var b = rhs.asBinaryString();
+
+    if (signed && a[0] != b[0]) {
+      return a[0] == '1' ? -1 : 1;
+    }
+
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return a[i] == '0' ? -1 : 1;
+      }
+    }
+
+    return 0;
   };
 
-  Val.HexString = function (s, num_bits) {
+  Value.cmpEQ = function (lhs, rhs) {
+    return this.cmp(lhs, rhs, false) == 0;
+  };
+
+  Value.cmpNE = function (lhs, rhs) {
+    return this.cmp(lhs, rhs, false) != 0;
+  };
+
+  Value.cmpLT = function (lhs, rhs) {
+    return this.cmp(lhs, rhs, true) == -1;
+  };
+
+  Value.cmpGE = function (lhs, rhs) {
+    return this.cmp(lhs, rhs, true) != -1;
+  };
+
+  Value.cmpLTU = function (lhs, rhs) {
+    return this.cmp(lhs, rhs, false) == -1;
+  };
+
+  Value.cmpGEU = function (lhs, rhs) {
+    return this.cmp(lhs, rhs, false) != -1;
+  };
+
+  Value.main = function () {// for (let i = -4; i < 4; i++) {
+    //     let v = this.fromSignedInt(i, 3);
+    //     console.log(v.asBinaryString() + " " + v.asSignedInt() + " " + v.asUnsignedInt());
+    // }
+    //@formatter:off
+    // console.log(this.cmpEQ(new Value(-10, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpEQ(new Value( 10, 32), new Value(-10, 32)) == false);
+    // console.log(this.cmpEQ(new Value( 10, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpEQ(new Value(-10, 32), new Value(-10, 32)) == true);
+    // console.log(this.cmpEQ(new Value(  9, 32), new Value(-10, 32)) == false);
+    // console.log(this.cmpEQ(new Value(  9, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpEQ(new Value( 11, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpEQ(new Value(-11, 32), new Value( 10, 32)) == false);
+    //
+    // console.log("--");
+    //
+    // console.log(this.cmpNE(new Value(-10, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpNE(new Value( 10, 32), new Value(-10, 32)) == true);
+    // console.log(this.cmpNE(new Value( 10, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpNE(new Value(-10, 32), new Value(-10, 32)) == false);
+    // console.log(this.cmpNE(new Value(  9, 32), new Value(-10, 32)) == true);
+    // console.log(this.cmpNE(new Value(  9, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpNE(new Value( 11, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpNE(new Value(-11, 32), new Value( 10, 32)) == true);
+    //
+    // console.log("--");
+    //
+    // console.log(this.cmpLT(new Value(-10, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpLT(new Value( 10, 32), new Value(-10, 32)) == false);
+    // console.log(this.cmpLT(new Value( 10, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpLT(new Value(-10, 32), new Value(-10, 32)) == false);
+    // console.log(this.cmpLT(new Value(  9, 32), new Value(-10, 32)) == false);
+    // console.log(this.cmpLT(new Value(  9, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpLT(new Value( 11, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpLT(new Value(-11, 32), new Value( 10, 32)) == true);
+    //
+    // console.log("--");
+    //
+    // console.log(this.cmpGE(new Value(-10, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpGE(new Value( 10, 32), new Value(-10, 32)) == true);
+    // console.log(this.cmpGE(new Value( 10, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpGE(new Value(-10, 32), new Value(-10, 32)) == true);
+    // console.log(this.cmpGE(new Value(  9, 32), new Value(-10, 32)) == true);
+    // console.log(this.cmpGE(new Value(  9, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpGE(new Value( 11, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpGE(new Value(-11, 32), new Value( 10, 32)) == false);
+    //
+    // console.log("--");
+    //
+    // console.log(this.cmpLTU(new Value( 10, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpLTU(new Value(  9, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpLTU(new Value( 11, 32), new Value( 10, 32)) == false);
+    //
+    // console.log("--");
+    //
+    // console.log(this.cmpGEU(new Value( 10, 32), new Value( 10, 32)) == true);
+    // console.log(this.cmpGEU(new Value(  9, 32), new Value( 10, 32)) == false);
+    // console.log(this.cmpGEU(new Value( 11, 32), new Value( 10, 32)) == true);
+    //@formatter:on
+  };
+
+  Value.HexString = function (s, num_bits) {
     if (num_bits === void 0) {
       num_bits = 32;
     }
 
-    return Val.UnsignedInt(parseInt(s, 16), num_bits);
+    return Value.fromUnsignedInt(parseInt(s, 16), num_bits);
   };
 
-  return Val;
+  return Value;
 }();
 
-exports.default = Val;
-exports.VAL_ZERO_32b = Val.UnsignedInt(0, 32);
-exports.VAL_ONE_32b = Val.UnsignedInt(1, 32);
-exports.VAL_TWO_32b = Val.UnsignedInt(2, 32);
-exports.VAL_THREE_32b = Val.UnsignedInt(3, 32);
-exports.VAL_ZERO_0b = Val.UnsignedInt(0, 0);
-exports.VAL_ZERO_5b = Val.UnsignedInt(0, 5);
-},{}],"ArithmeticLogicUnit.ts":[function(require,module,exports) {
+exports.default = Value;
+exports.VAL_ZERO_32b = Value.fromUnsignedInt(0, 32);
+exports.VAL_ONE_32b = Value.fromUnsignedInt(1, 32);
+exports.VAL_TWO_32b = Value.fromUnsignedInt(2, 32);
+exports.VAL_THREE_32b = Value.fromUnsignedInt(3, 32);
+exports.VAL_MAX_32b = new Value("11111111111111111111111111111111", 32);
+exports.VAL_ZERO_1b = Value.fromUnsignedInt(0, 1);
+exports.VAL_ZERO_5b = Value.fromUnsignedInt(0, 5);
+},{}],"components/ArithmeticLogicUnit.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -477,11 +624,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Graphics_1 = __importDefault(require("./Graphics"));
+var Graphics_1 = __importDefault(require("../util/Graphics"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
-var Val_1 = __importStar(require("./Val"));
+var Value_1 = __importStar(require("../util/Value"));
 
 var ArithmeticLogicUnit =
 /** @class */
@@ -499,9 +646,9 @@ function (_super) {
     _this._input1Node = null;
     _this._input2Node = null;
     _this._selOpNode = null;
-    _this.input1Value = Val_1.VAL_ZERO_32b;
-    _this.input2Value = Val_1.VAL_ZERO_0b;
-    _this.selOpValue = Val_1.VAL_ZERO_5b;
+    _this.input1Value = Value_1.VAL_ZERO_32b;
+    _this.input2Value = Value_1.VAL_ZERO_1b;
+    _this.selOpValue = Value_1.VAL_ZERO_5b;
     _this.defaultOp = defaultOp;
 
     _this.refresh();
@@ -543,49 +690,49 @@ function (_super) {
     switch (this.selOpValue) {
       case ArithmeticLogicUnit.ADD:
         {
-          result = Val_1.default.add(this.input1Value, this.input2Value);
+          result = Value_1.default.add(this.input1Value, this.input2Value);
           break;
         }
 
       case ArithmeticLogicUnit.SUB:
         {
-          result = Val_1.default.sub(this.input1Value, this.input2Value);
+          result = Value_1.default.sub(this.input1Value, this.input2Value);
           break;
         }
 
       case ArithmeticLogicUnit.AND:
         {
-          result = Val_1.default.and(this.input1Value, this.input2Value);
+          result = Value_1.default.and(this.input1Value, this.input2Value);
           break;
         }
 
       case ArithmeticLogicUnit.OR:
         {
-          result = Val_1.default.or(this.input1Value, this.input2Value);
+          result = Value_1.default.or(this.input1Value, this.input2Value);
           break;
         }
 
       case ArithmeticLogicUnit.XOR:
         {
-          result = Val_1.default.xor(this.input1Value, this.input2Value);
+          result = Value_1.default.xor(this.input1Value, this.input2Value);
           break;
         }
 
       case ArithmeticLogicUnit.SLL:
         {
-          result = Val_1.default.shiftLeftLogical(this.input1Value, this.input2Value);
+          result = Value_1.default.shiftLeftLogical(this.input1Value, this.input2Value);
           break;
         }
 
       case ArithmeticLogicUnit.SRL:
         {
-          result = Val_1.default.shiftRightLogical(this.input1Value, this.input2Value);
+          result = Value_1.default.shiftRightLogical(this.input1Value, this.input2Value);
           break;
         }
 
       case ArithmeticLogicUnit.SRA:
         {
-          result = Val_1.default.shiftRightArithmetic(this.input1Value, this.input2Value);
+          result = Value_1.default.shiftRightArithmetic(this.input1Value, this.input2Value);
           break;
         }
 
@@ -604,7 +751,7 @@ function (_super) {
       default:
         {
           console.error("Unknown operation");
-          result = Val_1.VAL_ZERO_32b;
+          result = Value_1.VAL_ZERO_32b;
         }
     }
 
@@ -654,41 +801,41 @@ function (_super) {
   });
   /* @formatter:off */
 
-  ArithmeticLogicUnit.ADD = new Val_1.default(0, 4);
+  ArithmeticLogicUnit.ADD = new Value_1.default("0", 4);
   /* Addition               */
 
-  ArithmeticLogicUnit.SUB = new Val_1.default(1, 4);
+  ArithmeticLogicUnit.SUB = new Value_1.default("1", 4);
   /* Subtraction            */
 
-  ArithmeticLogicUnit.AND = new Val_1.default(2, 4);
+  ArithmeticLogicUnit.AND = new Value_1.default("2", 4);
   /* Bitwise AND            */
 
-  ArithmeticLogicUnit.OR = new Val_1.default(3, 4);
+  ArithmeticLogicUnit.OR = new Value_1.default("3", 4);
   /* Bitwise OR             */
 
-  ArithmeticLogicUnit.XOR = new Val_1.default(4, 4);
+  ArithmeticLogicUnit.XOR = new Value_1.default("4", 4);
   /* Bitwise XOR            */
 
-  ArithmeticLogicUnit.SLL = new Val_1.default(5, 4);
+  ArithmeticLogicUnit.SLL = new Value_1.default("5", 4);
   /* Shift Left Logical     */
 
-  ArithmeticLogicUnit.SRL = new Val_1.default(6, 4);
+  ArithmeticLogicUnit.SRL = new Value_1.default("6", 4);
   /* Shift Right Logical    */
 
-  ArithmeticLogicUnit.SRA = new Val_1.default(7, 4);
+  ArithmeticLogicUnit.SRA = new Value_1.default("7", 4);
   /* Shift Right Arithmetic */
 
-  ArithmeticLogicUnit.SLT = new Val_1.default(8, 4);
+  ArithmeticLogicUnit.SLT = new Value_1.default("8", 4);
   /* Shift Right Arithmetic */
 
-  ArithmeticLogicUnit.SLTU = new Val_1.default(9, 4);
+  ArithmeticLogicUnit.SLTU = new Value_1.default("9", 4);
   /* Shift Right Arithmetic */
 
   return ArithmeticLogicUnit;
 }(Component_1.default);
 
 exports.default = ArithmeticLogicUnit;
-},{"./Component":"Component.ts","./Graphics":"Graphics.ts","./Config":"Config.ts","./Val":"Val.ts"}],"Register.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Graphics":"util/Graphics.ts","../util/Config":"util/Config.ts","../util/Value":"util/Value.ts"}],"components/Register.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -729,9 +876,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
-var Val_1 = require("./Val");
+var Value_1 = require("../util/Value");
 
 var RegisterOrientation;
 
@@ -755,7 +902,7 @@ function (_super) {
     _this._inputNode = null;
     _this._outNode = null;
     _this._writeEnable = null;
-    _this.value = Val_1.VAL_ZERO_32b;
+    _this.value = Value_1.VAL_ZERO_32b;
     _this.nextValue = undefined;
     _this.orientation = orientation;
     _this.nextValue = undefined;
@@ -815,7 +962,7 @@ function (_super) {
 }(Component_1.default);
 
 exports.default = Register;
-},{"./Component":"Component.ts","./Config":"Config.ts","./Val":"Val.ts"}],"CircutNode.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Config":"util/Config.ts","../util/Value":"util/Value.ts"}],"components/CircutNode.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -856,7 +1003,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
 var CircuitNode =
 /** @class */
@@ -935,31 +1082,93 @@ function (_super) {
 }(Component_1.default);
 
 exports.default = CircuitNode;
-},{"./Component":"Component.ts","./Config":"Config.ts"}],"InstructionHelper.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Config":"util/Config.ts"}],"instructions/InstructionConstants.ts":[function(require,module,exports) {
 "use strict";
-
-var __importDefault = this && this.__importDefault || function (mod) {
-  return mod && mod.__esModule ? mod : {
-    "default": mod
-  };
-};
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Val_1 = __importDefault(require("./Val"));
+var InstructionConstants =
+/** @class */
+function () {
+  function InstructionConstants() {}
+  /* @formatter:off */
+
+
+  InstructionConstants.OP_CODE_ALU = "0110011";
+  InstructionConstants.OP_CODE_ALUI = "0010011";
+  InstructionConstants.OP_CODE_LW = "0000011";
+  InstructionConstants.OP_CODE_SW = "0100011";
+  InstructionConstants.OP_CODE_BRANCH = "1100011";
+  InstructionConstants.OP_CODE_JAL = "1101111";
+  InstructionConstants.OP_CODE_JALR = "1100111";
+  /* ALU Functions */
+
+  InstructionConstants.FUNCT_ADD = "0000000000";
+  InstructionConstants.FUNCT_SUB = "0100000000";
+  InstructionConstants.FUNCT_SLL = "0000000001";
+  InstructionConstants.FUNCT_SLT = "0000000010";
+  InstructionConstants.FUNCT_SLTU = "0000000011";
+  InstructionConstants.FUNCT_XOR = "0000000100";
+  InstructionConstants.FUNCT_SRL = "0000000101";
+  InstructionConstants.FUNCT_SRA = "0100000101";
+  InstructionConstants.FUNCT_OR = "0000000110";
+  InstructionConstants.FUNCT_AND = "0000000111";
+  /* ALUi Functions */
+
+  InstructionConstants.FUNCT_ADDI = "000";
+  InstructionConstants.FUNCT_SLTI = "010";
+  InstructionConstants.FUNCT_SLTIU = "011";
+  InstructionConstants.FUNCT_XORI = "100";
+  InstructionConstants.FUNCT_ORI = "110";
+  InstructionConstants.FUNCT_ANDI = "111";
+  InstructionConstants.FUNCT_SLLI = "0000000001";
+  InstructionConstants.FUNCT_SRLI = "0000000101";
+  InstructionConstants.FUNCT_SRAI = "0100000101";
+  /* Load Functions */
+
+  InstructionConstants.FUNCT_LB = "000";
+  InstructionConstants.FUNCT_LH = "001";
+  InstructionConstants.FUNCT_LW = "010";
+  InstructionConstants.FUNCT_LBU = "100";
+  InstructionConstants.FUNCT_LHU = "101";
+  /* Store Functions */
+
+  InstructionConstants.FUNCT_SB = "000";
+  InstructionConstants.FUNCT_SH = "001";
+  InstructionConstants.FUNCT_SW = "010";
+  /* Branch Functions */
+
+  InstructionConstants.FUNCT_BEQ = "000";
+  InstructionConstants.FUNCT_BNE = "001";
+  InstructionConstants.FUNCT_BLT = "100";
+  InstructionConstants.FUNCT_BGE = "101";
+  InstructionConstants.FUNCT_BLTU = "110";
+  InstructionConstants.FUNCT_BGEU = "111";
+  return InstructionConstants;
+}();
+
+exports.default = InstructionConstants;
+},{}],"instructions/InstructionHelper.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var InstructionHelper =
 /** @class */
 function () {
   function InstructionHelper() {}
-  /* @formatter:on */
-
 
   InstructionHelper.convertAndPad = function (num, len) {
     if (len === void 0) {
       len = 32;
+    }
+
+    if (num < 0) {
+      num += Math.pow(2, len);
     }
 
     var str = num.toString(2);
@@ -1011,180 +1220,183 @@ function () {
     return parseInt(imm11 + imm4, 2);
   };
 
-  InstructionHelper.createRType = function (opCode, funct, rd, rs1, rs2) {
-    var funct7 = funct.substr(0, 7);
-    var funct3 = funct.substr(7, 3);
-    var instr = funct7 + this.convertAndPad(rs2, 5) + this.convertAndPad(rs1, 5) + funct3 + this.convertAndPad(rd, 5) + opCode;
-    return new Val_1.default(parseInt(instr, 2), 32);
+  InstructionHelper.getFuncLType = function (instr) {
+    return instr.asBinaryString().substr(17, 3);
   };
 
-  InstructionHelper.createIType = function (opCode, funct, rd, rs1, imm) {
-    var instr = this.convertAndPad(imm, 12) + this.convertAndPad(rs1, 5) + funct + this.convertAndPad(rd, 5) + opCode;
-    return new Val_1.default(parseInt(instr, 2), 32);
+  InstructionHelper.getFuncSType = function (instr) {
+    return instr.asBinaryString().substr(17, 3);
   };
 
-  InstructionHelper.createITypeShift = function (opCode, funct, rd, rs1, shamt) {
-    var funct7 = funct.substr(0, 7);
-    var funct3 = funct.substr(7, 3);
-    var instr = funct7 + this.convertAndPad(shamt, 5) + this.convertAndPad(rs1, 5) + funct3 + this.convertAndPad(rd, 5) + opCode;
-    return new Val_1.default(parseInt(instr, 2), 32);
+  InstructionHelper.getFuncBType = function (instr) {
+    return instr.asBinaryString().substr(17, 3);
   };
 
-  InstructionHelper.createSType = function (opCode, funct, rs1, rs2, imm) {
-    var immStr = this.convertAndPad(imm, 12);
-    var imm11 = immStr.substr(0, 7);
-    var imm4 = immStr.substr(7, 5);
-    var instr = imm11 + this.convertAndPad(rs2, 5) + this.convertAndPad(rs1, 5) + funct + imm4 + opCode;
-    return new Val_1.default(parseInt(instr, 2), 32);
-  };
+  InstructionHelper.INSTR_SIZE = 32;
+  InstructionHelper.OP_CODE_SIZE = 7;
+  return InstructionHelper;
+}();
 
-  InstructionHelper.createBType = function (opCode, funct, rs1, rs2, imm) {
-    var immStr = this.convertAndPad(imm, 12);
-    var imm12 = immStr.substr(0, 1);
-    var imm10 = immStr.substr(2, 6);
-    var imm4 = immStr.substr(8, 4);
-    var imm11 = immStr.substr(1, 1);
-    var instr = imm12 + imm10 + this.convertAndPad(rs2, 5) + this.convertAndPad(rs1, 5) + funct + imm4 + imm11 + opCode;
-    return new Val_1.default(parseInt(instr, 2), 32);
-  };
+exports.default = InstructionHelper;
+},{}],"instructions/InstructionDecoder.ts":[function(require,module,exports) {
+"use strict";
 
-  InstructionHelper.decode = function (instr) {
-    var opCode = this.getOpCodeStr(instr);
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var InstructionConstants_1 = __importDefault(require("./InstructionConstants"));
+
+var InstructionHelper_1 = __importDefault(require("./InstructionHelper"));
+
+var InstructionDecoder =
+/** @class */
+function () {
+  function InstructionDecoder() {}
+
+  InstructionDecoder.decode = function (instr) {
+    var opCode = InstructionHelper_1.default.getOpCodeStr(instr);
 
     switch (opCode) {
-      case this.OP_CODE_ALU:
+      case InstructionConstants_1.default.OP_CODE_ALU:
         return this.decodeALU(instr);
 
-      case this.OP_CODE_ALUI:
+      case InstructionConstants_1.default.OP_CODE_ALUI:
         return this.decodeALUI(instr);
 
-      case this.OP_CODE_LW:
+      case InstructionConstants_1.default.OP_CODE_LW:
         return this.decodeLW(instr);
 
-      case this.OP_CODE_SW:
+      case InstructionConstants_1.default.OP_CODE_SW:
         return this.decodeSW(instr);
 
-      case this.OP_CODE_BRANCH:
+      case InstructionConstants_1.default.OP_CODE_BRANCH:
         return this.decodeBRANCH(instr);
 
-      case this.OP_CODE_JAL:
+      case InstructionConstants_1.default.OP_CODE_JAL:
         return this.decodeJAL(instr);
 
-      case this.OP_CODE_JALR:
+      case InstructionConstants_1.default.OP_CODE_JALR:
         return this.decodeJALR(instr);
 
       default:
-        console.error("Unsupported OP Code: " + opCode);
+        // console.error("Unsupported OP Code: " + opCode);
         return instr.asHexString();
     }
   };
 
-  InstructionHelper.decodeALU = function (instr) {
+  InstructionDecoder.decodeALU = function (instr) {
     var func = instr.asBinaryString().substr(0, 7) + instr.asBinaryString().substr(17, 3);
     var name = "-";
 
     switch (func) {
-      case this.FUNCT_ADD:
+      case InstructionConstants_1.default.FUNCT_ADD:
         {
           name = "ADD";
           break;
         }
 
-      case this.FUNCT_SUB:
+      case InstructionConstants_1.default.FUNCT_SUB:
         {
           name = "SUB";
           break;
         }
 
-      case this.FUNCT_SLL:
+      case InstructionConstants_1.default.FUNCT_SLL:
         {
           name = "SLT";
           break;
         }
 
-      case this.FUNCT_SLT:
+      case InstructionConstants_1.default.FUNCT_SLT:
         {
           name = "SLT";
           break;
         }
 
-      case this.FUNCT_SLTIU:
+      case InstructionConstants_1.default.FUNCT_SLTIU:
         {
           name = "SLTU";
           break;
         }
 
-      case this.FUNCT_XOR:
+      case InstructionConstants_1.default.FUNCT_XOR:
         {
           name = "XOR";
           break;
         }
 
-      case this.FUNCT_SRL:
+      case InstructionConstants_1.default.FUNCT_SRL:
         {
           name = "SRL";
           break;
         }
 
-      case this.FUNCT_SRA:
+      case InstructionConstants_1.default.FUNCT_SRA:
         {
           name = "SRA";
           break;
         }
 
-      case this.FUNCT_OR:
+      case InstructionConstants_1.default.FUNCT_OR:
         {
           name = "OR";
           break;
         }
 
-      case this.FUNCT_AND:
+      case InstructionConstants_1.default.FUNCT_AND:
         {
           name = "";
           break;
         }
     }
 
-    return name + " x" + this.getRd(instr) + ", x" + this.getRs1(instr) + ", x" + this.getRs2(instr);
+    return name + " x" + InstructionHelper_1.default.getRd(instr) + ", x" + InstructionHelper_1.default.getRs1(instr) + ", x" + InstructionHelper_1.default.getRs2(instr);
   };
 
-  InstructionHelper.decodeALUI = function (instr) {
+  InstructionDecoder.decodeALUI = function (instr) {
     var func7 = instr.asBinaryString().substr(0, 7);
     var func3 = instr.asBinaryString().substr(17, 3);
     var name = "-";
 
     switch (func3) {
-      case this.FUNCT_ADDI:
+      case InstructionConstants_1.default.FUNCT_ADDI:
         {
           name = "ADDI";
           break;
         }
 
-      case this.FUNCT_SLTI:
+      case InstructionConstants_1.default.FUNCT_SLTI:
         {
           name = "SLTI";
           break;
         }
 
-      case this.FUNCT_SLTIU:
+      case InstructionConstants_1.default.FUNCT_SLTIU:
         {
           name = "SLTIU";
           break;
         }
 
-      case this.FUNCT_XORI:
+      case InstructionConstants_1.default.FUNCT_XORI:
         {
           name = "XORI";
           break;
         }
 
-      case this.FUNCT_ORI:
+      case InstructionConstants_1.default.FUNCT_ORI:
         {
           name = "ORI";
           break;
         }
 
-      case this.FUNCT_ANDI:
+      case InstructionConstants_1.default.FUNCT_ANDI:
         {
           name = "ANDI";
           break;
@@ -1192,219 +1404,248 @@ function () {
     }
 
     switch (func7 + func3) {
-      case this.FUNCT_SLLI:
+      case InstructionConstants_1.default.FUNCT_SLLI:
         {
           name = "SSLI";
           break;
         }
 
-      case this.FUNCT_SRLI:
+      case InstructionConstants_1.default.FUNCT_SRLI:
         {
           name = "SRLI";
           break;
         }
 
-      case this.FUNCT_SRAI:
+      case InstructionConstants_1.default.FUNCT_SRAI:
         {
           name = "SRAI";
           break;
         }
     }
 
-    return name + " x" + this.getRd(instr) + ", x" + this.getRs1(instr) + ", " + this.getImmIType(instr).toString(10);
+    var imm = InstructionHelper_1.default.getImmIType(instr);
+
+    if (imm >= 1 << 11) {
+      imm -= 1 << 12;
+    }
+
+    return name + " x" + InstructionHelper_1.default.getRd(instr) + ", x" + InstructionHelper_1.default.getRs1(instr) + ", " + imm.toString(10);
   };
 
-  InstructionHelper.decodeLW = function (instr) {
+  InstructionDecoder.decodeLW = function (instr) {
     var func = instr.asBinaryString().substr(17, 3);
     var name = "-";
 
     switch (func) {
-      case this.FUNCT_LB:
+      case InstructionConstants_1.default.FUNCT_LB:
         {
           name = "LB";
           break;
         }
 
-      case this.FUNCT_LH:
+      case InstructionConstants_1.default.FUNCT_LH:
         {
           name = "LH";
           break;
         }
 
-      case this.FUNCT_LW:
+      case InstructionConstants_1.default.FUNCT_LW:
         {
           name = "LW";
           break;
         }
 
-      case this.FUNCT_LBU:
+      case InstructionConstants_1.default.FUNCT_LBU:
         {
           name = "LBU";
           break;
         }
 
-      case this.FUNCT_LHU:
+      case InstructionConstants_1.default.FUNCT_LHU:
         {
           name = "LHU";
           break;
         }
     }
 
-    return name + " x" + this.getRd(instr) + ", 0x" + this.getImmIType(instr).toString(16).toUpperCase() + "(x" + this.getRs1(instr) + ")";
+    return name + " x" + InstructionHelper_1.default.getRd(instr) + ", 0x" + InstructionHelper_1.default.getImmIType(instr).toString(16).toUpperCase() + "(x" + InstructionHelper_1.default.getRs1(instr) + ")";
   };
 
-  InstructionHelper.decodeSW = function (instr) {
+  InstructionDecoder.decodeSW = function (instr) {
     var func = instr.asBinaryString().substr(17, 3);
     var name = "-";
 
     switch (func) {
-      case this.FUNCT_SB:
+      case InstructionConstants_1.default.FUNCT_SB:
         {
-          name = "SW";
+          name = "SB";
           break;
         }
 
-      case this.FUNCT_SH:
+      case InstructionConstants_1.default.FUNCT_SH:
         {
-          name = "SW";
+          name = "SH";
           break;
         }
 
-      case this.FUNCT_SW:
+      case InstructionConstants_1.default.FUNCT_SW:
         {
           name = "SW";
           break;
         }
     }
 
-    return name + " x" + this.getRs1(instr) + ", 0x" + this.getImmIType(instr).toString(16).toUpperCase() + "(x" + this.getRs2(instr) + ")";
+    return name + " x" + InstructionHelper_1.default.getRs1(instr) + ", 0x" + InstructionHelper_1.default.getImmSType(instr).toString(16).toUpperCase() + "(x" + InstructionHelper_1.default.getRs2(instr) + ")";
   };
 
-  InstructionHelper.decodeBRANCH = function (instr) {
+  InstructionDecoder.decodeBRANCH = function (instr) {
     var func = instr.asBinaryString().substr(17, 3);
     var name = "-";
 
     switch (func) {
-      case this.FUNCT_BEQ:
+      case InstructionConstants_1.default.FUNCT_BEQ:
         {
           name = "BEQ";
           break;
         }
 
-      case this.FUNCT_BNE:
+      case InstructionConstants_1.default.FUNCT_BNE:
         {
           name = "BNE";
           break;
         }
 
-      case this.FUNCT_BLT:
+      case InstructionConstants_1.default.FUNCT_BLT:
         {
           name = "BLT";
           break;
         }
 
-      case this.FUNCT_BGE:
+      case InstructionConstants_1.default.FUNCT_BGE:
         {
           name = "BGE";
           break;
         }
 
-      case this.FUNCT_BLTU:
+      case InstructionConstants_1.default.FUNCT_BLTU:
         {
           name = "BLTU";
           break;
         }
 
-      case this.FUNCT_BGEU:
+      case InstructionConstants_1.default.FUNCT_BGEU:
         {
           name = "BGEU";
           break;
         }
     }
 
-    return name + " x" + this.getRs1(instr) + ", x" + this.getRs2(instr) + ", 0x" + this.getImmBType(instr).toString(16).toUpperCase();
+    var imm = InstructionHelper_1.default.getImmBType(instr);
+
+    if (imm >= 1 << 12) {
+      imm -= 1 << 13;
+    }
+
+    return name + " x" + InstructionHelper_1.default.getRs1(instr) + ", x" + InstructionHelper_1.default.getRs2(instr) + ", " + imm.toString(10);
   };
 
-  InstructionHelper.decodeJAL = function (instr) {
+  InstructionDecoder.decodeJAL = function (instr) {
     return "JAL instruction";
   };
 
-  InstructionHelper.decodeJALR = function (instr) {
+  InstructionDecoder.decodeJALR = function (instr) {
     return "JALR instruction";
   };
 
-  InstructionHelper.compare = function (v, s) {
+  return InstructionDecoder;
+}();
+
+exports.InstructionDecoder = InstructionDecoder;
+},{"./InstructionConstants":"instructions/InstructionConstants.ts","./InstructionHelper":"instructions/InstructionHelper.ts"}],"instructions/InstructionFactory.ts":[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Value_1 = __importDefault(require("../util/Value"));
+
+var InstructionConstants_1 = __importDefault(require("./InstructionConstants"));
+
+var InstructionHelper_1 = __importDefault(require("./InstructionHelper"));
+
+var InstructionFactory =
+/** @class */
+function () {
+  function InstructionFactory() {}
+
+  InstructionFactory.createRType = function (opCode, funct, rd, rs1, rs2) {
+    var funct7 = funct.substr(0, 7);
+    var funct3 = funct.substr(7, 3);
+    var instr = funct7 + InstructionHelper_1.default.convertAndPad(rs2, 5) + InstructionHelper_1.default.convertAndPad(rs1, 5) + funct3 + InstructionHelper_1.default.convertAndPad(rd, 5) + opCode;
+    return new Value_1.default(instr, 32);
+  };
+
+  InstructionFactory.createIType = function (opCode, funct, rd, rs1, imm) {
+    var instr = InstructionHelper_1.default.convertAndPad(imm, 12) + InstructionHelper_1.default.convertAndPad(rs1, 5) + funct + InstructionHelper_1.default.convertAndPad(rd, 5) + opCode;
+    return new Value_1.default(instr, 32);
+  };
+
+  InstructionFactory.createITypeShift = function (opCode, funct, rd, rs1, shamt) {
+    var funct7 = funct.substr(0, 7);
+    var funct3 = funct.substr(7, 3);
+    var instr = funct7 + InstructionHelper_1.default.convertAndPad(shamt, 5) + InstructionHelper_1.default.convertAndPad(rs1, 5) + funct3 + InstructionHelper_1.default.convertAndPad(rd, 5) + opCode;
+    return new Value_1.default(instr, 32);
+  };
+
+  InstructionFactory.createSType = function (opCode, funct, rs1, rs2, imm) {
+    var immStr = InstructionHelper_1.default.convertAndPad(imm, 12);
+    var imm11 = immStr.substr(0, 7);
+    var imm4 = immStr.substr(7, 5);
+    var instr = imm11 + InstructionHelper_1.default.convertAndPad(rs2, 5) + InstructionHelper_1.default.convertAndPad(rs1, 5) + funct + imm4 + opCode;
+    return new Value_1.default(instr, 32);
+  };
+
+  InstructionFactory.createBType = function (opCode, funct, rs1, rs2, imm) {
+    if (imm % 4 != 0) {
+      console.error("Imm should be divisible by 4!");
+      imm -= imm / 4;
+    }
+
+    imm /= 2;
+    var immStr = InstructionHelper_1.default.convertAndPad(imm, 12);
+    var imm12 = immStr.substr(0, 1);
+    var imm10 = immStr.substr(2, 6);
+    var imm4 = immStr.substr(8, 4);
+    var imm11 = immStr.substr(1, 1);
+    var instr = imm12 + imm10 + InstructionHelper_1.default.convertAndPad(rs2, 5) + InstructionHelper_1.default.convertAndPad(rs1, 5) + funct + imm4 + imm11 + opCode;
+    return new Value_1.default(instr, 32);
+  };
+
+  InstructionFactory.compare = function (v, s) {
     console.log(v.asBinaryString());
     console.log(s.replace(/ /g, ""));
   };
 
-  InstructionHelper.main = function (args) {
+  InstructionFactory.main = function (args) {
     if (args === void 0) {
       args = [];
     }
 
-    this.compare(this.createRType(this.OP_CODE_ALU, this.FUNCT_ADD, 2, 1, 1), "0000000 00001 00001 000 00010 0110011");
+    this.compare(this.createRType(InstructionConstants_1.default.OP_CODE_ALU, InstructionConstants_1.default.FUNCT_ADD, 2, 1, 1), "0000000 00001 00001 000 00010 0110011");
   };
 
-  InstructionHelper.INSTR_SIZE = 32;
-  InstructionHelper.OP_CODE_SIZE = 7;
-  /* @formatter:off */
-
-  InstructionHelper.OP_CODE_ALU = "0110011";
-  InstructionHelper.OP_CODE_ALUI = "0010011";
-  InstructionHelper.OP_CODE_LW = "0000011";
-  InstructionHelper.OP_CODE_SW = "0100011";
-  InstructionHelper.OP_CODE_BRANCH = "1100011";
-  InstructionHelper.OP_CODE_JAL = "1101111";
-  InstructionHelper.OP_CODE_JALR = "1100111";
-  /* ALU Functions */
-
-  InstructionHelper.FUNCT_ADD = "0000000000";
-  InstructionHelper.FUNCT_SUB = "0100000000";
-  InstructionHelper.FUNCT_SLL = "0000000001";
-  InstructionHelper.FUNCT_SLT = "0000000010";
-  InstructionHelper.FUNCT_SLTU = "0000000011";
-  InstructionHelper.FUNCT_XOR = "0000000100";
-  InstructionHelper.FUNCT_SRL = "0000000101";
-  InstructionHelper.FUNCT_SRA = "0100000101";
-  InstructionHelper.FUNCT_OR = "0000000110";
-  InstructionHelper.FUNCT_AND = "0000000111";
-  /* ALUi Functions */
-
-  InstructionHelper.FUNCT_ADDI = "000";
-  InstructionHelper.FUNCT_SLTI = "010";
-  InstructionHelper.FUNCT_SLTIU = "011";
-  InstructionHelper.FUNCT_XORI = "100";
-  InstructionHelper.FUNCT_ORI = "110";
-  InstructionHelper.FUNCT_ANDI = "111";
-  InstructionHelper.FUNCT_SLLI = "0000000001";
-  InstructionHelper.FUNCT_SRLI = "0000000101";
-  InstructionHelper.FUNCT_SRAI = "0100000101";
-  /* Load Functions */
-
-  InstructionHelper.FUNCT_LB = "000";
-  InstructionHelper.FUNCT_LH = "001";
-  InstructionHelper.FUNCT_LW = "010";
-  InstructionHelper.FUNCT_LBU = "100";
-  InstructionHelper.FUNCT_LHU = "10";
-  /* Store Functions */
-
-  InstructionHelper.FUNCT_SB = "000";
-  InstructionHelper.FUNCT_SH = "001";
-  InstructionHelper.FUNCT_SW = "010";
-  /* Branch Functions */
-
-  InstructionHelper.FUNCT_BEQ = "000";
-  InstructionHelper.FUNCT_BNE = "001";
-  InstructionHelper.FUNCT_BLT = "100";
-  InstructionHelper.FUNCT_BGE = "101";
-  InstructionHelper.FUNCT_BLTU = "110";
-  InstructionHelper.FUNCT_BGEU = "111";
-  return InstructionHelper;
+  return InstructionFactory;
 }();
 
-exports.default = InstructionHelper;
-},{"./Val":"Val.ts"}],"InstructionMemory.ts":[function(require,module,exports) {
+exports.default = InstructionFactory;
+},{"../util/Value":"util/Value.ts","./InstructionConstants":"instructions/InstructionConstants.ts","./InstructionHelper":"instructions/InstructionHelper.ts"}],"components/InstructionMemory.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -1445,9 +1686,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
-var InstructionHelper_1 = __importDefault(require("./InstructionHelper"));
+var InstructionConstants_1 = __importDefault(require("../instructions/InstructionConstants"));
+
+var InstructionDecoder_1 = require("../instructions/InstructionDecoder");
+
+var InstructionFactory_1 = __importDefault(require("../instructions/InstructionFactory"));
 
 var InstructionMemory =
 /** @class */
@@ -1458,28 +1703,57 @@ function (_super) {
     var _this = _super.call(this, x, y) || this;
 
     _this.values = [];
+    _this._decoded = true;
     _this.values = values;
-    _this.values[0] = InstructionHelper_1.default.createIType(InstructionHelper_1.default.OP_CODE_ALUI, InstructionHelper_1.default.FUNCT_ADDI, 1, 0, 5);
-    _this.values[1] = InstructionHelper_1.default.createIType(InstructionHelper_1.default.OP_CODE_ALUI, InstructionHelper_1.default.FUNCT_ADDI, 2, 0, 7);
-    _this.values[2] = InstructionHelper_1.default.createRType(InstructionHelper_1.default.OP_CODE_ALU, InstructionHelper_1.default.FUNCT_ADD, 3, 1, 2);
-    _this.values[3] = InstructionHelper_1.default.createIType(InstructionHelper_1.default.OP_CODE_ALUI, InstructionHelper_1.default.FUNCT_ADDI, 3, 3, 4);
-    _this.values[4] = InstructionHelper_1.default.createRType(InstructionHelper_1.default.OP_CODE_ALU, InstructionHelper_1.default.FUNCT_SUB, 4, 3, 1);
-    _this.values[5] = InstructionHelper_1.default.createRType(InstructionHelper_1.default.OP_CODE_ALU, InstructionHelper_1.default.FUNCT_ADD, 5, 4, 2);
-    _this.values[6] = InstructionHelper_1.default.createITypeShift(InstructionHelper_1.default.OP_CODE_ALUI, InstructionHelper_1.default.FUNCT_SRLI, 6, 5, 1);
+    _this.values[0] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_LW, InstructionConstants_1.default.FUNCT_LW, 1, 0, 124);
+    _this.values[1] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 2, 0, 0);
+    _this.values[2] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 3, 0, 0);
+    _this.values[3] = InstructionFactory_1.default.createBType(InstructionConstants_1.default.OP_CODE_BRANCH, InstructionConstants_1.default.FUNCT_BGE, 2, 1, 112);
+    _this.values[4] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 4, 0, 0);
+    _this.values[5] = InstructionFactory_1.default.createSType(InstructionConstants_1.default.OP_CODE_SW, InstructionConstants_1.default.FUNCT_SW, 3, 4, 0);
+    _this.values[6] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 2, 2, 1);
+    _this.values[7] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 3, 3, 4);
+    _this.values[8] = InstructionFactory_1.default.createBType(InstructionConstants_1.default.OP_CODE_BRANCH, InstructionConstants_1.default.FUNCT_BGE, 2, 1, 92);
+    _this.values[9] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 5, 0, 1);
+    _this.values[10] = InstructionFactory_1.default.createSType(InstructionConstants_1.default.OP_CODE_SW, InstructionConstants_1.default.FUNCT_SW, 3, 5, 0);
+    _this.values[11] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 2, 2, 1);
+    _this.values[12] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 3, 3, 4);
+    _this.values[13] = InstructionFactory_1.default.createBType(InstructionConstants_1.default.OP_CODE_BRANCH, InstructionConstants_1.default.FUNCT_BGE, 2, 1, 72);
+    _this.values[14] = InstructionFactory_1.default.createRType(InstructionConstants_1.default.OP_CODE_ALU, InstructionConstants_1.default.FUNCT_ADD, 6, 5, 0);
+    _this.values[15] = InstructionFactory_1.default.createRType(InstructionConstants_1.default.OP_CODE_ALU, InstructionConstants_1.default.FUNCT_ADD, 5, 5, 4);
+    _this.values[16] = InstructionFactory_1.default.createRType(InstructionConstants_1.default.OP_CODE_ALU, InstructionConstants_1.default.FUNCT_ADD, 4, 6, 0);
+    _this.values[17] = InstructionFactory_1.default.createSType(InstructionConstants_1.default.OP_CODE_SW, InstructionConstants_1.default.FUNCT_SW, 3, 5, 0);
+    _this.values[18] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 2, 2, 1);
+    _this.values[19] = InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, InstructionConstants_1.default.FUNCT_ADDI, 3, 3, 4);
+    _this.values[20] = InstructionFactory_1.default.createBType(InstructionConstants_1.default.OP_CODE_BRANCH, InstructionConstants_1.default.FUNCT_BGE, 0, 0, -28);
+    _this.values[31] = InstructionFactory_1.default.createBType(InstructionConstants_1.default.OP_CODE_BRANCH, InstructionConstants_1.default.FUNCT_BGE, 0, 0, 0);
     return _this;
   }
 
+  InstructionMemory.prototype.refresh = function () {
+    this.selectedInstr = undefined;
+  };
+
   InstructionMemory.prototype.draw = function (g) {
-    g.fillRect(this.x, this.y, 100, InstructionMemory.SIZE * 15 + 20, Config_1.default.elementFillColor, Config_1.default.elementStrokeColor);
+    g.fillRect(this.x, this.y, 230, InstructionMemory.SIZE * 20 + 30, Config_1.default.elementFillColor, Config_1.default.elementStrokeColor);
 
     for (var i = 0; i < InstructionMemory.SIZE; i++) {
-      g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15, Config_1.default.memoryFillColor, Config_1.default.memoryStrokeColor);
-      g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(), Config_1.default.fontColor, 12);
+      g.fillRect(this.x + 15, this.y + 15 + i * 20, 200, 20, Config_1.default.memoryFillColor, Config_1.default.memoryStrokeColor, 1);
+      var text = this._decoded ? InstructionDecoder_1.InstructionDecoder.decode(this.values[i]) : this.values[i].asHexString();
+      var color = this.selectedInstr == i ? Config_1.default.readFontColor : Config_1.default.fontColor;
+      g.drawText(this.x + 15 + 10, this.y + 15 + 17 + i * 20, text, color, 18);
+    }
+
+    if (this.selectedInstr != undefined) {
+      var instrY = this.y + 15 + this.selectedInstr * 20 + 11;
+      g.drawPath([[this.x + 215, instrY], [this.x + 222.5, instrY], [this.x + 222.5, this._outputDataNode.y], [this._outputDataNode.x, this._outputDataNode.y]], Config_1.default.signalColor);
     }
   };
 
   InstructionMemory.prototype.forwardSignal = function (signaler, value) {
-    this._outputDataNode.forwardSignal(this, this.values[value.asUnsignedInt() / 4]);
+    this.selectedInstr = value.asUnsignedInt() / 4;
+
+    this._outputDataNode.forwardSignal(this, this.values[this.selectedInstr]);
   };
 
   InstructionMemory.prototype.mark = function (caller) {
@@ -1506,7 +1780,7 @@ function (_super) {
 }(Component_1.default);
 
 exports.default = InstructionMemory;
-},{"./Component":"Component.ts","./Config":"Config.ts","./InstructionHelper":"InstructionHelper.ts"}],"Multiplexer.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Config":"util/Config.ts","../instructions/InstructionConstants":"instructions/InstructionConstants.ts","../instructions/InstructionDecoder":"instructions/InstructionDecoder.ts","../instructions/InstructionFactory":"instructions/InstructionFactory.ts"}],"components/Multiplexer.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -1547,9 +1821,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Graphics_1 = __importDefault(require("./Graphics"));
+var Graphics_1 = __importDefault(require("../util/Graphics"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
 var MultiplexerOrientation;
 
@@ -1652,7 +1926,7 @@ function (_super) {
     }
   };
 
-  Multiplexer.prototype.setInputNodes = function (idx, node) {
+  Multiplexer.prototype.setInputNode = function (idx, node) {
     this._inputNodes[idx] = node;
     node.addNeighbour(this);
   };
@@ -1676,7 +1950,7 @@ function (_super) {
 }(Component_1.default);
 
 exports.default = Multiplexer;
-},{"./Component":"Component.ts","./Graphics":"Graphics.ts","./Config":"Config.ts"}],"ALUControl.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Graphics":"util/Graphics.ts","../util/Config":"util/Config.ts"}],"components/ALUControl.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -1717,13 +1991,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
-var Val_1 = __importDefault(require("./Val"));
+var Value_1 = __importDefault(require("../util/Value"));
 
 var ArithmeticLogicUnit_1 = __importDefault(require("./ArithmeticLogicUnit"));
 
-var InstructionHelper_1 = __importDefault(require("./InstructionHelper"));
+var InstructionConstants_1 = __importDefault(require("../instructions/InstructionConstants"));
 
 var ALUControl =
 /** @class */
@@ -1790,7 +2064,7 @@ function (_super) {
 
       case ALUControl.ADD:
         {
-          result = ALUControl.ADD;
+          result = ArithmeticLogicUnit_1.default.ADD;
           break;
         }
 
@@ -1813,34 +2087,34 @@ function (_super) {
     var func = func7 + func3;
 
     switch (func) {
-      case InstructionHelper_1.default.FUNCT_ADD:
+      case InstructionConstants_1.default.FUNCT_ADD:
         return ArithmeticLogicUnit_1.default.ADD;
 
-      case InstructionHelper_1.default.FUNCT_SUB:
+      case InstructionConstants_1.default.FUNCT_SUB:
         return ArithmeticLogicUnit_1.default.SUB;
 
-      case InstructionHelper_1.default.FUNCT_SLL:
+      case InstructionConstants_1.default.FUNCT_SLL:
         return ArithmeticLogicUnit_1.default.SLL;
 
-      case InstructionHelper_1.default.FUNCT_SLT:
+      case InstructionConstants_1.default.FUNCT_SLT:
         return ArithmeticLogicUnit_1.default.SLT;
 
-      case InstructionHelper_1.default.FUNCT_SLTU:
+      case InstructionConstants_1.default.FUNCT_SLTU:
         return ArithmeticLogicUnit_1.default.SLTU;
 
-      case InstructionHelper_1.default.FUNCT_XOR:
+      case InstructionConstants_1.default.FUNCT_XOR:
         return ArithmeticLogicUnit_1.default.XOR;
 
-      case InstructionHelper_1.default.FUNCT_SRL:
+      case InstructionConstants_1.default.FUNCT_SRL:
         return ArithmeticLogicUnit_1.default.XOR;
 
-      case InstructionHelper_1.default.FUNCT_SRA:
+      case InstructionConstants_1.default.FUNCT_SRA:
         return ArithmeticLogicUnit_1.default.SRA;
 
-      case InstructionHelper_1.default.FUNCT_OR:
+      case InstructionConstants_1.default.FUNCT_OR:
         return ArithmeticLogicUnit_1.default.OR;
 
-      case InstructionHelper_1.default.FUNCT_AND:
+      case InstructionConstants_1.default.FUNCT_AND:
         return ArithmeticLogicUnit_1.default.AND;
 
       default:
@@ -1853,33 +2127,33 @@ function (_super) {
     var func3 = this.instrValue.asBinaryString().substr(17, 3);
 
     switch (func3) {
-      case InstructionHelper_1.default.FUNCT_ADDI:
+      case InstructionConstants_1.default.FUNCT_ADDI:
         return ArithmeticLogicUnit_1.default.ADD;
 
-      case InstructionHelper_1.default.FUNCT_SLTI:
+      case InstructionConstants_1.default.FUNCT_SLTI:
         return ArithmeticLogicUnit_1.default.SLT;
 
-      case InstructionHelper_1.default.FUNCT_SLTIU:
+      case InstructionConstants_1.default.FUNCT_SLTIU:
         return ArithmeticLogicUnit_1.default.SLTU;
 
-      case InstructionHelper_1.default.FUNCT_XORI:
+      case InstructionConstants_1.default.FUNCT_XORI:
         return ArithmeticLogicUnit_1.default.XOR;
 
-      case InstructionHelper_1.default.FUNCT_ORI:
+      case InstructionConstants_1.default.FUNCT_ORI:
         return ArithmeticLogicUnit_1.default.OR;
 
-      case InstructionHelper_1.default.FUNCT_ANDI:
+      case InstructionConstants_1.default.FUNCT_ANDI:
         return ArithmeticLogicUnit_1.default.AND;
     }
 
     switch (func7 + func3) {
-      case InstructionHelper_1.default.FUNCT_SLLI:
+      case InstructionConstants_1.default.FUNCT_SLLI:
         return ArithmeticLogicUnit_1.default.SLL;
 
-      case InstructionHelper_1.default.FUNCT_SRLI:
+      case InstructionConstants_1.default.FUNCT_SRLI:
         return ArithmeticLogicUnit_1.default.SRL;
 
-      case InstructionHelper_1.default.FUNCT_SRAI:
+      case InstructionConstants_1.default.FUNCT_SRAI:
         return ArithmeticLogicUnit_1.default.SRA;
 
       default:
@@ -1916,14 +2190,14 @@ function (_super) {
     enumerable: true,
     configurable: true
   });
-  ALUControl.FUNC = Val_1.default.UnsignedInt(0, 2);
-  ALUControl.OP = Val_1.default.UnsignedInt(1, 2);
-  ALUControl.ADD = Val_1.default.UnsignedInt(2, 2);
+  ALUControl.FUNC = Value_1.default.fromUnsignedInt(0, 2);
+  ALUControl.OP = Value_1.default.fromUnsignedInt(1, 2);
+  ALUControl.ADD = Value_1.default.fromUnsignedInt(2, 2);
   return ALUControl;
 }(Component_1.default);
 
 exports.default = ALUControl;
-},{"./Component":"Component.ts","./Config":"Config.ts","./Val":"Val.ts","./ArithmeticLogicUnit":"ArithmeticLogicUnit.ts","./InstructionHelper":"InstructionHelper.ts"}],"DataMemory.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Config":"util/Config.ts","../util/Value":"util/Value.ts","./ArithmeticLogicUnit":"components/ArithmeticLogicUnit.ts","../instructions/InstructionConstants":"instructions/InstructionConstants.ts"}],"components/DataMemory.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -1972,11 +2246,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Val_1 = __importStar(require("./Val"));
+var Value_1 = __importStar(require("../util/Value"));
+
+var InstructionHelper_1 = __importDefault(require("../instructions/InstructionHelper"));
+
+var InstructionConstants_1 = __importDefault(require("../instructions/InstructionConstants"));
 
 var DataMemory =
 /** @class */
@@ -1988,11 +2266,14 @@ function (_super) {
 
     _this.size = 32;
     _this.values = [];
+    _this.nextValue = [];
 
-    for (var i = 0; i < _this.size; i++) {
-      _this.values.push(Val_1.VAL_ZERO_32b);
+    for (var i = 0; i < _this.size + 1; i++) {
+      // this.values.push(VAL_ZERO_32b);
+      _this.values.push(Value_1.VAL_MAX_32b);
     }
 
+    _this.values[31] = Value_1.default.fromUnsignedInt(25, 32);
     return _this;
   }
 
@@ -2000,18 +2281,193 @@ function (_super) {
     g.fillRect(this.x, this.y, 100, this.size * 15 + 20, Config_1.default.elementFillColor, Config_1.default.elementStrokeColor);
 
     for (var i = 0; i < this.size; i++) {
-      g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15, Config_1.default.memoryFillColor, Config_1.default.memoryStrokeColor);
+      g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15, Config_1.default.memoryFillColor, Config_1.default.memoryStrokeColor, 1);
       g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(), Config_1.default.fontColor, 12);
     }
   };
 
-  DataMemory.prototype.forwardSignal = function (signaler, value) {
-    this._outputDataNode.forwardSignal(this, this.values[value.asUnsignedInt() / 4]);
+  DataMemory.prototype.refresh = function () {
+    this.instrValue = undefined;
+    this.writeEnValue = undefined;
+    this.addressValue = undefined;
+
+    for (var i in this.nextValue) {
+      this.values[i] = this.nextValue[i];
+    }
+
+    this.nextValue = [];
   };
 
+  DataMemory.prototype.forwardSignal = function (signaler, value) {
+    switch (signaler) {
+      case this._instrNode:
+        {
+          this.instrValue = value;
+          break;
+        }
+
+      case this._writeEnNode:
+        {
+          this.writeEnValue = value;
+          break;
+        }
+
+      case this._addressNode:
+        {
+          this.addressValue = value;
+          break;
+        }
+
+      default:
+        {
+          console.log("Error");
+        }
+    }
+
+    if (this.instrValue == undefined || this.writeEnValue == undefined || this.addressValue == undefined) {
+      return;
+    }
+
+    if (InstructionHelper_1.default.getOpCodeStr(this.instrValue) != InstructionConstants_1.default.OP_CODE_LW) {
+      return;
+    }
+
+    var funct = InstructionHelper_1.default.getFuncLType(this.instrValue);
+    var nbytes;
+
+    switch (funct) {
+      case InstructionConstants_1.default.FUNCT_LB:
+      case InstructionConstants_1.default.FUNCT_LBU:
+        {
+          nbytes = 1;
+          break;
+        }
+
+      case InstructionConstants_1.default.FUNCT_LH:
+      case InstructionConstants_1.default.FUNCT_LHU:
+        {
+          nbytes = 2;
+          break;
+        }
+
+      case InstructionConstants_1.default.FUNCT_LW:
+        {
+          nbytes = 4;
+          break;
+        }
+
+      default:
+        {
+          console.log("Error");
+        }
+    }
+
+    var address = this.addressValue.asUnsignedInt();
+    var wordIdx = Math.floor(address / 4);
+    var byteIdx = address % 4;
+    var result = "";
+
+    for (var i = 0; i < nbytes; i++) {
+      result = this.values[wordIdx].getByteBinary(byteIdx) + result;
+
+      if (++byteIdx == 4) {
+        byteIdx = 0;
+        wordIdx++;
+      }
+    }
+    /* Sign extend */
+
+
+    if (funct == InstructionConstants_1.default.FUNCT_LBU || funct == InstructionConstants_1.default.FUNCT_LHU || true) {
+      var signBit = result[0];
+
+      while (result.length < 32) {
+        result = signBit + result;
+      }
+    }
+
+    this._outputDataNode.forwardSignal(this, new Value_1.default(result, 32));
+  };
+
+  DataMemory.prototype.mark = function (caller) {
+    this._instrNode.mark(this);
+
+    this._writeEnNode.mark(this);
+
+    this._addressNode.mark(this);
+  };
+
+  DataMemory.prototype.onRisingEdge = function () {
+    if (this._writeEnNode.value == DataMemory.WRITE_YES) {
+      if (this._addressNode.value == null || this._inputDataNode.value == null) {
+        console.log("Error");
+      }
+
+      var funct = InstructionHelper_1.default.getFuncSType(this.instrValue);
+      var nbytes = void 0;
+
+      switch (funct) {
+        case InstructionConstants_1.default.FUNCT_SB:
+          {
+            nbytes = 1;
+            break;
+          }
+
+        case InstructionConstants_1.default.FUNCT_SH:
+          {
+            nbytes = 2;
+            break;
+          }
+
+        case InstructionConstants_1.default.FUNCT_SW:
+          {
+            nbytes = 4;
+            break;
+          }
+
+        default:
+          {
+            console.log("Error");
+          }
+      }
+
+      var address = this._addressNode.value.asUnsignedInt();
+
+      var wordIdx = Math.floor(address / 4);
+      var byteIdx = address % 4;
+      var writeValue = this._inputDataNode.value;
+      this.nextValue[wordIdx] = this.values[wordIdx];
+      this.nextValue[wordIdx + 1] = this.values[wordIdx + 1];
+
+      for (var i = 0; i < nbytes; i++) {
+        this.nextValue[wordIdx] = this.nextValue[wordIdx].writeByte(byteIdx, writeValue.getByteBinary(i));
+
+        if (++byteIdx == 4) {
+          byteIdx = 0;
+          wordIdx++;
+        }
+      }
+
+      this._writeEnNode.mark(this);
+
+      this._addressNode.mark(this);
+
+      this._inputDataNode.mark(this);
+    }
+  };
+
+  Object.defineProperty(DataMemory.prototype, "instrNode", {
+    set: function set(node) {
+      this._instrNode = node;
+      node.addNeighbour(this);
+    },
+    enumerable: true,
+    configurable: true
+  });
   Object.defineProperty(DataMemory.prototype, "writeEnNode", {
-    set: function set(value) {
-      this._writeEnNode = value;
+    set: function set(node) {
+      this._writeEnNode = node;
+      node.addNeighbour(this);
     },
     enumerable: true,
     configurable: true
@@ -2025,8 +2481,8 @@ function (_super) {
     configurable: true
   });
   Object.defineProperty(DataMemory.prototype, "inputDataNode", {
-    set: function set(value) {
-      this._inputDataNode = value;
+    set: function set(node) {
+      this._inputDataNode = node;
     },
     enumerable: true,
     configurable: true
@@ -2038,13 +2494,13 @@ function (_super) {
     enumerable: true,
     configurable: true
   });
-  DataMemory.WRITE_NO = Val_1.default.UnsignedInt(0, 1);
-  DataMemory.WRITE_YES = Val_1.default.UnsignedInt(1, 1);
+  DataMemory.WRITE_NO = Value_1.default.fromUnsignedInt(0, 1);
+  DataMemory.WRITE_YES = Value_1.default.fromUnsignedInt(1, 1);
   return DataMemory;
 }(Component_1.default);
 
 exports.default = DataMemory;
-},{"./Config":"Config.ts","./Component":"Component.ts","./Val":"Val.ts"}],"RegisterFile.ts":[function(require,module,exports) {
+},{"../util/Config":"util/Config.ts","./Component":"components/Component.ts","../util/Value":"util/Value.ts","../instructions/InstructionHelper":"instructions/InstructionHelper.ts","../instructions/InstructionConstants":"instructions/InstructionConstants.ts"}],"components/RegisterFile.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -2095,11 +2551,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
-var Val_1 = __importStar(require("./Val"));
+var Value_1 = __importStar(require("../util/Value"));
 
-var InstructionHelper_1 = __importDefault(require("./InstructionHelper"));
+var InstructionHelper_1 = __importDefault(require("../instructions/InstructionHelper"));
 
 var RegisterFile =
 /** @class */
@@ -2109,26 +2565,18 @@ function (_super) {
   function RegisterFile(x, y) {
     var _this = _super.call(this, x, y) || this;
 
+    _this.maxSize = 32;
     _this.size = 16;
     _this.values = [];
 
-    for (var i = 0; i < _this.size; i++) {
-      _this.values.push(Val_1.VAL_ZERO_32b);
+    for (var i = 0; i < _this.maxSize; i++) {
+      _this.values.push(Value_1.VAL_ZERO_32b);
     }
 
     _this.nextValue = undefined;
     _this.nextSel = undefined;
     return _this;
   }
-
-  RegisterFile.prototype.draw = function (g) {
-    g.fillRect(this.x, this.y, 100, this.size * 15 + 20, Config_1.default.elementFillColor, Config_1.default.elementStrokeColor);
-
-    for (var i = 0; i < this.size; i++) {
-      g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15, Config_1.default.memoryFillColor, Config_1.default.memoryStrokeColor);
-      g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(), Config_1.default.fontColor, 12);
-    }
-  };
 
   RegisterFile.prototype.refresh = function () {
     if (this.nextSel && this.nextValue) {
@@ -2137,13 +2585,46 @@ function (_super) {
 
     this.nextValue = undefined;
     this.nextSel = undefined;
+    this.selectedReadReg1 = undefined;
+    this.readReg1Marked = false;
+    this.selectedReadReg2 = undefined;
+    this.readReg2Marked = false;
+    this.selectedWriteReg = undefined;
+  };
+
+  RegisterFile.prototype.draw = function (g) {
+    g.fillRect(this.x, this.y, 150, this.size * 20 + 30, Config_1.default.elementFillColor, Config_1.default.elementStrokeColor);
+
+    for (var i = 0; i < this.size; i++) {
+      g.fillRect(this.x + 15, this.y + 15 + i * 20, 120, 20, Config_1.default.memoryFillColor, Config_1.default.memoryStrokeColor, 1);
+      g.drawText(this.x + 15 + 5, this.y + 15 + 17 + i * 20, this.values[i].asHexString(), Config_1.default.fontColor, 18);
+    }
+
+    if (this.selectedWriteReg != undefined) {
+      var regY = this.y + 15 + this.selectedWriteReg * 20 + 10;
+      g.drawPath([[this.x, this._inputWriteDataNode.y], [this.x + 7.5, this._inputWriteDataNode.y], [this.x + 7.5, regY], [this.x + 15, regY]], Config_1.default.signalColor);
+    }
+
+    if (this.selectedReadReg1 != undefined && this.readReg1Marked) {
+      var regY = this.y + 15 + this.selectedReadReg1 * 20 + 10;
+      g.drawPath([[this.x + 135, regY], [this.x + 140, regY], [this.x + 140, this._readSel1Node.y], [this.x + 150, this._readSel1Node.y]], Config_1.default.signalColor);
+    }
+
+    if (this.selectedReadReg2 != undefined && this.readReg2Marked) {
+      var regY = this.y + 15 + this.selectedReadReg2 * 20 + 10;
+      g.drawPath([[this.x + 135, regY], [this.x + 145, regY], [this.x + 145, this._readSel2Node.y], [this.x + 150, this._readSel2Node.y]], Config_1.default.signalColor);
+    }
   };
 
   RegisterFile.prototype.forwardSignal = function (signaler, value) {
     if (signaler == this._readSel1Node) {
-      this._readData1Node.forwardSignal(this, this.values[InstructionHelper_1.default.getRs1(value)]);
+      this.selectedReadReg1 = InstructionHelper_1.default.getRs1(value);
+
+      this._readData1Node.forwardSignal(this, this.values[this.selectedReadReg1]);
     } else if (signaler == this._readSel2Node) {
-      this._readData2Node.forwardSignal(this, this.values[InstructionHelper_1.default.getRs2(value)]);
+      this.selectedReadReg2 = InstructionHelper_1.default.getRs2(value);
+
+      this._readData2Node.forwardSignal(this, this.values[this.selectedReadReg2]);
     } else {
       console.error("Error");
     }
@@ -2152,6 +2633,7 @@ function (_super) {
   RegisterFile.prototype.onRisingEdge = function () {
     if (this._inputWriteEnNode.value == RegisterFile.WRITE_YES) {
       this.nextSel = InstructionHelper_1.default.getRd(this._inputWriteSelNode.value);
+      this.selectedWriteReg = this.nextSel;
 
       if (this._inputWriteDataNode.value == null) {
         console.log("Error");
@@ -2172,6 +2654,8 @@ function (_super) {
     switch (caller) {
       case this._readData1Node:
         {
+          this.readReg1Marked = true;
+
           this._readSel1Node.mark(this);
 
           break;
@@ -2179,6 +2663,8 @@ function (_super) {
 
       case this._readData2Node:
         {
+          this.readReg2Marked = true;
+
           this._readSel2Node.mark(this);
 
           break;
@@ -2242,13 +2728,13 @@ function (_super) {
     enumerable: true,
     configurable: true
   });
-  RegisterFile.WRITE_NO = Val_1.default.UnsignedInt(0, 1);
-  RegisterFile.WRITE_YES = Val_1.default.UnsignedInt(1, 1);
+  RegisterFile.WRITE_NO = Value_1.default.fromUnsignedInt(0, 1);
+  RegisterFile.WRITE_YES = Value_1.default.fromUnsignedInt(1, 1);
   return RegisterFile;
 }(Component_1.default);
 
 exports.default = RegisterFile;
-},{"./Component":"Component.ts","./Config":"Config.ts","./Val":"Val.ts","./InstructionHelper":"InstructionHelper.ts"}],"ImmSelect.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Config":"util/Config.ts","../util/Value":"util/Value.ts","../instructions/InstructionHelper":"instructions/InstructionHelper.ts"}],"components/ImmSelect.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -2289,11 +2775,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
-var Val_1 = __importDefault(require("./Val"));
+var Value_1 = __importDefault(require("../util/Value"));
 
-var InstructionHelper_1 = __importDefault(require("./InstructionHelper"));
+var InstructionHelper_1 = __importDefault(require("../instructions/InstructionHelper"));
 
 var ImmSelect =
 /** @class */
@@ -2348,30 +2834,30 @@ function (_super) {
     switch (this.ctrlValue) {
       case ImmSelect.ITYPE:
         {
-          result = InstructionHelper_1.default.getImmIType(this.instrValue);
+          result = Value_1.default.fromUnsignedInt(InstructionHelper_1.default.getImmIType(this.instrValue), 12);
           break;
         }
 
       case ImmSelect.BRTYPE:
         {
-          result = InstructionHelper_1.default.getImmBType(this.instrValue);
+          result = Value_1.default.fromUnsignedInt(InstructionHelper_1.default.getImmBType(this.instrValue), 13);
           break;
         }
 
       case ImmSelect.BSTYPE:
         {
-          result = InstructionHelper_1.default.getImmSType(this.instrValue);
+          result = Value_1.default.fromUnsignedInt(InstructionHelper_1.default.getImmSType(this.instrValue), 12);
           break;
         }
 
       default:
         {
-          result = 0;
+          result = new Value_1.default("0", 12);
           console.log("Unsupported control signal");
         }
     }
 
-    this._outNode.forwardSignal(this, new Val_1.default(result, 32));
+    this._outNode.forwardSignal(this, result.signExtend(32));
   };
 
   ImmSelect.prototype.mark = function (caller) {
@@ -2403,14 +2889,14 @@ function (_super) {
     enumerable: true,
     configurable: true
   });
-  ImmSelect.ITYPE = Val_1.default.UnsignedInt(0, 2);
-  ImmSelect.BRTYPE = Val_1.default.UnsignedInt(1, 2);
-  ImmSelect.BSTYPE = Val_1.default.UnsignedInt(2, 2);
+  ImmSelect.ITYPE = Value_1.default.fromUnsignedInt(0, 2);
+  ImmSelect.BRTYPE = Value_1.default.fromUnsignedInt(1, 2);
+  ImmSelect.BSTYPE = Value_1.default.fromUnsignedInt(2, 2);
   return ImmSelect;
 }(Component_1.default);
 
 exports.default = ImmSelect;
-},{"./Component":"Component.ts","./Config":"Config.ts","./Val":"Val.ts","./InstructionHelper":"InstructionHelper.ts"}],"ControlUnit.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Config":"util/Config.ts","../util/Value":"util/Value.ts","../instructions/InstructionHelper":"instructions/InstructionHelper.ts"}],"components/BranchLogic.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -2451,9 +2937,179 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
-var Val_1 = require("./Val");
+var Value_1 = __importDefault(require("../util/Value"));
+
+var InstructionHelper_1 = __importDefault(require("../instructions/InstructionHelper"));
+
+var InstructionConstants_1 = __importDefault(require("../instructions/InstructionConstants"));
+
+var BranchLogic =
+/** @class */
+function (_super) {
+  __extends(BranchLogic, _super);
+
+  function BranchLogic(x, y) {
+    return _super.call(this, x, y) || this;
+  }
+
+  BranchLogic.prototype.draw = function (g) {
+    g.fillRect(this.x, this.y, 100, 50, Config_1.default.elementFillColor, Config_1.default.elementStrokeColor);
+    g.drawTextCentered(this.x, this.y + 23, 100, "Branch", Config_1.default.fontColor, Config_1.default.fontSize);
+    g.drawTextCentered(this.x, this.y + 43, 100, "Logic", Config_1.default.fontColor, Config_1.default.fontSize);
+  };
+
+  BranchLogic.prototype.forwardSignal = function (signaler, value) {
+    switch (signaler) {
+      case this._data1Node:
+        this.data1Value = value;
+        break;
+
+      case this._data2Node:
+        this.data2Value = value;
+        break;
+
+      case this._instrNode:
+        this.instrValue = value;
+        break;
+    }
+
+    if (this.data1Value == undefined || this.data2Value == undefined || this.instrValue == undefined) {
+      return;
+    }
+
+    var func = InstructionHelper_1.default.getFuncBType(this.instrValue);
+    var result;
+
+    switch (func) {
+      case InstructionConstants_1.default.FUNCT_BEQ:
+        {
+          result = Value_1.default.cmpEQ(this.data1Value, this.data2Value);
+          break;
+        }
+
+      case InstructionConstants_1.default.FUNCT_BNE:
+        {
+          result = Value_1.default.cmpNE(this.data1Value, this.data2Value);
+          break;
+        }
+
+      case InstructionConstants_1.default.FUNCT_BLT:
+        {
+          result = Value_1.default.cmpLT(this.data1Value, this.data2Value);
+          break;
+        }
+
+      case InstructionConstants_1.default.FUNCT_BGE:
+        {
+          result = Value_1.default.cmpGE(this.data1Value, this.data2Value);
+          break;
+        }
+
+      case InstructionConstants_1.default.FUNCT_BLTU:
+        {
+          result = Value_1.default.cmpLTU(this.data1Value, this.data2Value);
+          break;
+        }
+
+      case InstructionConstants_1.default.FUNCT_BGEU:
+        {
+          result = Value_1.default.cmpGEU(this.data1Value, this.data2Value);
+          break;
+        }
+    }
+
+    this._outNode.forwardSignal(this, result ? BranchLogic.BRANCH_TRUE : BranchLogic.BRANCH_FALSE);
+  };
+
+  BranchLogic.prototype.mark = function (caller) {
+    this._data1Node.mark(this);
+
+    this._data2Node.mark(this);
+
+    this._instrNode.mark(this);
+  };
+
+  Object.defineProperty(BranchLogic.prototype, "data1Node", {
+    set: function set(node) {
+      this._data1Node = node;
+      node.addNeighbour(this);
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(BranchLogic.prototype, "data2Node", {
+    set: function set(node) {
+      this._data2Node = node;
+      node.addNeighbour(this);
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(BranchLogic.prototype, "instrNode", {
+    set: function set(node) {
+      this._instrNode = node;
+      node.addNeighbour(this);
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(BranchLogic.prototype, "outNode", {
+    set: function set(value) {
+      this._outNode = value;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  BranchLogic.BRANCH_TRUE = new Value_1.default("0", 1);
+  BranchLogic.BRANCH_FALSE = new Value_1.default("1", 1);
+  return BranchLogic;
+}(Component_1.default);
+
+exports.default = BranchLogic;
+},{"./Component":"components/Component.ts","../util/Config":"util/Config.ts","../util/Value":"util/Value.ts","../instructions/InstructionHelper":"instructions/InstructionHelper.ts","../instructions/InstructionConstants":"instructions/InstructionConstants.ts"}],"components/ControlUnit.ts":[function(require,module,exports) {
+"use strict";
+
+var __extends = this && this.__extends || function () {
+  var _extendStatics = function extendStatics(d, b) {
+    _extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) {
+        if (b.hasOwnProperty(p)) d[p] = b[p];
+      }
+    };
+
+    return _extendStatics(d, b);
+  };
+
+  return function (d, b) {
+    _extendStatics(d, b);
+
+    function __() {
+      this.constructor = d;
+    }
+
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+
+var __importDefault = this && this.__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var Component_1 = __importDefault(require("./Component"));
+
+var Value_1 = require("../util/Value");
 
 var ALUControl_1 = __importDefault(require("./ALUControl"));
 
@@ -2461,9 +3117,13 @@ var DataMemory_1 = __importDefault(require("./DataMemory"));
 
 var RegisterFile_1 = __importDefault(require("./RegisterFile"));
 
-var InstructionHelper_1 = __importDefault(require("./InstructionHelper"));
+var InstructionHelper_1 = __importDefault(require("../instructions/InstructionHelper"));
 
 var ImmSelect_1 = __importDefault(require("./ImmSelect"));
+
+var BranchLogic_1 = __importDefault(require("./BranchLogic"));
+
+var InstructionConstants_1 = __importDefault(require("../instructions/InstructionConstants"));
 
 var ControlUnit =
 /** @class */
@@ -2473,23 +3133,20 @@ function (_super) {
   function ControlUnit(x, y) {
     var _this = _super.call(this, x, y) || this;
 
-    _this.instrValue = Val_1.VAL_ZERO_32b;
+    _this.instrValue = Value_1.VAL_ZERO_32b;
 
     _this.refresh();
 
     return _this;
   }
 
-  ControlUnit.prototype.draw = function (g) {
-    g.fillRect(this.x, this.y, 250, 125, Config_1.default.elementFillColor, Config_1.default.elementStrokeColor);
-    g.drawTextCentered(this.x, this.y + 45, 250, "Control", Config_1.default.fontColor, Config_1.default.fontSize);
-    g.drawTextCentered(this.x, this.y + 70, 250, "Unit", Config_1.default.fontColor, Config_1.default.fontSize);
-    g.fillRect(this.x + 10, this.y + 90, 230, 25, Config_1.default.memoryFillColor, Config_1.default.memoryStrokeColor);
-    g.drawText(this.x + 20, this.y + 90 + 21, InstructionHelper_1.default.decode(this.instrValue), Config_1.default.fontColor, Config_1.default.fontSize);
+  ControlUnit.prototype.draw = function (g) {// g.fillRect(this.x - 5, this.y - 5, 10, 10, Config.signalColor, Config.signalColor);
   };
 
   ControlUnit.prototype.refresh = function () {
     this.instrValue = undefined;
+    this.branchValue = undefined;
+    this.markBranch = undefined;
   };
 
   ControlUnit.prototype.forwardSignal = function (signaler, value) {
@@ -2500,69 +3157,79 @@ function (_super) {
           break;
         }
 
+      case this._branchNode:
+        {
+          this.branchValue = value;
+          break;
+        }
+
       default:
         {
           console.error("Error");
         }
     }
 
+    if (this.instrValue == undefined || this.branchValue == undefined) {
+      return;
+    }
+
     var opcode = InstructionHelper_1.default.getOpCodeStr(this.instrValue);
     var ImmSel, Op2Sel, FuncSel, MemWr, RFWen, WBSel, WASel, PCSel;
 
     switch (opcode) {
-      case InstructionHelper_1.default.OP_CODE_ALU:
+      case InstructionConstants_1.default.OP_CODE_ALU:
         {
           ImmSel = undefined;
-          Op2Sel = Val_1.VAL_ZERO_32b;
+          Op2Sel = Value_1.VAL_ZERO_32b;
           FuncSel = ALUControl_1.default.FUNC;
           MemWr = DataMemory_1.default.WRITE_NO;
           RFWen = RegisterFile_1.default.WRITE_YES;
-          WBSel = Val_1.VAL_TWO_32b;
-          WASel = Val_1.VAL_ONE_32b;
-          PCSel = Val_1.VAL_THREE_32b;
+          WBSel = Value_1.VAL_TWO_32b;
+          WASel = Value_1.VAL_ONE_32b;
+          PCSel = Value_1.VAL_THREE_32b;
           break;
         }
 
-      case InstructionHelper_1.default.OP_CODE_ALUI:
+      case InstructionConstants_1.default.OP_CODE_ALUI:
         {
           ImmSel = ImmSelect_1.default.ITYPE;
-          Op2Sel = Val_1.VAL_ONE_32b;
+          Op2Sel = Value_1.VAL_ONE_32b;
           FuncSel = ALUControl_1.default.OP;
           MemWr = DataMemory_1.default.WRITE_NO;
           RFWen = RegisterFile_1.default.WRITE_YES;
-          WBSel = Val_1.VAL_TWO_32b;
-          WASel = Val_1.VAL_ONE_32b;
-          PCSel = Val_1.VAL_THREE_32b;
+          WBSel = Value_1.VAL_TWO_32b;
+          WASel = Value_1.VAL_ONE_32b;
+          PCSel = Value_1.VAL_THREE_32b;
           break;
         }
 
-      case InstructionHelper_1.default.OP_CODE_LW:
+      case InstructionConstants_1.default.OP_CODE_LW:
         {
           ImmSel = ImmSelect_1.default.ITYPE;
-          Op2Sel = Val_1.VAL_ONE_32b;
+          Op2Sel = Value_1.VAL_ONE_32b;
           FuncSel = ALUControl_1.default.ADD;
           MemWr = DataMemory_1.default.WRITE_NO;
           RFWen = RegisterFile_1.default.WRITE_YES;
-          WBSel = Val_1.VAL_ONE_32b;
-          WASel = Val_1.VAL_ONE_32b;
-          PCSel = Val_1.VAL_THREE_32b;
+          WBSel = Value_1.VAL_ONE_32b;
+          WASel = Value_1.VAL_ONE_32b;
+          PCSel = Value_1.VAL_THREE_32b;
           break;
         }
 
-      case InstructionHelper_1.default.OP_CODE_SW:
+      case InstructionConstants_1.default.OP_CODE_SW:
         {
           ImmSel = ImmSelect_1.default.BSTYPE;
-          Op2Sel = Val_1.VAL_ONE_32b;
+          Op2Sel = Value_1.VAL_ONE_32b;
           FuncSel = ALUControl_1.default.ADD;
           MemWr = DataMemory_1.default.WRITE_YES;
           RFWen = RegisterFile_1.default.WRITE_NO;
           WBSel = undefined;
           WASel = undefined;
-          PCSel = Val_1.VAL_THREE_32b;
+          PCSel = Value_1.VAL_THREE_32b;
           break;
         }
 
-      case InstructionHelper_1.default.OP_CODE_BRANCH:
+      case InstructionConstants_1.default.OP_CODE_BRANCH:
         {
           ImmSel = ImmSelect_1.default.BRTYPE;
           Op2Sel = undefined;
@@ -2571,41 +3238,41 @@ function (_super) {
           RFWen = RegisterFile_1.default.WRITE_NO;
           WBSel = undefined;
           WASel = undefined;
-          PCSel = true ? Val_1.VAL_ZERO_32b : Val_1.VAL_THREE_32b; // TODO
-
+          PCSel = this.branchValue == BranchLogic_1.default.BRANCH_TRUE ? Value_1.VAL_ZERO_32b : Value_1.VAL_THREE_32b;
+          this.markBranch = true;
           break;
         }
 
-      case InstructionHelper_1.default.OP_CODE_JAL:
+      case InstructionConstants_1.default.OP_CODE_JAL:
         {
           ImmSel = undefined;
           Op2Sel = undefined;
           FuncSel = undefined;
           MemWr = DataMemory_1.default.WRITE_NO;
           RFWen = RegisterFile_1.default.WRITE_YES;
-          WBSel = Val_1.VAL_ZERO_32b;
-          WASel = Val_1.VAL_ZERO_32b;
-          PCSel = Val_1.VAL_TWO_32b;
+          WBSel = Value_1.VAL_ZERO_32b;
+          WASel = Value_1.VAL_ZERO_32b;
+          PCSel = Value_1.VAL_TWO_32b;
           break;
         }
 
-      case InstructionHelper_1.default.OP_CODE_JALR:
+      case InstructionConstants_1.default.OP_CODE_JALR:
         {
           ImmSel = undefined;
           Op2Sel = undefined;
           FuncSel = undefined;
           MemWr = DataMemory_1.default.WRITE_NO;
           RFWen = RegisterFile_1.default.WRITE_YES;
-          WBSel = Val_1.VAL_ZERO_32b;
-          WASel = Val_1.VAL_ONE_32b;
-          PCSel = Val_1.VAL_ONE_32b;
+          WBSel = Value_1.VAL_ZERO_32b;
+          WASel = Value_1.VAL_ONE_32b;
+          PCSel = Value_1.VAL_ONE_32b;
           break;
         }
 
       default:
         {
           console.error("Unknown OP Code: " + opcode);
-          PCSel = Val_1.VAL_THREE_32b;
+          PCSel = Value_1.VAL_THREE_32b;
         }
     }
 
@@ -2621,11 +3288,23 @@ function (_super) {
 
   ControlUnit.prototype.mark = function (caller) {
     this._instrNode.mark(this);
+
+    if (this.markBranch) {
+      this._branchNode.mark(this);
+    }
   };
 
   Object.defineProperty(ControlUnit.prototype, "instrNode", {
     set: function set(node) {
       this._instrNode = node;
+      node.addNeighbour(this);
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(ControlUnit.prototype, "branchNode", {
+    set: function set(node) {
+      this._branchNode = node;
       node.addNeighbour(this);
     },
     enumerable: true,
@@ -2691,7 +3370,7 @@ function (_super) {
 }(Component_1.default);
 
 exports.default = ControlUnit;
-},{"./Component":"Component.ts","./Config":"Config.ts","./Val":"Val.ts","./ALUControl":"ALUControl.ts","./DataMemory":"DataMemory.ts","./RegisterFile":"RegisterFile.ts","./InstructionHelper":"InstructionHelper.ts","./ImmSelect":"ImmSelect.ts"}],"ConstValue.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Value":"util/Value.ts","./ALUControl":"components/ALUControl.ts","./DataMemory":"components/DataMemory.ts","./RegisterFile":"components/RegisterFile.ts","../instructions/InstructionHelper":"instructions/InstructionHelper.ts","./ImmSelect":"components/ImmSelect.ts","./BranchLogic":"components/BranchLogic.ts","../instructions/InstructionConstants":"instructions/InstructionConstants.ts"}],"components/ConstValue.ts":[function(require,module,exports) {
 "use strict";
 
 var __extends = this && this.__extends || function () {
@@ -2732,9 +3411,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var Component_1 = __importDefault(require("./Component"));
 
-var Graphics_1 = __importDefault(require("./Graphics"));
+var Graphics_1 = __importDefault(require("../util/Graphics"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("../util/Config"));
 
 var ConstValue =
 /** @class */
@@ -2771,7 +3450,7 @@ function (_super) {
 }(Component_1.default);
 
 exports.default = ConstValue;
-},{"./Component":"Component.ts","./Graphics":"Graphics.ts","./Config":"Config.ts"}],"Simulator.ts":[function(require,module,exports) {
+},{"./Component":"components/Component.ts","../util/Graphics":"util/Graphics.ts","../util/Config":"util/Config.ts"}],"Simulator.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -2794,33 +3473,35 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Graphics_1 = __importDefault(require("./Graphics"));
+var Graphics_1 = __importDefault(require("./util/Graphics"));
 
-var ArithmeticLogicUnit_1 = __importDefault(require("./ArithmeticLogicUnit"));
+var ArithmeticLogicUnit_1 = __importDefault(require("./components/ArithmeticLogicUnit"));
 
-var Register_1 = __importDefault(require("./Register"));
+var Register_1 = __importDefault(require("./components/Register"));
 
-var CircutNode_1 = __importDefault(require("./CircutNode"));
+var CircutNode_1 = __importDefault(require("./components/CircutNode"));
 
-var Config_1 = __importDefault(require("./Config"));
+var Config_1 = __importDefault(require("./util/Config"));
 
-var InstructionMemory_1 = __importDefault(require("./InstructionMemory"));
+var InstructionMemory_1 = __importDefault(require("./components/InstructionMemory"));
 
-var Multiplexer_1 = __importStar(require("./Multiplexer"));
+var Multiplexer_1 = __importStar(require("./components/Multiplexer"));
 
-var ControlUnit_1 = __importDefault(require("./ControlUnit"));
+var ControlUnit_1 = __importDefault(require("./components/ControlUnit"));
 
-var ConstValue_1 = __importDefault(require("./ConstValue"));
+var ConstValue_1 = __importDefault(require("./components/ConstValue"));
 
-var RegisterFile_1 = __importDefault(require("./RegisterFile"));
+var RegisterFile_1 = __importDefault(require("./components/RegisterFile"));
 
-var ImmSelect_1 = __importDefault(require("./ImmSelect"));
+var ImmSelect_1 = __importDefault(require("./components/ImmSelect"));
 
-var ALUControl_1 = __importDefault(require("./ALUControl"));
+var ALUControl_1 = __importDefault(require("./components/ALUControl"));
 
-var DataMemory_1 = __importDefault(require("./DataMemory"));
+var DataMemory_1 = __importDefault(require("./components/DataMemory"));
 
-var Val_1 = __importDefault(require("./Val"));
+var Value_1 = __importDefault(require("./util/Value"));
+
+var BranchLogic_1 = __importDefault(require("./components/BranchLogic"));
 
 var Simulator =
 /** @class */
@@ -2832,17 +3513,17 @@ function () {
   }
 
   Simulator.prototype.create = function () {
-    var PCRegister = new Register_1.default(35, 230);
-    var instrMemory = new InstructionMemory_1.default(60, 285, this.initialInstruct);
-    var PCStep = new ConstValue_1.default(150, 135, Val_1.default.UnsignedInt(4));
-    var PCAdder = new ArithmeticLogicUnit_1.default(205, 135, ArithmeticLogicUnit_1.default.ADD);
-    var PCSelMux = new Multiplexer_1.default(210, 25, 4, Multiplexer_1.MultiplexerOrientation.LEFT);
-    var controlUnit = new ControlUnit_1.default(170, 450);
-    this.elements.push(PCRegister, instrMemory, PCStep, PCSelMux, PCAdder, controlUnit);
-    var WASel1 = new ConstValue_1.default(450, 520, Val_1.default.UnsignedInt(1));
-    var WASelMux = new Multiplexer_1.default(485, 520, 2);
-    var registerFile = new RegisterFile_1.default(550, 350);
-    var immSelect = new ImmSelect_1.default(670, 550);
+    var controlUnit = new ControlUnit_1.default(0, 0);
+    var PCRegister = new Register_1.default(50, 50);
+    var instrMemory = new InstructionMemory_1.default(10, 100, this.initialInstruct);
+    var PCStepVal = new ConstValue_1.default(350, 135, Value_1.default.fromUnsignedInt(4));
+    var PCAdder = new ArithmeticLogicUnit_1.default(405, 135, ArithmeticLogicUnit_1.default.ADD);
+    var PCSelMux = new Multiplexer_1.default(410, 25, 4, Multiplexer_1.MultiplexerOrientation.LEFT);
+    this.elements.push(PCRegister, instrMemory, PCStepVal, PCSelMux, PCAdder, controlUnit);
+    var WASel1 = new ConstValue_1.default(325, 520, Value_1.default.fromUnsignedInt(1));
+    var WASelMux = new Multiplexer_1.default(360, 520, 2);
+    var registerFile = new RegisterFile_1.default(425, 260);
+    var immSelect = new ImmSelect_1.default(625, 550);
     var ALUCtrl = new ALUControl_1.default(740, 630);
     this.elements.push(WASel1, registerFile, WASelMux, immSelect, ALUCtrl);
     var op2SelMux = new Multiplexer_1.default(850, 500, 2);
@@ -2851,111 +3532,115 @@ function () {
     var dataMemory = new DataMemory_1.default(985, 200);
     var WBSelMux = new Multiplexer_1.default(1135, 600, 3);
     this.elements.push(dataMemory, WBSelMux);
+    var branchAdder = new ArithmeticLogicUnit_1.default(800, 210, ArithmeticLogicUnit_1.default.ADD);
+    var branchLogic = new BranchLogic_1.default(670, 275);
+    this.elements.push(branchAdder, branchLogic);
     /* PC enable write */
 
-    var node = new CircutNode_1.default(65, 230, Val_1.default.UnsignedInt(1));
+    var node = new CircutNode_1.default(70, 50, Value_1.default.fromUnsignedInt(1));
     PCRegister.writeEnable = node;
     this.elements.push(node); // Not required
 
     var path;
     /* PCSelMux ->  PC */
 
-    path = this.createPath([[210, 72.5], [25, 72.5], [25, 242.5], [35, 242.5]]);
+    path = this.createPath([[410, 72.5], [375, 72.5], [375, 40], [30, 40], [30, 62.5], [50, 62.5]]);
     PCSelMux.outNode = path[0];
     PCRegister.inputNode = path[path.length - 1];
     /* PC Step -> PC Adder */
 
-    path = this.createPath([[175, 147.5], [205, 147.5]]);
-    PCStep.outNode = path[0];
+    path = this.createPath([[375, 147.5], [405, 147.5]]);
+    PCStepVal.outNode = path[0];
     PCAdder.input1Node = path[path.length - 1];
     /* PC Register -> PC Adder */
 
-    path = this.createPath([[185, 242.5], [195, 242.5], [195, 197.5], [205, 197.5]]);
+    path = this.createPath([[200, 62.5], [220, 62.5], [275, 62.5], [325, 62.5], [325, 197.5], [405, 197.5]]);
     PCRegister.outNode = path[0];
     PCAdder.input2Node = path[path.length - 1];
-    var PCRegisterNode = path[1];
+    var PCRegisterNode1 = path[1];
+    var PCRegisterNode2 = path[2];
     /* PC Adder -> PCSelMux */
 
-    path = this.createPath([[245, 172.5], [255, 172.5], [255, 95], [235, 95]]);
+    path = this.createPath([[445, 172.5], [455, 172.5], [455, 95], [435, 95]]);
     PCAdder.resultNode = path[0];
-    PCSelMux.setInputNodes(3, path[path.length - 1]);
+    PCSelMux.setInputNode(3, path[path.length - 1]);
     /* PC Register -> Instruction memory */
 
-    path = this.createPath([[195, 242.5], [195, 275], [110, 275], [110, 285]]);
-    PCRegisterNode.addNeighbour(path[0]);
+    path = this.createPath([[220, 85], [125, 85], [125, 100]]);
+    PCRegisterNode1.addNeighbour(path[0]);
     instrMemory.addressNode = path[path.length - 1];
     /* Instruction memory -> instrNode */
 
-    path = this.createPath([[160, 412.5], [295, 412.5]]);
+    path = this.createPath([[240, 425], [305, 425]]);
     instrMemory.outputDataNode = path[0];
     var instrNode = path[path.length - 1];
-    /* instrNode -> Control unit */
+    /* Instr node for Control unit */
 
-    path = this.createPath([[295, 412.5], [295, 450]]);
-    instrNode.addNeighbour(path[0]);
-    controlUnit.instrNode = path[path.length - 1];
-    /* Extend instruction wire */
-
-    node = new CircutNode_1.default(430, 412.5);
-    this.elements.push(node);
-    instrNode.addNeighbour(node);
-    instrNode = node;
+    controlUnit.instrNode = instrNode;
     /* WASel1 -> WASelMux */
 
-    path = this.createPath([[475, 532.5], [485, 532.5]]);
+    path = this.createPath([[350, 532.5], [360, 532.5]]);
     WASel1.outNode = path[1];
-    WASelMux.setInputNodes(0, path[path.length - 1]);
+    WASelMux.setInputNode(0, path[path.length - 1]);
     /* WASelMux -> Register File */
 
-    path = this.createPath([[510, 552.5], [550, 552.5]]);
+    path = this.createPath([[385, 552.5], [425, 552.5]]);
     WASelMux.outNode = path[0];
     registerFile.inputWriteSelNode = path[path.length - 1];
     /* instrNode -> RF Write select */
 
-    path = this.createPath([[430, 570], [485, 570]]);
+    path = this.createPath([[305, 570], [360, 570]]);
     instrNode.addNeighbour(path[0]);
     var instrNodeBottom = path[0];
-    WASelMux.setInputNodes(1, path[path.length - 1]);
+    WASelMux.setInputNode(1, path[path.length - 1]);
     /* instrNode -> ImmSelect */
 
-    path = this.createPath([[430, 620], [660, 620], [660, 575], [670, 575]]);
+    path = this.createPath([[305, 620], [600, 620], [600, 575], [625, 575]]);
     instrNodeBottom.addNeighbour(path[0]);
     instrNodeBottom = path[0];
     immSelect.instrNode = path[path.length - 1];
     /* instrNode -> ALU Control */
 
-    path = this.createPath([[430, 655], [740, 655]]);
+    path = this.createPath([[305, 655], [740, 655]]);
     instrNodeBottom.addNeighbour(path[0]);
     instrNodeBottom = path[0];
     ALUCtrl.instrNode = path[path.length - 1];
+    /* instrNode -> DataMemory */
+
+    path = this.createPath([[305, 690], [985, 690]]);
+    instrNodeBottom.addNeighbour(path[0]);
+    dataMemory.instrNode = path[path.length - 1];
     /* instrNode -> ReadSel2 */
 
-    path = this.createPath([[430, 390], [550, 390]]);
+    path = this.createPath([[305, 390], [425, 390]]);
     instrNode.addNeighbour(path[0]);
     var instrNodeTop = path[0];
     registerFile.readSel2Node = path[path.length - 1];
     /* instrNode -> ReadSel1 */
 
-    path = this.createPath([[430, 370], [550, 370]]);
+    path = this.createPath([[305, 370], [425, 370]]);
     instrNodeTop.addNeighbour(path[0]);
     instrNodeTop = path[0];
     registerFile.readSel1Node = path[path.length - 1];
     /* ImmSelect -> op2SelMux */
 
-    path = this.createPath([[770, 575], [790, 575], [790, 550], [850, 550]]);
+    path = this.createPath([[725, 575], [790, 575], [790, 550], [850, 550]]);
     immSelect.outNode = path[0];
-    op2SelMux.setInputNodes(1, path[path.length - 1]);
+    op2SelMux.setInputNode(1, path[path.length - 1]);
+    var immSelectNode = path[2];
     /* RF ReadData2 -> op2SelMux */
 
-    path = this.createPath([[650, 390], [670, 390], [670, 525], [830, 525], [850, 525]]);
+    path = this.createPath([[575, 390], [670, 390], [670, 525], [745, 525], [830, 525], [850, 525]]);
     registerFile.readData2Node = path[0];
-    op2SelMux.setInputNodes(0, path[path.length - 1]);
+    op2SelMux.setInputNode(0, path[path.length - 1]);
     var readData2Node = path[path.length - 2];
+    var readData2BranchNode = path[3];
     /* RF ReadData1 -> ALU */
 
-    path = this.createPath([[650, 370], [885, 370], [885, 415], [895, 415]]);
+    path = this.createPath([[575, 370], [695, 370], [885, 370], [885, 415], [895, 415]]);
     registerFile.readData1Node = path[0];
     ALU.input1Node = path[path.length - 1];
+    var readData1BranchNode = path[1];
     /* op2SelMux -> ALU */
 
     path = this.createPath([[875, 532.5], [885, 532.5], [885, 460], [895, 460]]);
@@ -2970,10 +3655,21 @@ function () {
 
     path = this.createPath([[935, 437.5], [960, 437.5], [960, 710], [1110, 710], [1110, 655], [1135, 655]]);
     ALU.resultNode = path[0];
-    WBSelMux.setInputNodes(2, path[path.length - 1]);
+    WBSelMux.setInputNode(2, path[path.length - 1]);
+    var ALUoutNode = path[1];
+    /* ALU -> DataMemory */
+
+    path = this.createPath([[960, 300], [985, 300]]);
+    ALUoutNode.addNeighbour(path[0]);
+    dataMemory.addressNode = path[path.length - 1];
+    /* DataMemory - > WBSel Mux */
+
+    path = this.createPath([[1085, 640], [1135, 640]]);
+    dataMemory.outputDataNode = path[0];
+    WBSelMux.setInputNode(1, path[path.length - 1]);
     /* WBSel Mux -> RF WriteData */
 
-    path = this.createPath([[1160, 640], [1180, 640], [1180, 730], [530, 730], [530, 590], [550, 590]]);
+    path = this.createPath([[1160, 640], [1180, 640], [1180, 730], [405, 730], [405, 590], [425, 590]]);
     WBSelMux.outNode = path[0];
     registerFile.inputWriteDataNode = path[path.length - 1];
     /* RF ReadData2 -> DataMemory */
@@ -2981,18 +3677,54 @@ function () {
     path = this.createPath([[830, 610], [985, 610]]);
     readData2Node.addNeighbour(path[0]);
     dataMemory.inputDataNode = path[path.length - 1];
+    /* PC -> branchAdder */
+
+    path = this.createPath([[275, 222.5], [800, 222.5]]);
+    PCRegisterNode2.addNeighbour(path[0]);
+    branchAdder.input1Node = path[path.length - 1];
+    /* ImmSelect -> branchAdder */
+
+    path = this.createPath([[790, 272.5], [800, 272.5]]);
+    immSelectNode.addNeighbour(path[0]);
+    branchAdder.input2Node = path[path.length - 1];
+    /* branchAdder -> PCSel */
+
+    path = this.createPath([[840, 247.5], [850, 247.5], [850, 50], [435, 50]]);
+    branchAdder.resultNode = path[0];
+    PCSelMux.setInputNode(0, path[path.length - 1]);
+    /* readData1 -> Branch Logic */
+
+    node = new CircutNode_1.default(695, 325);
+    readData1BranchNode.addNeighbour(node);
+    branchLogic.data1Node = node;
+    this.elements.push(node);
+    /* readData2 -> Branch Logic */
+
+    node = new CircutNode_1.default(745, 325);
+    readData2BranchNode.addNeighbour(node);
+    branchLogic.data2Node = node;
+    this.elements.push(node);
+    /* instrNode -> Branch Select */
+
+    branchLogic.instrNode = instrNodeTop;
+    /* Branch Logic -> Control Unit */
+
+    node = new CircutNode_1.default(770, 300);
+    branchLogic.outNode = node;
+    controlUnit.branchNode = node;
+    this.elements.push(node);
     /*
      *Control signals
      */
 
     /* PCSel */
 
-    path = this.createPath([[222.5, 10], [222.5, 32.5]]);
+    path = this.createPath([[422.5, 10], [422.5, 32.5]]);
     controlUnit.PCSelNode = path[0];
     PCSelMux.selInputNode = path[path.length - 1];
     /* RegEnWrite */
 
-    path = this.createPath([[575, 10], [575, 350]]);
+    path = this.createPath([[550, 10], [550, 260]]);
     controlUnit.RegWriteEn = path[0];
     registerFile.inputWriteEnNode = path[path.length - 1];
     /* MemWrite */
@@ -3007,12 +3739,12 @@ function () {
     WBSelMux.selInputNode = path[path.length - 1];
     /* WASel */
 
-    path = this.createPath([[497.5, 790], [497.5, 577.5]]);
+    path = this.createPath([[372.5, 790], [372.5, 577.5]]);
     controlUnit.WASel = path[0];
     WASelMux.selInputNode = path[path.length - 1];
     /* ImmSel */
 
-    path = this.createPath([[720, 790], [720, 600]]);
+    path = this.createPath([[675, 790], [675, 600]]);
     controlUnit.ImmSel = path[0];
     immSelect.controlNode = path[path.length - 1];
     /* FuncSel */
@@ -3051,7 +3783,8 @@ function () {
     var _this = this;
 
     this.g.rescale();
-    this.g.clear(Config_1.default.backgroundColor);
+    this.g.clear(Config_1.default.backgroundColor); // this.g.fillRect(0, 0, 1200, 800, "#00000000", "red");
+
     this.elements.forEach(function (el) {
       return el.draw(_this.g);
     });
@@ -3086,7 +3819,7 @@ function () {
 }();
 
 exports.default = Simulator;
-},{"./Graphics":"Graphics.ts","./ArithmeticLogicUnit":"ArithmeticLogicUnit.ts","./Register":"Register.ts","./CircutNode":"CircutNode.ts","./Config":"Config.ts","./InstructionMemory":"InstructionMemory.ts","./Multiplexer":"Multiplexer.ts","./ControlUnit":"ControlUnit.ts","./ConstValue":"ConstValue.ts","./RegisterFile":"RegisterFile.ts","./ImmSelect":"ImmSelect.ts","./ALUControl":"ALUControl.ts","./DataMemory":"DataMemory.ts","./Val":"Val.ts"}],"Parser.ts":[function(require,module,exports) {
+},{"./util/Graphics":"util/Graphics.ts","./components/ArithmeticLogicUnit":"components/ArithmeticLogicUnit.ts","./components/Register":"components/Register.ts","./components/CircutNode":"components/CircutNode.ts","./util/Config":"util/Config.ts","./components/InstructionMemory":"components/InstructionMemory.ts","./components/Multiplexer":"components/Multiplexer.ts","./components/ControlUnit":"components/ControlUnit.ts","./components/ConstValue":"components/ConstValue.ts","./components/RegisterFile":"components/RegisterFile.ts","./components/ImmSelect":"components/ImmSelect.ts","./components/ALUControl":"components/ALUControl.ts","./components/DataMemory":"components/DataMemory.ts","./util/Value":"util/Value.ts","./components/BranchLogic":"components/BranchLogic.ts"}],"util/Parser.ts":[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -3109,9 +3842,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var Val_1 = __importStar(require("././Val"));
+var Value_1 = __importStar(require("./Value"));
 
-var InstructionMemory_1 = __importDefault(require("./InstructionMemory"));
+var InstructionMemory_1 = __importDefault(require("../components/InstructionMemory"));
 
 var Parser =
 /** @class */
@@ -3123,11 +3856,11 @@ function () {
     var lines = textContent.split('\n');
 
     for (var i = 0; i < lines.length; i++) {
-      ret.push(Val_1.default.HexString(lines[i]));
+      ret.push(Value_1.default.HexString(lines[i]));
     }
 
     while (ret.length < InstructionMemory_1.default.SIZE) {
-      ret.push(Val_1.VAL_ZERO_32b);
+      ret.push(Value_1.VAL_ZERO_32b);
     }
 
     return ret;
@@ -3137,7 +3870,7 @@ function () {
 }();
 
 exports.default = Parser;
-},{"././Val":"Val.ts","./InstructionMemory":"InstructionMemory.ts"}],"util.ts":[function(require,module,exports) {
+},{"./Value":"util/Value.ts","../components/InstructionMemory":"components/InstructionMemory.ts"}],"util/util.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3151,8 +3884,9 @@ function toggleFullScreen() {
     // @ts-ignoreç
     if (documentBody.requestFullScreen) {
       // @ts-ignoreç
-      documentBody.requestFullScreen();
+      documentBody.requestFullScreen(); // @ts-ignoreç
     } else if (documentBody.webkitRequestFullscreen) {
+      // @ts-ignoreç
       documentBody.webkitRequestFullscreen(); // @ts-ignoreç
     } else if (documentBody.mozRequestFullScreen) {
       // @ts-ignoreç
@@ -3171,8 +3905,9 @@ function toggleFullScreen() {
       document.msExitFullscreen(); // @ts-ignoreç
     } else if (document.mozCancelFullScreen) {
       // @ts-ignorec
-      document.mozCancelFullScreen();
+      document.mozCancelFullScreen(); // @ts-ignoreç
     } else if (document.webkitExitFullscreen) {
+      // @ts-ignoreç
       document.webkitExitFullscreen();
     }
 
@@ -3196,9 +3931,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var Simulator_1 = __importDefault(require("./Simulator"));
 
-var Parser_1 = __importDefault(require("./Parser"));
+var Parser_1 = __importDefault(require("./util/Parser"));
 
-var util_1 = require("./util");
+var util_1 = require("./util/util");
+
+var Value_1 = __importDefault(require("./util/Value"));
 
 var canvas = document.getElementById("sim-canvas");
 var menuBar = document.getElementById("menu");
@@ -3221,6 +3958,7 @@ resize();
 window.addEventListener("resize", function () {
   return resize();
 });
+Value_1.default.main();
 window.addEventListener("keydown", function (evt) {
   switch (evt.key) {
     case "s":
@@ -3273,8 +4011,8 @@ setInterval(function () {
   if (play) {
     sim.step();
   }
-}, 1000);
-},{"./Simulator":"Simulator.ts","./Parser":"Parser.ts","./util":"util.ts"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+}, 100);
+},{"./Simulator":"Simulator.ts","./util/Parser":"util/Parser.ts","./util/util":"util/util.ts","./util/Value":"util/Value.ts"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -3301,7 +4039,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60828" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56055" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
