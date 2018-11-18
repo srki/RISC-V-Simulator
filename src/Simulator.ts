@@ -36,10 +36,10 @@ export default class Simulator {
 
         this.elements.push(PCRegister, instrMemory, PCStepVal, PCSelMux, PCAdder, controlUnit);
 
-        let WASel1 = new ConstValue(450, 520, Value.fromUnsignedInt(1));
-        let WASelMux = new Multiplexer(485, 520, 2);
-        let registerFile = new RegisterFile(550, 350);
-        let immSelect = new ImmSelect(670, 550);
+        let WASel1 = new ConstValue(325, 520, Value.fromUnsignedInt(1));
+        let WASelMux = new Multiplexer(360, 520, 2);
+        let registerFile = new RegisterFile(425, 260);
+        let immSelect = new ImmSelect(625, 550);
         let ALUCtrl = new ALUControl(740, 630);
 
         this.elements.push(WASel1, registerFile, WASelMux, immSelect, ALUCtrl);
@@ -95,7 +95,7 @@ export default class Simulator {
         instrMemory.addressNode = path[path.length - 1];
 
         /* Instruction memory -> instrNode */
-        path = this.createPath([[240, 412.5], [430, 412.5]]);
+        path = this.createPath([[240, 425], [305, 425]]);
         instrMemory.outputDataNode = path[0];
         let instrNode = path[path.length - 1];
 
@@ -103,66 +103,66 @@ export default class Simulator {
         controlUnit.instrNode = instrNode;
 
         /* WASel1 -> WASelMux */
-        path = this.createPath([[475, 532.5], [485, 532.5]]);
+        path = this.createPath([[350, 532.5], [360, 532.5]]);
         WASel1.outNode = path[1];
         WASelMux.setInputNode(0, path[path.length - 1]);
 
         /* WASelMux -> Register File */
-        path = this.createPath([[510, 552.5], [550, 552.5]]);
+        path = this.createPath([[385, 552.5], [425, 552.5]]);
         WASelMux.outNode = path[0];
         registerFile.inputWriteSelNode = path[path.length - 1];
 
         /* instrNode -> RF Write select */
-        path = this.createPath([[430, 570], [485, 570]]);
+        path = this.createPath([[305, 570], [360, 570]]);
         instrNode.addNeighbour(path[0]);
         let instrNodeBottom = path[0];
         WASelMux.setInputNode(1, path[path.length - 1]);
 
         /* instrNode -> ImmSelect */
-        path = this.createPath([[430, 620], [660, 620], [660, 575], [670, 575]]);
+        path = this.createPath([[305, 620], [600, 620], [600, 575], [625, 575]]);
         instrNodeBottom.addNeighbour(path[0]);
         instrNodeBottom = path[0];
         immSelect.instrNode = path[path.length - 1];
 
         /* instrNode -> ALU Control */
-        path = this.createPath([[430, 655], [740, 655]]);
+        path = this.createPath([[305, 655], [740, 655]]);
         instrNodeBottom.addNeighbour(path[0]);
         instrNodeBottom = path[0];
         ALUCtrl.instrNode = path[path.length - 1];
 
         /* instrNode -> DataMemory */
-        path = this.createPath([[430, 690], [985, 690]]);
+        path = this.createPath([[305, 690], [985, 690]]);
         instrNodeBottom.addNeighbour(path[0]);
         dataMemory.instrNode = path[path.length - 1];
 
         /* instrNode -> ReadSel2 */
-        path = this.createPath([[430, 390], [550, 390]]);
+        path = this.createPath([[305, 390], [425, 390]]);
         instrNode.addNeighbour(path[0]);
         let instrNodeTop = path[0];
         registerFile.readSel2Node = path[path.length - 1];
 
         /* instrNode -> ReadSel1 */
-        path = this.createPath([[430, 370], [550, 370]]);
+        path = this.createPath([[305, 370], [425, 370]]);
         instrNodeTop.addNeighbour(path[0]);
         instrNodeTop = path[0];
         registerFile.readSel1Node = path[path.length - 1];
 
         /* ImmSelect -> op2SelMux */
-        path = this.createPath([[770, 575], [790, 575], [790, 550], [850, 550]]);
+        path = this.createPath([[725, 575], [790, 575], [790, 550], [850, 550]]);
         immSelect.outNode = path[0];
         op2SelMux.setInputNode(1, path[path.length - 1]);
 
         let immSelectNode = path[2];
 
         /* RF ReadData2 -> op2SelMux */
-        path = this.createPath([[650, 390], [670, 390], [670, 525], [745, 525], [830, 525], [850, 525]]);
+        path = this.createPath([[575, 390], [670, 390], [670, 525], [745, 525], [830, 525], [850, 525]]);
         registerFile.readData2Node = path[0];
         op2SelMux.setInputNode(0, path[path.length - 1]);
         let readData2Node = path[path.length - 2];
         let readData2BranchNode = path[3];
 
         /* RF ReadData1 -> ALU */
-        path = this.createPath([[650, 370], [695, 370], [885, 370], [885, 415], [895, 415]]);
+        path = this.createPath([[575, 370], [695, 370], [885, 370], [885, 415], [895, 415]]);
         registerFile.readData1Node = path[0];
         ALU.input1Node = path[path.length - 1];
 
@@ -195,7 +195,7 @@ export default class Simulator {
         WBSelMux.setInputNode(1, path[path.length - 1]);
 
         /* WBSel Mux -> RF WriteData */
-        path = this.createPath([[1160, 640], [1180, 640], [1180, 730], [530, 730], [530, 590], [550, 590]]);
+        path = this.createPath([[1160, 640], [1180, 640], [1180, 730], [405, 730], [405, 590], [425, 590]]);
         WBSelMux.outNode = path[0];
         registerFile.inputWriteDataNode = path[path.length - 1];
 
@@ -247,7 +247,7 @@ export default class Simulator {
         PCSelMux.selInputNode = path[path.length - 1];
 
         /* RegEnWrite */
-        path = this.createPath([[575, 10], [575, 350]]);
+        path = this.createPath([[550, 10], [550, 260]]);
         controlUnit.RegWriteEn = path[0];
         registerFile.inputWriteEnNode = path[path.length - 1];
 
@@ -262,12 +262,12 @@ export default class Simulator {
         WBSelMux.selInputNode = path[path.length - 1];
 
         /* WASel */
-        path = this.createPath([[497.5, 790], [497.5, 577.5]]);
+        path = this.createPath([[372.5, 790], [372.5, 577.5]]);
         controlUnit.WASel = path[0];
         WASelMux.selInputNode = path[path.length - 1];
 
         /* ImmSel */
-        path = this.createPath([[720, 790], [720, 600]]);
+        path = this.createPath([[675, 790], [675, 600]]);
         controlUnit.ImmSel = path[0];
         immSelect.controlNode = path[path.length - 1];
 

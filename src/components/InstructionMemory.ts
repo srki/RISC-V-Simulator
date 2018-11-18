@@ -40,22 +40,22 @@ export default class InstructionMemory extends Component {
     }
 
     draw(g: Graphics): void {
-        g.fillRect(this.x, this.y, 230, InstructionMemory.SIZE * 20 + 20,
+        g.fillRect(this.x, this.y, 230, InstructionMemory.SIZE * 20 + 30,
             Config.elementFillColor, Config.elementStrokeColor);
 
         for (let i = 0; i < InstructionMemory.SIZE; i++) {
-            g.fillRect(this.x + 10, this.y + 10 + i * 20, 200, 20,
-                Config.memoryFillColor, Config.memoryStrokeColor);
+            g.fillRect(this.x + 15, this.y + 15 + i * 20, 200, 20,
+                Config.memoryFillColor, Config.memoryStrokeColor, 1);
 
             let text = this._decoded ? InstructionDecoder.decode(this.values[i]) : this.values[i].asHexString();
             let color = this.selectedInstr == i ? Config.readFontColor : Config.fontColor;
-            g.drawText(this.x + 10 + 10, this.y + 10 + 17 + i * 20, text, color, 18);
+            g.drawText(this.x + 15 + 10, this.y + 15 + 17 + i * 20, text, color, 18);
         }
 
         if (this.selectedInstr != undefined) {
-            let instrY = this.y + 10 + this.selectedInstr * 20 + 11;
-            g.drawPath([[this.x + 210, instrY], [this.x + 220, instrY],
-                    [this.x + 220, this._outputDataNode.y], [this._outputDataNode.x, this._outputDataNode.y]],
+            let instrY = this.y + 15 + this.selectedInstr * 20 + 11;
+            g.drawPath([[this.x + 215, instrY], [this.x + 222.5, instrY],
+                    [this.x + 222.5, this._outputDataNode.y], [this._outputDataNode.x, this._outputDataNode.y]],
                 Config.signalColor);
         }
     }

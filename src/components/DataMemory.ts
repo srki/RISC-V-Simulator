@@ -40,7 +40,7 @@ export default class DataMemory extends Component {
 
         for (let i = 0; i < this.size; i++) {
             g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15,
-                Config.memoryFillColor, Config.memoryStrokeColor);
+                Config.memoryFillColor, Config.memoryStrokeColor, 1);
             g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(),
                 Config.fontColor, 12);
         }

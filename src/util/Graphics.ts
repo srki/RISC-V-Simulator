@@ -47,16 +47,18 @@ export default class Graphics {
         this.ctx.restore();
     }
 
-    drawLine(x1: number, y1: number, x2: number, y2: number, color: string) {
+    drawLine(x1: number, y1: number, x2: number, y2: number, color: string, lineWidth: number = 2) {
         this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = lineWidth;
         this.ctx.beginPath();
         this.ctx.moveTo(x1, y1);
         this.ctx.lineTo(x2, y2);
         this.ctx.stroke();
     }
 
-    drawPath(path: number[][], strokeStyle: string) {
+    drawPath(path: number[][], strokeStyle: string, lineWidth: number = 2) {
         this.ctx.strokeStyle = strokeStyle;
+        this.ctx.lineWidth = lineWidth;
         this.ctx.beginPath();
 
         this.ctx.moveTo(path[0][0], path[0][1]);
@@ -68,13 +70,14 @@ export default class Graphics {
     }
 
 
-    fillRect(x: number, y: number, w: number, h: number, fillStyle: string, strokeStyle: string) {
-        this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], fillStyle, strokeStyle);
+    fillRect(x: number, y: number, w: number, h: number, fillStyle: string, strokeStyle: string, lineWidth: number = 2) {
+        this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], fillStyle, strokeStyle ,lineWidth);
     }
 
-    fillPolygon(point: number[][], fillStyle: string, strokeStyle: string) {
+    fillPolygon(point: number[][], fillStyle: string, strokeStyle: string, lineWidth: number = 2) {
         this.ctx.fillStyle = fillStyle;
         this.ctx.strokeStyle = strokeStyle;
+        this.ctx.lineWidth = lineWidth;
         this.ctx.beginPath();
 
         this.ctx.moveTo(point[0][0], point[0][1]);

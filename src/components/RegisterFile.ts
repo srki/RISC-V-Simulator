@@ -13,6 +13,12 @@ export default class RegisterFile extends Component {
     private readonly size: number = 16;
     private values: Value[] = [];
 
+    private selectedReadReg1: number;
+    private readReg1Marked: boolean;
+    private selectedReadReg2: number;
+    private readReg2Marked: boolean;
+    private selectedWriteReg: number;
+
     private nextValue: Value;
     private nextSel: number;
 
@@ -36,32 +42,59 @@ export default class RegisterFile extends Component {
         this.nextSel = undefined;
     }
 
-    draw(g: Graphics): void {
-        g.fillRect(this.x, this.y, 100, this.size * 15 + 20,
-            Config.elementFillColor, Config.elementStrokeColor);
-
-        for (let i = 0; i < this.size; i++) {
-            g.fillRect(this.x + 10, this.y + 10 + i * 15, 80, 15,
-                Config.memoryFillColor, Config.memoryStrokeColor);
-            g.drawText(this.x + 10 + 5, this.y + 10 + 12 + i * 15, this.values[i].asHexString(),
-                Config.fontColor, 12);
-        }
-    }
-
-    refresh() : void {
+    refresh(): void {
         if (this.nextSel && this.nextValue) {
             this.values[this.nextSel] = this.nextValue;
         }
 
         this.nextValue = undefined;
         this.nextSel = undefined;
+
+        this.selectedReadReg1 = undefined;
+        this.readReg1Marked = false;
+        this.selectedReadReg2 = undefined;
+        this.readReg2Marked = false;
+        this.selectedWriteReg = undefined;
+    }
+
+    draw(g: Graphics): void {
+        g.fillRect(this.x, this.y, 150, this.size * 20 + 30,
+            Config.elementFillColor, Config.elementStrokeColor);
+
+        for (let i = 0; i < this.size; i++) {
+            g.fillRect(this.x + 15, this.y + 15 + i * 20, 120, 20,
+                Config.memoryFillColor, Config.memoryStrokeColor, 1);
+            g.drawText(this.x + 15 + 5, this.y + 15 + 17 + i * 20, this.values[i].asHexString(),
+                Config.fontColor, 18);
+        }
+
+        if (this.selectedWriteReg != undefined) {
+            let regY = this.y + 15 + this.selectedWriteReg * 20 + 10;
+            g.drawPath([[this.x, this._inputWriteDataNode.y], [this.x + 7.5, this._inputWriteDataNode.y],
+                [this.x + 7.5, regY], [this.x + 15, regY]], Config.signalColor);
+        }
+
+        if (this.selectedReadReg1 != undefined && this.readReg1Marked) {
+            let regY = this.y + 15 + this.selectedReadReg1 * 20 + 10;
+            g.drawPath([[this.x + 135, regY], [this.x + 140, regY],
+                [this.x + 140, this._readSel1Node.y], [this.x+150, this._readSel1Node.y]], Config.signalColor);
+        }
+
+        if (this.selectedReadReg2 != undefined && this.readReg2Marked) {
+            let regY = this.y + 15 + this.selectedReadReg2 * 20 + 10;
+            g.drawPath([[this.x + 135, regY], [this.x + 145, regY],
+                [this.x + 145, this._readSel2Node.y], [this.x+150, this._readSel2Node.y]], Config.signalColor);
+        }
+
     }
 
     forwardSignal(signaler: Component, value: Value): void {
         if (signaler == this._readSel1Node) {
-            this._readData1Node.forwardSignal(this, this.values[InstructionHelper.getRs1(value)]);
+            this.selectedReadReg1 = InstructionHelper.getRs1(value);
+            this._readData1Node.forwardSignal(this, this.values[this.selectedReadReg1]);
         } else if (signaler == this._readSel2Node) {
-            this._readData2Node.forwardSignal(this, this.values[InstructionHelper.getRs2(value)]);
+            this.selectedReadReg2 = InstructionHelper.getRs2(value);
+            this._readData2Node.forwardSignal(this, this.values[this.selectedReadReg2]);
         } else {
             console.error("Error");
         }
@@ -70,6 +103,7 @@ export default class RegisterFile extends Component {
     onRisingEdge(): void {
         if (this._inputWriteEnNode.value == RegisterFile.WRITE_YES) {
             this.nextSel = InstructionHelper.getRd(this._inputWriteSelNode.value);
+            this.selectedWriteReg = this.nextSel;
 
             if (this._inputWriteDataNode.value == null) {
                 console.log("Error");
@@ -87,10 +121,12 @@ export default class RegisterFile extends Component {
     mark(caller: Component): void {
         switch (caller) {
             case this._readData1Node: {
+                this.readReg1Marked = true;
                 this._readSel1Node.mark(this);
                 break;
             }
             case this._readData2Node: {
+                this.readReg2Marked = true;
                 this._readSel2Node.mark(this);
                 break;
             }
