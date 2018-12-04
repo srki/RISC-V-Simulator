@@ -48,7 +48,7 @@ export class InstructionDecoder {
                 break;
             }
             case InstructionConstants.FUNCT_SLL: {
-                name = "SLT";
+                name = "SLL";
                 break;
             }
             case InstructionConstants.FUNCT_SLT: {
