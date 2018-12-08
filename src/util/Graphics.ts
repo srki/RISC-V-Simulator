@@ -35,7 +35,7 @@ export default class Graphics {
         let rescaleOffsetY = (canvasHeight - scale * this.height) / 2;
 
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.translate(rescaleOffsetX , rescaleOffsetY);
+        this.ctx.translate(rescaleOffsetX * window.devicePixelRatio, rescaleOffsetY * window.devicePixelRatio);
         this.ctx.scale(scale * window.devicePixelRatio, scale * window.devicePixelRatio);
     }
 
@@ -71,7 +71,7 @@ export default class Graphics {
 
 
     fillRect(x: number, y: number, w: number, h: number, fillStyle: string, strokeStyle: string, lineWidth: number = 2) {
-        this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], fillStyle, strokeStyle ,lineWidth);
+        this.fillPolygon([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], fillStyle, strokeStyle, lineWidth);
     }
 
     fillPolygon(point: number[][], fillStyle: string, strokeStyle: string, lineWidth: number = 2) {
