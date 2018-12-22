@@ -19,7 +19,6 @@ export default class ControlUnit extends Component {
     private _RegWriteEn: CircuitNode;
     private _MemWrite: CircuitNode;
     private _WBSel: CircuitNode;
-    private _WASel: CircuitNode;
     private _ImmSel: CircuitNode;
     private _FuncSel: CircuitNode;
     private _Op2Sel: CircuitNode;
@@ -157,7 +156,6 @@ export default class ControlUnit extends Component {
         if (MemWr) this._MemWrite.forwardSignal(this, MemWr);
         if (RFWen) this._RegWriteEn.forwardSignal(this, RFWen);
         if (WBSel) this._WBSel.forwardSignal(this, WBSel);
-        if (WASel) this._WASel.forwardSignal(this, WASel);
         if (PCSel) this._PCSelNode.forwardSignal(this, PCSel);
     }
 
@@ -193,10 +191,6 @@ export default class ControlUnit extends Component {
 
     set WBSel(node: CircuitNode) {
         this._WBSel = node;
-    }
-
-    set WASel(node: CircuitNode) {
-        this._WASel = node;
     }
 
     set ImmSel(node: CircuitNode) {

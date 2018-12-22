@@ -11,7 +11,7 @@ let btnPause = <HTMLButtonElement> document.getElementById("btn-pause");
 let txtCode = <HTMLTextAreaElement> document.getElementById("txt-code");
 let btnLoad = <HTMLButtonElement> document.getElementById("btn-load");
 let btnReset = <HTMLButtonElement> document.getElementById("btn-reset");
-let sim = new Simulator(canvas, Parser.parse(txtCode.textContent));
+let sim = new Simulator(canvas, Parser.parse(""));
 let play = false;
 
 let resize = () => {
