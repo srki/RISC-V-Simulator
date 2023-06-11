@@ -289,13 +289,11 @@ export default class Simulator {
     draw() {
         this.g.rescale();
         this.g.clear(Config.backgroundColor);
-        // this.g.fillRect(0, 0, 1200, 800, "#00000000", "red");
 
         this.elements.forEach(el => el.draw(this.g))
     }
 
     step() {
-        console.log("Step");
         this.elements.forEach(el => el.refresh());
         this.elements.forEach(el => el.onFallingEdge());
         this.elements.forEach(el => el.onRisingEdge());
