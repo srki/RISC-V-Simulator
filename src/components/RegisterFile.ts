@@ -43,7 +43,7 @@ export default class RegisterFile extends Component {
     }
 
     refresh(): void {
-        if (this.nextSel && this.nextValue) {
+        if (this.nextSel != undefined && this.nextValue) {
             this.values[this.nextSel] = this.nextValue;
         }
 
