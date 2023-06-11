@@ -1,82 +1,48 @@
+import Split from "split.js";
+import * as ace from 'ace-builds/src-noconflict/ace';
+import 'ace-builds/src-noconflict/theme-monokai'
+import 'ace-builds/src-noconflict/mode-javascript'
 import Simulator from "./Simulator";
 import Parser from "./util/Parser";
 import {toggleFullScreen} from "./util/util";
-import Value from "./util/Value";
+import Assembler from "./instructions/Assembler";
+import Menu from "./Menu";
 
 let canvas = <HTMLCanvasElement> document.getElementById("sim-canvas");
+let codePane;
+let simulatorPane = <HTMLDivElement> document.getElementById("simulator");
+
 let menuBar = <HTMLDivElement> document.getElementById("menu");
-let btnStep = <HTMLButtonElement> document.getElementById("btn-step");
-let btnPlay = <HTMLButtonElement> document.getElementById("btn-play");
-let btnPause = <HTMLButtonElement> document.getElementById("btn-pause");
-let txtCode = <HTMLTextAreaElement> document.getElementById("txt-code");
-let btnLoad = <HTMLButtonElement> document.getElementById("btn-load");
-let btnReset = <HTMLButtonElement> document.getElementById("btn-reset");
+let simulatorMenuBar = <HTMLDivElement> document.getElementById("simulator-menu");
 let sim = new Simulator(canvas, Parser.parse(""));
-let play = false;
 
 let resize = () => {
-    canvas.style.width = document.body.clientWidth + "px";
-    canvas.style.height = (document.body.clientHeight - menuBar.clientHeight) + "px";
+    canvas.style.width = simulatorPane.clientWidth + "px";
+    canvas.style.height = (simulatorPane.clientHeight - simulatorMenuBar.clientHeight) + "px";
     sim.draw();
 };
 
-resize();
-
 window.addEventListener("resize", () => resize());
 
-Value.main();
+Split(["#code", "#simulator"], {
+    sizes: [25, 75],
+    minSize: [200, 300],
+    onDrag: () => resize()
+});
+resize();
 
-window.addEventListener("keydown", evt => {
-    switch (evt.key) {
-        case "s":
-        case "S": {
-            sim.step();
-            break;
-        }
-
-        case "r":
-        case "R": {
-            sim.reset();
-            break;
-        }
-
-        case "f":
-        case "F": {
-            toggleFullScreen();
-            break;
-        }
-        case "ArrowRight":
-            console.log("->")
-    }
+Split(["#editor", "#output"], {
+    sizes: [75, 25],
+    direction: "vertical"
 });
 
-btnStep.addEventListener("click", evt => {
-    sim.step();
-    btnPause.click()
+let editor = ace.edit("editor", {
+    useWorker: false
 });
+editor.setTheme("ace/theme/monokai");
+editor.session.setMode("ace/mode/javascript");
 
-btnPlay.addEventListener("click", evt => {
-    play = true;
-    btnPlay.disabled = true;
-    btnPause.disabled = false
-});
+let menu = new Menu(editor, sim)
 
-btnPause.addEventListener("click", evt => {
-    play = false;
-    btnPlay.disabled = false;
-    btnPause.disabled = true
-});
 
-btnLoad.addEventListener("click", evt => {
-    let parsed = Parser.parse(txtCode.textContent);
-    if (parsed) sim.load(parsed)
-});
 
-btnReset.addEventListener("click", evt => sim.reset());
-
-setInterval(() => {
-    if (play) {
-        sim.step();
-    }
-
-}, 100);

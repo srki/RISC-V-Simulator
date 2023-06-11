@@ -3,55 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <title>RISC-V Simulator</title>
-
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-
-        button {
-            background-color: #44c767;
-            -moz-border-radius: 12px;
-            -webkit-border-radius: 12px;
-            border-radius: 12px;
-            border: 1px solid #18ab29;
-            display: inline-block;
-            cursor: pointer;
-            color: #ffffff;
-            font-family: Arial;
-            font-size: 17px;
-            padding: 16px 31px;
-            text-decoration: none;
-            text-shadow: 0px 1px 0px #2f6627;
-        }
-
-        button:hover {
-            background-color: #5cbf2a;
-        }
-
-        button:active {
-            position: relative;
-            top: 1px;
-        }
-
-        button:disabled, button[disabled] {
-            border: 1px solid #999999;
-            background-color: #cccccc;
-            color: #666666;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="main.css">
 </head>
 <body>
 
-<div id="menu" style="padding: 4px;">
-    <button id="btn-load">load</button>
-    <button id="btn-reset">reset</button>
-    <button id="btn-step">step</button>
-    <button id="btn-play">play</button>
-    <button disabled id="btn-pause">pause</button>
-</div>
-<canvas id="sim-canvas" style="position: absolute"></canvas>
+<header class="header">
+    <div style="display: table; margin: 0 auto;">
+        <img style="vertical-align: middle" src="assets/riscv-symbol-text-by-wide.png" alt="RISC-V" height="25px">
+        <b style="color: white; font-family: sans-serif"> Assembler and Simulator</b>
+    </div>
+</header>
+
+<main class="split fill-1">
+    <div id="code">
+        <div id="code-menu" class="menu">
+            <button class="menu-item">Open</button>
+<!--            <label for="cars"></label>-->
+<!--            <select name="cars" id="cars">-->
+<!--                <option value="empty">Select a program to load</option>-->
+<!--                <option value="fib">Fibonacci</option>-->
+<!--            </select>-->
+            <button id="btn-load" class="menu-item">Build</button>
+        </div>
+        <div id="editor"></div>
+        <div id="output" style="overflow-wrap: break-word;">
+
+
+        </div>
+    </div>
+    <div id="simulator">
+        <div id="simulator-menu" class="menu">
+            <button id="btn-run" class="menu-item">Run</button>
+            <button id="btn-step" class="menu-item">Step</button>
+            <button id="btn-reset" class="menu-item">Reset</button>
+        </div>
+        <canvas id="sim-canvas" style="position: absolute"></canvas>
+    </div>
+</main>
+<footer class="footer">
+    <a href="https://github.com/srki/RISC-V-Simulator" style="color: black">GitHub Repository</a>
+</footer>
+
 <script src="./main.ts"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
