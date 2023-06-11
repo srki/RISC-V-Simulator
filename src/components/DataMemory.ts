@@ -2,7 +2,7 @@ import CircuitNode from "./CircutNode";
 import Graphics from "../util/Graphics";
 import Config from "../util/Config";
 import Component from "./Component";
-import Value, {VAL_MAX_32b, VAL_ZERO_32b} from "../util/Value";
+import Value, {VAL_MAX_32b} from "../util/Value";
 import InstructionHelper from "../instructions/InstructionHelper";
 import InstructionConstants from "../instructions/InstructionConstants";
 
@@ -28,11 +28,8 @@ export default class DataMemory extends Component {
     constructor(x: number, y: number) {
         super(x, y);
         for (let i = 0; i < this.size + 1; i++) {
-            // this.values.push(VAL_ZERO_32b);
             this.values.push(VAL_MAX_32b);
         }
-
-        this.values[31] = Value.fromUnsignedInt(25, 32);
     }
 
     draw(g: Graphics): void {
