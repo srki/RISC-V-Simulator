@@ -8,9 +8,9 @@
 <body>
 
 <header class="header">
-    <div style="display: table; margin: 0 auto;">
-        <img style="vertical-align: middle" src="assets/riscv-symbol-text-by-wide.png" alt="RISC-V" height="25px">
-        <b style="color: white; font-family: sans-serif"> Assembler and Simulator</b>
+    <div class="header-container">
+        <img src="assets/riscv-symbol-text-by-wide.png" alt="RISC-V" height="40px">
+        <span><b class="header-text"> Assembler and Simulator</b></span>
     </div>
 </header>
 
@@ -18,17 +18,14 @@
     <div id="code">
         <div id="code-menu" class="menu">
             <button class="menu-item">Open</button>
-<!--            <label for="cars"></label>-->
-<!--            <select name="cars" id="cars">-->
-<!--                <option value="empty">Select a program to load</option>-->
-<!--                <option value="fib">Fibonacci</option>-->
-<!--            </select>-->
-            <button id="btn-load" class="menu-item">Build</button>
+            <button id="btn-build" class="menu-item">Build</button>
         </div>
         <div id="editor"></div>
         <div id="output" style="overflow-wrap: break-word;">
-
-
+            <div class="menu">
+                <button id="btn-clear" class="menu-item">Clear</button>
+            </div>
+            <div id="output-content"></div>
         </div>
     </div>
     <div id="simulator">
@@ -40,11 +37,12 @@
         <canvas id="sim-canvas" style="position: absolute"></canvas>
     </div>
 </main>
+
 <footer class="footer">
     <a href="https://github.com/srki/RISC-V-Simulator" style="color: black">GitHub Repository</a>
 </footer>
 
-<script src="./main.ts"></script>
+<script src="index.ts"></script>
 </body>
 </html>
 
