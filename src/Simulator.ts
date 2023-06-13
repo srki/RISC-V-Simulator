@@ -21,7 +21,7 @@ export default class Simulator {
     private initialInstruct: Value[];
 
     constructor(canvas: HTMLCanvasElement, parsed: Value[]) {
-        this.g = new Graphics(canvas, 1200, 800);
+        this.g = new Graphics(canvas, 1100, 800);
         this.load(parsed);
     }
 

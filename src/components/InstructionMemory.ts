@@ -34,12 +34,12 @@ export default class InstructionMemory extends Component {
             Config.elementFillColor, Config.elementStrokeColor);
 
         for (let i = 0; i < InstructionMemory.SIZE; i++) {
-            g.fillRect(this.x + 15, this.y + 15 + i * 20, 200, 20,
-                Config.memoryFillColor, Config.memoryStrokeColor, 1);
+            let fillColor = this.selectedInstr == i ? Config.readFontColor : Config.memoryFillColor;
+
+            g.fillRect(this.x + 15, this.y + 15 + i * 20, 200, 20, fillColor, Config.memoryStrokeColor, 1);
 
             let text = this._decoded ? InstructionDecoder.decode(this.values[i]) : this.values[i].asHexString();
-            let color = this.selectedInstr == i ? Config.readFontColor : Config.fontColor;
-            g.drawText(this.x + 15 + 10, this.y + 15 + 17 + i * 20, text, color, 18);
+            g.drawText(this.x + 15 + 10, this.y + 15 + 17 + i * 20, text, Config.fontColor, 18);
         }
 
         if (this.selectedInstr != undefined) {

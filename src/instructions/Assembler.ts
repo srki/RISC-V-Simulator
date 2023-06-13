@@ -213,8 +213,8 @@ export default class Assembler {
         }
 
         return InstructionFactory.createSType(InstructionConstants.OP_CODE_SW, funct,
-            parseInt(args[0].substr(1)),
             parseInt(args[1].split("(")[1].replace(/([x)])/g, "")),
+            parseInt(args[0].substr(1)),
             parseInt(args[1].split("(")[0]),);
     }
 

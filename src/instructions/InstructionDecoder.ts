@@ -192,9 +192,9 @@ export class InstructionDecoder {
             }
         }
 
-        return name + " x" + InstructionHelper.getRs1(instr) + ", 0x" +
+        return name + " x" + InstructionHelper.getRs2(instr) + ", 0x" +
             InstructionHelper.getImmSType(instr).toString(16).toUpperCase() +
-            "(x" + InstructionHelper.getRs2(instr) + ")";
+            "(x" + InstructionHelper.getRs1(instr) + ")";
     }
 
     static decodeBRANCH(instr: Value): string {

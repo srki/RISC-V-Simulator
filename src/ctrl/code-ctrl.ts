@@ -14,7 +14,6 @@ export default class CodeCtrl {
     private loadFn: (values: Value[]) => void
 
     private editor: any;
-    private ace: any;
 
     constructor(loadFn: (values: Value[]) => void) {
         this.loadFn = loadFn;
@@ -31,8 +30,9 @@ export default class CodeCtrl {
     private initEditor() {
         this.editor = ace.edit("editor", {
             useWorker: false,
+            useWrapMode: true,
             theme: "ace/theme/monokai",
-            mode: "ace/mode/javascript"
+            // mode: "ace/mode/javascript"
         });
 
         // this.editor.setTheme("ace/theme/monokai")
@@ -41,18 +41,18 @@ export default class CodeCtrl {
         const code = window.localStorage.getItem(CodeCtrl.CODE_STORAGE_KEY)
         this.editor.setValue(code, -1)
 
-        this.editor.on('change', (value, b, c) => {
+        this.editor.on('change', () => {
             window.localStorage.setItem(CodeCtrl.CODE_STORAGE_KEY, this.editor.getValue())
         })
     }
 
     private addButtonListeners() {
-        this.btnBuild.addEventListener("click", evt => {
+        this.btnBuild.addEventListener("click", () => {
             try {
                 let parsed = Assembler.parse(this.editor.getValue())
                 if (parsed) {
                     this.loadFn(parsed)
-                    this.outputContent.innerHTML += new Date().toLocaleString()
+                    this.outputContent.innerHTML += "<div style='color: white'>" +new Date().toLocaleString() + "</div>"
                     this.outputContent.innerHTML += "<div class='success'>" + "Built successfully!" + "</div>"
                     this.outputContent.innerHTML += "<br/>"
 
@@ -62,7 +62,7 @@ export default class CodeCtrl {
             }
         })
 
-        this.btnClear.addEventListener('click', evt => {
+        this.btnClear.addEventListener('click', () => {
             this.outputContent.innerHTML = ""
         })
     }

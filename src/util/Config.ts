@@ -1,14 +1,13 @@
 export default class Config {
-    static readonly backgroundColor: string = "#ffffff";
-    static readonly elementFillColor: string = "#b1e5e0";
-    static readonly elementStrokeColor: string = "#000000";
-    static readonly memoryFillColor: string = "#fffed0";
-    static readonly memoryStrokeColor: string = "#000000";
-    static readonly lineColor: string = "#000000";
-    static readonly signalColor: string = "#FF0000";
-    static readonly fontColor: string = "#000000";
-    static readonly readFontColor: string = "#0000FF";
-    static readonly writeFontColor: string = "#FF0000";
+    static readonly backgroundColor: string = "#333333";
+    static readonly elementFillColor: string = "#606060";
+    static readonly elementStrokeColor: string = "#FFFFFF";
+    static readonly memoryFillColor: string = "#272822";
+    static readonly memoryStrokeColor: string = "#888888";
+    static readonly lineColor: string = "#FFFFFF";
+    static readonly signalColor: string = "#FF7F50";
+    static readonly fontColor: string = "#FFFFFF";
+    static readonly readFontColor: string = "#0a6b7c";
 
     static readonly fontSize: number = 20;
 }
