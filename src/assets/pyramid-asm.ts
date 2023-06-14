@@ -1,5 +1,5 @@
 export const pyramidAsm =
-    "ADDI x1, x0, 5     ; size\n" +
+    "ADDI x1, x0, 11     ; size\n" +
     "\n" +
     "; outer loop init\n" +
     "ADDI x2, x0, 0      ; lower bound\n" +
