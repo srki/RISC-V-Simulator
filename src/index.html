@@ -16,11 +16,15 @@
 
 <main class="split fill-1">
     <div id="code">
-        <div id="code-menu" class="menu">
-            <button class="menu-item">Open</button>
-            <button id="btn-build" class="menu-item">Build</button>
+        <div id="editor-container" class="fill-vertical">
+            <div id="code-menu" class="menu">
+                <button id="btn-load-new" class="menu-item">New</button>
+                <button id="btn-load-pyramid" class="menu-item" style="float: right">Pyramid</button>
+                <button id="btn-load-mult" class="menu-item" style="float: right">Mult</button>
+                <button id="btn-load-fib" class="menu-item" style="float: right">Fib</button>
+            </div>
+            <div id="editor" class="fill-1"></div>
         </div>
-        <div id="editor"></div>
         <div id="output" class="fill-vertical">
             <div class="menu">
                 <button id="btn-clear" class="menu-item">Clear</button>
@@ -30,6 +34,7 @@
     </div>
     <div id="simulator">
         <div id="simulator-menu" class="menu">
+            <button id="btn-build" class="menu-item">Build</button>
             <button id="btn-run" class="menu-item">Run</button>
             <button id="btn-step" class="menu-item">Step</button>
             <button id="btn-reset" class="menu-item">Reset</button>
@@ -39,7 +44,9 @@
 </main>
 
 <footer class="footer">
-    <a href="https://github.com/srki/RISC-V-Simulator" style="color: black">GitHub Repository</a>
+    <div class="footer-container">
+        <a href="https://github.com/srki/RISC-V-Simulator" style="color: black">GitHub Repository</a>
+    </div>
 </footer>
 
 <script src="index.ts"></script>

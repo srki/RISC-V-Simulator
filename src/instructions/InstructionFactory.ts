@@ -16,6 +16,10 @@ export default class InstructionFactory {
     }
 
     static createIType(opCode: string, funct: string, rd: number, rs1: number, imm: number): Value {
+        if (funct.length > 3) {
+            return this.createITypeShift(opCode, funct, rd, rs1, imm);
+        }
+
         let instr =
             InstructionHelper.convertAndPad(imm, 12) +
             InstructionHelper.convertAndPad(rs1, 5) + funct +

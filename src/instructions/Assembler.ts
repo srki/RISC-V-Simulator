@@ -11,6 +11,7 @@ export default class Assembler {
     static parse(text: string): Value[] {
         return text.split('\n')
             .map(value => value.replace(/#.*/, ''))
+            .map(value => value.replace(/;.*/, ''))
             .map(value => value.trim())
             .map((value, index) => {
                 try {

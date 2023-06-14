@@ -3,8 +3,8 @@ import Split from "split.js";
 import SimulatorCtrl from "./ctrl/simulator-ctrl";
 import CodeCtrl from "./ctrl/code-ctrl";
 
-let simCtrl = new SimulatorCtrl()
-let codeCtrl = new CodeCtrl(simCtrl.getLoadFn())
+let codeCtrl = new CodeCtrl()
+let simCtrl = new SimulatorCtrl(codeCtrl.getBuildFn())
 
 let mainSplitPane = Split(["#code", "#simulator"], {
     sizes: [25, 75],
@@ -12,7 +12,7 @@ let mainSplitPane = Split(["#code", "#simulator"], {
     onDrag: simCtrl.getResizeFn()
 });
 
-Split(["#editor", "#output"], {
+Split(["#editor-container", "#output"], {
     sizes: [60, 40],
     direction: "vertical"
 });

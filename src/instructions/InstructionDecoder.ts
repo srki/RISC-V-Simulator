@@ -117,23 +117,29 @@ export class InstructionDecoder {
             }
         }
 
+        let isShift = false;
         switch (func7 + func3) {
             case InstructionConstants.FUNCT_SLLI: {
-                name = "SSLI";
+                name = "SLLI";
+                isShift = true;
                 break;
             }
             case InstructionConstants.FUNCT_SRLI: {
                 name = "SRLI";
+                isShift = true;
                 break;
             }
             case InstructionConstants.FUNCT_SRAI: {
                 name = "SRAI";
+                isShift = true;
                 break;
             }
         }
 
         let imm = InstructionHelper.getImmIType(instr);
-        if (imm >= 1<< 11) {
+        if (isShift) {
+          imm &= 0x1F
+        } else if (imm >= 1<< 11) {
             imm -= (1 << 12);
         }
 

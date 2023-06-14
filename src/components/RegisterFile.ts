@@ -43,7 +43,8 @@ export default class RegisterFile extends Component {
     }
 
     refresh(): void {
-        if (this.nextSel != undefined && this.nextValue) {
+        // register x0 is hardwired to 0
+        if (this.nextSel && this.nextValue) {
             this.values[this.nextSel] = this.nextValue;
         }
 
@@ -116,7 +117,6 @@ export default class RegisterFile extends Component {
             this._inputWriteDataNode.mark(this);
         }
     }
-
 
     mark(caller: Component): void {
         switch (caller) {

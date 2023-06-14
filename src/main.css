@@ -33,6 +33,13 @@ body {
     background-color: coral;
 }
 
+.footer-container {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin: 0 auto;
+}
+
 /* endregion */
 
 /* region menu */
@@ -57,7 +64,6 @@ body {
 .menu-item:active {
     background: #555555;
 }
-
 
 /* endregion */
 
