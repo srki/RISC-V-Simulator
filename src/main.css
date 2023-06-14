@@ -65,6 +65,15 @@ body {
     background: #555555;
 }
 
+.menu-label {
+    background: #444444;
+    color: white;
+    border: 0;
+    padding: 7px 0;
+    font-size: 18px;
+    cursor: pointer;
+}
+
 /* endregion */
 
 /* region output*/

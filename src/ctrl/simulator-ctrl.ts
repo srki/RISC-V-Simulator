@@ -9,6 +9,9 @@ export default class SimulatorCtrl {
     private btnReset: HTMLButtonElement
     private simulatorPane: HTMLDivElement
     private simulatorMenuBar: HTMLDivElement
+    private btnInc: HTMLButtonElement
+    private btnDec: HTMLButtonElement
+    private freqLabel: HTMLDivElement
 
     private simulator: Simulator
 
@@ -16,6 +19,7 @@ export default class SimulatorCtrl {
     private buildFn: () => Value[]
 
     private execute: boolean = false
+    private freq: number = 16
 
     constructor(buildFn: () => Value[]) {
         this.buildFn = buildFn
@@ -26,18 +30,26 @@ export default class SimulatorCtrl {
         this.btnRun = <HTMLButtonElement>document.getElementById("btn-run")
         this.btnReset = <HTMLButtonElement>document.getElementById("btn-reset")
 
-        this.simulatorPane = <HTMLDivElement> document.getElementById("simulator");
-        this.simulatorMenuBar = <HTMLDivElement> document.getElementById("simulator-menu");
+        this.simulatorPane = <HTMLDivElement>document.getElementById("simulator");
+        this.simulatorMenuBar = <HTMLDivElement>document.getElementById("simulator-menu");
+
+        this.btnInc = <HTMLButtonElement>document.getElementById("btn-inc")
+        this.btnDec = <HTMLButtonElement>document.getElementById("btn-dec")
+        this.freqLabel = <HTMLDivElement>document.getElementById("freq-lbl")
 
         this.simulator = new Simulator(this.canvas, [])
         this.addButtonListeners()
         this.initCanvasResizeHandler()
 
-        setInterval(() => {
+        const run = () => {
             if (this.execute) {
                 this.simulator.step();
             }
-        }, 100);
+
+            setTimeout(run, 1000 / this.freq)
+        }
+        run()
+        this.displayFreq()
 
         let values = this.buildFn()
         if (values) {
@@ -87,9 +99,29 @@ export default class SimulatorCtrl {
                 this.btnRun.click();
             }
         });
+
+        this.btnInc.addEventListener("click", () => {
+            this.freq *= 2
+            if (this.freq > 1024) {
+                this.freq = 1204
+            }
+            this.displayFreq()
+        })
+
+        this.btnDec.addEventListener("click", () => {
+            this.freq /= 2
+            if (this.freq > 1) {
+                this.freq = 1
+            }
+            this.displayFreq()
+        })
     }
 
     private toggleExecution() {
         this.execute = !this.execute;
+    }
+
+    private displayFreq() {
+        this.freqLabel.innerHTML = this.freq + " Hz";
     }
 }
