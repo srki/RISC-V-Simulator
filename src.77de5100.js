@@ -3832,7 +3832,7 @@ var SimulatorCtrl = /** @class */function () {
     });
     this.btnDec.addEventListener("click", function () {
       _this.freq /= 2;
-      if (_this.freq > 1) {
+      if (_this.freq < 1) {
         _this.freq = 1;
       }
       _this.displayFreq();
@@ -26326,7 +26326,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59393" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55027" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
