@@ -6,7 +6,7 @@ import CodeCtrl from "./ctrl/code-ctrl";
 let codeCtrl = new CodeCtrl()
 let simCtrl = new SimulatorCtrl(codeCtrl.getBuildFn())
 
-let mainSplitPane = Split(["#code", "#simulator"], {
+Split(["#code", "#simulator"], {
     sizes: [25, 75],
     minSize: [300, 300],
     onDrag: simCtrl.getResizeFn()

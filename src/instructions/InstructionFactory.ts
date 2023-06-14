@@ -80,7 +80,7 @@ export default class InstructionFactory {
         console.log(s.replace(/ /g, ""));
     }
 
-    static main(args: String[] = []): void {
+    static main(_: String[] = []): void {
         this.compare(this.createRType(InstructionConstants.OP_CODE_ALU, InstructionConstants.FUNCT_ADD,
             2, 1, 1),
             "0000000 00001 00001 000 00010 0110011");

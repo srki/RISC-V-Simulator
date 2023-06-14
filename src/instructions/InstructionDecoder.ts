@@ -243,11 +243,11 @@ export class InstructionDecoder {
             ", " + imm.toString(10);
     }
 
-    static decodeJAL(instr: Value): string {
+    static decodeJAL(_: Value): string {
         return "JAL instruction";
     }
 
-    static decodeJALR(instr: Value): string {
+    static decodeJALR(_: Value): string {
         return "JALR instruction";
     }
 }
