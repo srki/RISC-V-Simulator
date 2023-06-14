@@ -1832,25 +1832,31 @@ var InstructionDecoder = /** @class */function () {
           break;
         }
     }
+    var isShift = false;
     switch (func7 + func3) {
       case InstructionConstants_1.default.FUNCT_SLLI:
         {
-          name = "SSLI";
+          name = "SLLI";
+          isShift = true;
           break;
         }
       case InstructionConstants_1.default.FUNCT_SRLI:
         {
           name = "SRLI";
+          isShift = true;
           break;
         }
       case InstructionConstants_1.default.FUNCT_SRAI:
         {
           name = "SRAI";
+          isShift = true;
           break;
         }
     }
     var imm = InstructionHelper_1.default.getImmIType(instr);
-    if (imm >= 1 << 11) {
+    if (isShift) {
+      imm &= 0x1F;
+    } else if (imm >= 1 << 11) {
       imm -= 1 << 12;
     }
     return name + " x" + InstructionHelper_1.default.getRd(instr) + ", x" + InstructionHelper_1.default.getRs1(instr) + ", " + imm.toString(10);
@@ -1950,10 +1956,10 @@ var InstructionDecoder = /** @class */function () {
     }
     return name + " x" + InstructionHelper_1.default.getRs1(instr) + ", x" + InstructionHelper_1.default.getRs2(instr) + ", " + imm.toString(10);
   };
-  InstructionDecoder.decodeJAL = function (instr) {
+  InstructionDecoder.decodeJAL = function (_) {
     return "JAL instruction";
   };
-  InstructionDecoder.decodeJALR = function (instr) {
+  InstructionDecoder.decodeJALR = function (_) {
     return "JALR instruction";
   };
   return InstructionDecoder;
@@ -2721,7 +2727,8 @@ var RegisterFile = /** @class */function (_super) {
     return _this;
   }
   RegisterFile.prototype.refresh = function () {
-    if (this.nextSel != undefined && this.nextValue) {
+    // register x0 is hardwired to 0
+    if (this.nextSel && this.nextValue) {
       this.values[this.nextSel] = this.nextValue;
     }
     this.nextValue = undefined;
@@ -3745,30 +3752,37 @@ Object.defineProperty(exports, "__esModule", {
 });
 var Simulator_1 = __importDefault(require("../Simulator"));
 var SimulatorCtrl = /** @class */function () {
-  function SimulatorCtrl() {
+  function SimulatorCtrl(buildFn) {
     var _this = this;
     this.execute = false;
+    this.freq = 16;
+    this.buildFn = buildFn;
     this.canvas = document.getElementById("sim-canvas");
+    this.btnBuild = document.getElementById("btn-build");
     this.btnStep = document.getElementById("btn-step");
     this.btnRun = document.getElementById("btn-run");
     this.btnReset = document.getElementById("btn-reset");
     this.simulatorPane = document.getElementById("simulator");
     this.simulatorMenuBar = document.getElementById("simulator-menu");
+    this.btnInc = document.getElementById("btn-inc");
+    this.btnDec = document.getElementById("btn-dec");
+    this.freqLabel = document.getElementById("freq-lbl");
     this.simulator = new Simulator_1.default(this.canvas, []);
     this.addButtonListeners();
     this.initCanvasResizeHandler();
-    setInterval(function () {
+    var run = function run() {
       if (_this.execute) {
         _this.simulator.step();
       }
-    }, 100);
-  }
-  SimulatorCtrl.prototype.getLoadFn = function () {
-    var _this = this;
-    return function (values) {
-      return _this.simulator.load(values);
+      setTimeout(run, 1000 / _this.freq);
     };
-  };
+    run();
+    this.displayFreq();
+    var values = this.buildFn();
+    if (values) {
+      this.simulator.load(values);
+    }
+  }
   SimulatorCtrl.prototype.getResizeFn = function () {
     return this.resizeFn;
   };
@@ -3785,24 +3799,50 @@ var SimulatorCtrl = /** @class */function () {
   };
   SimulatorCtrl.prototype.addButtonListeners = function () {
     var _this = this;
-    this.btnStep.addEventListener("click", function (evt) {
+    this.btnBuild.addEventListener("click", function () {
+      var values = _this.buildFn();
+      if (values) {
+        _this.simulator.load(values);
+      }
+      if (_this.execute) {
+        _this.btnRun.click();
+      }
+    });
+    this.btnStep.addEventListener("click", function () {
       _this.simulator.step();
       if (_this.execute) {
         _this.btnRun.click();
       }
     });
-    this.btnRun.addEventListener("click", function (evt) {
+    this.btnRun.addEventListener("click", function () {
       _this.toggleExecution();
     });
-    this.btnReset.addEventListener("click", function (evt) {
+    this.btnReset.addEventListener("click", function () {
       _this.simulator.reset();
       if (_this.execute) {
         _this.btnRun.click();
       }
     });
+    this.btnInc.addEventListener("click", function () {
+      _this.freq *= 2;
+      if (_this.freq > 1024) {
+        _this.freq = 1204;
+      }
+      _this.displayFreq();
+    });
+    this.btnDec.addEventListener("click", function () {
+      _this.freq /= 2;
+      if (_this.freq > 1) {
+        _this.freq = 1;
+      }
+      _this.displayFreq();
+    });
   };
   SimulatorCtrl.prototype.toggleExecution = function () {
     this.execute = !this.execute;
+  };
+  SimulatorCtrl.prototype.displayFreq = function () {
+    this.freqLabel.innerHTML = this.freq + " Hz";
   };
   return SimulatorCtrl;
 }();
@@ -3830,6 +3870,9 @@ var InstructionFactory = /** @class */function () {
     return new Value_1.default(instr, 32);
   };
   InstructionFactory.createIType = function (opCode, funct, rd, rs1, imm) {
+    if (funct.length > 3) {
+      return this.createITypeShift(opCode, funct, rd, rs1, imm);
+    }
     var instr = InstructionHelper_1.default.convertAndPad(imm, 12) + InstructionHelper_1.default.convertAndPad(rs1, 5) + funct + InstructionHelper_1.default.convertAndPad(rd, 5) + opCode;
     return new Value_1.default(instr, 32);
   };
@@ -3864,9 +3907,9 @@ var InstructionFactory = /** @class */function () {
     console.log(v.asBinaryString());
     console.log(s.replace(/ /g, ""));
   };
-  InstructionFactory.main = function (args) {
-    if (args === void 0) {
-      args = [];
+  InstructionFactory.main = function (_) {
+    if (_ === void 0) {
+      _ = [];
     }
     this.compare(this.createRType(InstructionConstants_1.default.OP_CODE_ALU, InstructionConstants_1.default.FUNCT_ADD, 2, 1, 1), "0000000 00001 00001 000 00010 0110011");
   };
@@ -3887,25 +3930,78 @@ Object.defineProperty(exports, "__esModule", {
 var InstructionConstants_1 = __importDefault(require("./InstructionConstants"));
 var InstructionFactory_1 = __importDefault(require("./InstructionFactory"));
 var Assembler = /** @class */function () {
-  function Assembler() {}
+  function Assembler() {
+    this.address = 0;
+    this.labels = {};
+  }
   Assembler.parse = function (text) {
-    var _this = this;
+    return new Assembler().parse(text);
+  };
+  Assembler.prototype.parse = function (text) {
+    var lines = Assembler.preprocessCode(text);
+    this.labels = Assembler.extractLabels(lines);
+    return this.parseLines(lines);
+  };
+  Assembler.extractLabels = function (text) {
+    var labels = {};
+    var address = 0;
+    for (var _i = 0, text_1 = text; _i < text_1.length; _i++) {
+      var line = text_1[_i];
+      if (line.length == 0) {
+        continue;
+      }
+      if (line.match(Assembler.LABEL_DEF_REGEX)) {
+        var label = line.substring(0, line.length - 1);
+        labels[label] = address;
+      } else {
+        address += 4;
+      }
+    }
+    return labels;
+  };
+  Assembler.preprocessCode = function (text) {
     return text.split('\n').map(function (value) {
       return value.replace(/#.*/, '');
     }).map(function (value) {
+      return value.replace(/;.*/, '');
+    }).map(function (value) {
       return value.trim();
-    }).map(function (value, index) {
-      try {
-        return _this.parseLine(value);
-      } catch (e) {
-        throw "Line " + (index + 1) + ": " + e;
-      }
-    }).filter(function (value) {
-      return value != null;
     });
   };
-  Assembler.parseLine = function (line) {
-    if (line.length == 0) {
+  Assembler.prototype.parseLines = function (lines) {
+    this.address = 0;
+    var values = [];
+    for (var idx in lines) {
+      var line = lines[idx];
+      try {
+        var parsed = this.parseLine(line);
+        if (parsed) {
+          values.push(parsed);
+          this.address += 4;
+        }
+      } catch (e) {
+        throw "Line " + (idx + 1) + ": " + e;
+      }
+    }
+    return values;
+  };
+  Assembler.prototype.parseConstant = function (value, base) {
+    if (base === void 0) {
+      base = 0;
+    }
+    if (value.match(Assembler.NUMBER_REGEX)) {
+      return parseInt(value);
+    }
+    if (value.match(Assembler.LABEL_REGEX)) {
+      if (!this.labels[value]) {
+        throw "Label '" + value + "' does not exist";
+      }
+      return this.labels[value] - base;
+    }
+    throw "Internal error.";
+  };
+  Assembler.prototype.parseLine = function (line) {
+    if (line.length == 0 || line.match(Assembler.LABEL_DEF_REGEX)) {
       return null;
     }
     var instrName = line.replace(/[^A-Za-z].*/, '');
@@ -4062,92 +4158,94 @@ var Assembler = /** @class */function () {
         }
     }
   };
-  Assembler.parseBranch = function (funct, argsStr) {
+  Assembler.prototype.parseBranch = function (funct, argsStr) {
     var args = argsStr.split(",").map(function (arg) {
       return arg.trim();
     });
     if (args.length != 3) {
       throw "Instruction requires 3 arguments";
     }
-    if (!args[0].match(this.REG_REGEX)) {
+    if (!args[0].match(Assembler.REG_REGEX)) {
       throw "Invalid rs1 register format.";
     }
-    if (!args[1].match(this.REG_REGEX)) {
+    if (!args[1].match(Assembler.REG_REGEX)) {
       throw "Invalid rs2 register format.";
     }
-    if (!args[2].match(this.NUMBER_REGEX)) {
+    if (!args[2].match(Assembler.NUMBER_REGEX) && !args[2].match(Assembler.LABEL_REGEX)) {
       throw "Invalid relative address format.";
     }
-    return InstructionFactory_1.default.createBType(InstructionConstants_1.default.OP_CODE_BRANCH, funct, parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), parseInt(args[2]));
+    return InstructionFactory_1.default.createBType(InstructionConstants_1.default.OP_CODE_BRANCH, funct, parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), this.parseConstant(args[2], this.address));
   };
-  Assembler.parseLoad = function (funct, argsStr) {
+  Assembler.prototype.parseLoad = function (funct, argsStr) {
     var args = argsStr.split(",").map(function (arg) {
       return arg.trim();
     });
     if (args.length != 2) {
       throw "Instruction requires 2 arguments";
     }
-    if (!args[0].match(this.REG_REGEX)) {
+    if (!args[0].match(Assembler.REG_REGEX)) {
       throw "Invalid rd register format.";
     }
-    if (!args[1].match(this.INDEXING_REGEX)) {
+    if (!args[1].match(Assembler.INDEXING_REGEX)) {
       throw "Invalid address format."; // TODO: change message
     }
 
     return InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_LW, funct, parseInt(args[0].substr(1)), parseInt(args[1].split("(")[1].replace(/([x)])/g, "")), parseInt(args[1].split("(")[0]));
   };
-  Assembler.parseStore = function (funct, argsStr) {
+  Assembler.prototype.parseStore = function (funct, argsStr) {
     var args = argsStr.split(",").map(function (arg) {
       return arg.trim();
     });
     if (args.length != 2) {
       throw "Instruction requires 2 arguments";
     }
-    if (!args[0].match(this.REG_REGEX)) {
+    if (!args[0].match(Assembler.REG_REGEX)) {
       throw "Invalid rs1 register format.";
     }
-    if (!args[1].match(this.INDEXING_REGEX)) {
+    if (!args[1].match(Assembler.INDEXING_REGEX)) {
       throw "Invalid address format."; // TODO: change message
     }
 
     return InstructionFactory_1.default.createSType(InstructionConstants_1.default.OP_CODE_SW, funct, parseInt(args[1].split("(")[1].replace(/([x)])/g, "")), parseInt(args[0].substr(1)), parseInt(args[1].split("(")[0]));
   };
-  Assembler.parseImm = function (funct, argsStr) {
+  Assembler.prototype.parseImm = function (funct, argsStr) {
     var args = argsStr.split(",").map(function (arg) {
       return arg.trim();
     });
     if (args.length != 3) {
       throw "Instruction requires 3 arguments";
     }
-    if (!args[0].match(this.REG_REGEX)) {
+    if (!args[0].match(Assembler.REG_REGEX)) {
       throw "Invalid rd register format.";
     }
-    if (!args[1].match(this.REG_REGEX)) {
+    if (!args[1].match(Assembler.REG_REGEX)) {
       throw "Invalid rs1 register format.";
     }
-    if (!args[2].match(this.NUMBER_REGEX)) {
+    if (!args[2].match(Assembler.NUMBER_REGEX) && !args[2].match(Assembler.LABEL_REGEX)) {
       throw "Invalid relative address format.";
     }
-    return InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, funct, parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), parseInt(args[2]));
+    return InstructionFactory_1.default.createIType(InstructionConstants_1.default.OP_CODE_ALUI, funct, parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), this.parseConstant(args[2]));
   };
-  Assembler.parseALU = function (funct, argsStr) {
+  Assembler.prototype.parseALU = function (funct, argsStr) {
     var args = argsStr.split(",").map(function (arg) {
       return arg.trim();
     });
     if (args.length != 3) {
       throw "Instruction requires 3 arguments";
     }
-    if (!args[0].match(this.REG_REGEX)) {
+    if (!args[0].match(Assembler.REG_REGEX)) {
       throw "Invalid rd register format.";
     }
-    if (!args[1].match(this.REG_REGEX)) {
+    if (!args[1].match(Assembler.REG_REGEX)) {
       throw "Invalid rs1 register format.";
     }
-    if (!args[2].match(this.REG_REGEX)) {
+    if (!args[2].match(Assembler.REG_REGEX)) {
       throw "Invalid rs2 register format.";
     }
     return InstructionFactory_1.default.createRType(InstructionConstants_1.default.OP_CODE_ALU, funct, parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), parseInt(args[2].substr(1)));
   };
+  Assembler.LABEL_DEF_REGEX = /^[a-zA-z0-9]+:/;
+  Assembler.LABEL_REGEX = /^[a-zA-z0-9]+/;
   Assembler.REG_REGEX = /^x\d+$/;
   Assembler.NUMBER_REGEX = /^-?((0x[0-9A-Fa-f]+)|\d+)$/;
   Assembler.INDEXING_REGEX = /^-?((0x[0-9A-Fa-f]+)|\d+)\(x\d+\)$/; // TODO: change name
@@ -25869,14 +25967,196 @@ exports.Mode = Mode;
                     });
                 })();
             
-},{}],"assets/fib-src.ts":[function(require,module,exports) {
+},{}],"../node_modules/ace-builds/src-noconflict/mode-assembly_x86.js":[function(require,module,exports) {
+ace.define("ace/mode/assembly_x86_highlight_rules",["require","exports","module","ace/lib/oop","ace/mode/text_highlight_rules"], function(require, exports, module){/* This file was autogenerated from Assembly x86.tmLanguage (uuid: ) */
+"use strict";
+var oop = require("../lib/oop");
+var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
+var AssemblyX86HighlightRules = function () {
+    this.$rules = { start: [{ token: 'keyword.control.assembly',
+                regex: '\\b(?:aaa|aad|aam|aas|adc|add|addpd|addps|addsd|addss|addsubpd|addsubps|aesdec|aesdeclast|aesenc|aesenclast|aesimc|aeskeygenassist|and|andpd|andps|andnpd|andnps|arpl|blendpd|blendps|blendvpd|blendvps|bound|bsf|bsr|bswap|bt|btc|btr|bts|cbw|cwde|cdqe|clc|cld|cflush|clts|cmc|cmov(?:n?e|ge?|ae?|le?|be?|n?o|n?z)|cmp|cmppd|cmpps|cmps|cnpsb|cmpsw|cmpsd|cmpsq|cmpss|cmpxchg|cmpxchg8b|cmpxchg16b|comisd|comiss|cpuid|crc32|cvtdq2pd|cvtdq2ps|cvtpd2dq|cvtpd2pi|cvtpd2ps|cvtpi2pd|cvtpi2ps|cvtps2dq|cvtps2pd|cvtps2pi|cvtsd2si|cvtsd2ss|cvts2sd|cvtsi2ss|cvtss2sd|cvtss2si|cvttpd2dq|cvtpd2pi|cvttps2dq|cvttps2pi|cvttps2dq|cvttps2pi|cvttsd2si|cvttss2si|cwd|cdq|cqo|daa|das|dec|div|divpd|divps|divsd|divss|dppd|dpps|emms|enter|extractps|f2xm1|fabs|fadd|faddp|fiadd|fbld|fbstp|fchs|fclex|fnclex|fcmov(?:n?e|ge?|ae?|le?|be?|n?o|n?z)|fcom|fcmop|fcompp|fcomi|fcomip|fucomi|fucomip|fcos|fdecstp|fdiv|fdivp|fidiv|fdivr|fdivrp|fidivr|ffree|ficom|ficomp|fild|fincstp|finit|fnint|fist|fistp|fisttp|fld|fld1|fldl2t|fldl2e|fldpi|fldlg2|fldln2|fldz|fldcw|fldenv|fmul|fmulp|fimul|fnop|fpatan|fprem|fprem1|fptan|frndint|frstor|fsave|fnsave|fscale|fsin|fsincos|fsqrt|fst|fstp|fstcw|fnstcw|fstenv|fnstenv|fsts|fnstsw|fsub|fsubp|fisub|fsubr|fsubrp|fisubr|ftst|fucom|fucomp|fucompp|fxam|fxch|fxrstor|fxsave|fxtract|fyl2x|fyl2xp1|haddpd|haddps|husbpd|hsubps|idiv|imul|in|inc|ins|insb|insw|insd|insertps|int|into|invd|invplg|invpcid|iret|iretd|iretq|lahf|lar|lddqu|ldmxcsr|lds|les|lfs|lgs|lss|lea|leave|lfence|lgdt|lidt|llgdt|lmsw|lock|lods|lodsb|lodsw|lodsd|lodsq|lsl|ltr|maskmovdqu|maskmovq|maxpd|maxps|maxsd|maxss|mfence|minpd|minps|minsd|minss|monitor|mov|movapd|movaps|movbe|movd|movq|movddup|movdqa|movdqu|movq2q|movhlps|movhpd|movhps|movlhps|movlpd|movlps|movmskpd|movmskps|movntdqa|movntdq|movnti|movntpd|movntps|movntq|movq|movq2dq|movs|movsb|movsw|movsd|movsq|movsd|movshdup|movsldup|movss|movsx|movsxd|movupd|movups|movzx|mpsadbw|mul|mulpd|mulps|mulsd|mulss|mwait|neg|not|or|orpd|orps|out|outs|outsb|outsw|outsd|pabsb|pabsw|pabsd|packsswb|packssdw|packusdw|packuswbpaddb|paddw|paddd|paddq|paddsb|paddsw|paddusb|paddusw|palignr|pand|pandn|pause|pavgb|pavgw|pblendvb|pblendw|pclmulqdq|pcmpeqb|pcmpeqw|pcmpeqd|pcmpeqq|pcmpestri|pcmpestrm|pcmptb|pcmptgw|pcmpgtd|pcmpgtq|pcmpistri|pcmpisrm|pextrb|pextrd|pextrq|pextrw|phaddw|phaddd|phaddsw|phinposuw|phsubw|phsubd|phsubsw|pinsrb|pinsrd|pinsrq|pinsrw|pmaddubsw|pmadddwd|pmaxsb|pmaxsd|pmaxsw|pmaxsw|pmaxub|pmaxud|pmaxuw|pminsb|pminsd|pminsw|pminub|pminud|pminuw|pmovmskb|pmovsx|pmovzx|pmuldq|pmulhrsw|pmulhuw|pmulhw|pmulld|pmullw|pmuludw|pop|popa|popad|popcnt|popf|popfd|popfq|por|prefetch|psadbw|pshufb|pshufd|pshufhw|pshuflw|pshufw|psignb|psignw|psignd|pslldq|psllw|pslld|psllq|psraw|psrad|psrldq|psrlw|psrld|psrlq|psubb|psubw|psubd|psubq|psubsb|psubsw|psubusb|psubusw|test|ptest|punpckhbw|punpckhwd|punpckhdq|punpckhddq|punpcklbw|punpcklwd|punpckldq|punpckldqd|push|pusha|pushad|pushf|pushfd|pxor|prcl|rcr|rol|ror|rcpps|rcpss|rdfsbase|rdgsbase|rdmsr|rdpmc|rdrand|rdtsc|rdtscp|rep|repe|repz|repne|repnz|roundpd|roundps|roundsd|roundss|rsm|rsqrps|rsqrtss|sahf|sal|sar|shl|shr|sbb|scas|scasb|scasw|scasd|set(?:n?e|ge?|ae?|le?|be?|n?o|n?z)|sfence|sgdt|shld|shrd|shufpd|shufps|sidt|sldt|smsw|sqrtpd|sqrtps|sqrtsd|sqrtss|stc|std|stmxcsr|stos|stosb|stosw|stosd|stosq|str|sub|subpd|subps|subsd|subss|swapgs|syscall|sysenter|sysexit|sysret|teset|ucomisd|ucomiss|ud2|unpckhpd|unpckhps|unpcklpd|unpcklps|vbroadcast|vcvtph2ps|vcvtp2sph|verr|verw|vextractf128|vinsertf128|vmaskmov|vpermilpd|vpermilps|vperm2f128|vtestpd|vtestps|vzeroall|vzeroupper|wait|fwait|wbinvd|wrfsbase|wrgsbase|wrmsr|xadd|xchg|xgetbv|xlat|xlatb|xor|xorpd|xorps|xrstor|xsave|xsaveopt|xsetbv|lzcnt|extrq|insertq|movntsd|movntss|vfmaddpd|vfmaddps|vfmaddsd|vfmaddss|vfmaddsubbpd|vfmaddsubps|vfmsubaddpd|vfmsubaddps|vfmsubpd|vfmsubps|vfmsubsd|vfnmaddpd|vfnmaddps|vfnmaddsd|vfnmaddss|vfnmsubpd|vfnmusbps|vfnmusbsd|vfnmusbss|cvt|xor|cli|sti|hlt|nop|lock|wait|enter|leave|ret|loop(?:n?e|n?z)?|call|j(?:mp|n?e|ge?|ae?|le?|be?|n?o|n?z))\\b',
+                caseInsensitive: true },
+            { token: 'variable.parameter.register.assembly',
+                regex: '\\b(?:CS|DS|ES|FS|GS|SS|RAX|EAX|RBX|EBX|RCX|ECX|RDX|EDX|RCX|RIP|EIP|IP|RSP|ESP|SP|RSI|ESI|SI|RDI|EDI|DI|RFLAGS|EFLAGS|FLAGS|R8-15|(?:Y|X)MM(?:[0-9]|10|11|12|13|14|15)|(?:A|B|C|D)(?:X|H|L)|CR(?:[0-4]|DR(?:[0-7]|TR6|TR7|EFER)))\\b',
+                caseInsensitive: true },
+            { token: 'constant.character.decimal.assembly',
+                regex: '\\b[0-9]+\\b' },
+            { token: 'constant.character.hexadecimal.assembly',
+                regex: '\\b0x[A-F0-9]+\\b',
+                caseInsensitive: true },
+            { token: 'constant.character.hexadecimal.assembly',
+                regex: '\\b[A-F0-9]+h\\b',
+                caseInsensitive: true },
+            { token: 'string.assembly', regex: /'([^\\']|\\.)*'/ },
+            { token: 'string.assembly', regex: /"([^\\"]|\\.)*"/ },
+            { token: 'support.function.directive.assembly',
+                regex: '^\\[',
+                push: [{ token: 'support.function.directive.assembly',
+                        regex: '\\]$',
+                        next: 'pop' },
+                    { defaultToken: 'support.function.directive.assembly' }] },
+            { token: ['support.function.directive.assembly',
+                    'support.function.directive.assembly',
+                    'entity.name.function.assembly'],
+                regex: '(^struc)( )([_a-zA-Z][_a-zA-Z0-9]*)' },
+            { token: 'support.function.directive.assembly',
+                regex: '^endstruc\\b' },
+            { token: ['support.function.directive.assembly',
+                    'entity.name.function.assembly',
+                    'support.function.directive.assembly',
+                    'constant.character.assembly'],
+                regex: '^(%macro )([_a-zA-Z][_a-zA-Z0-9]*)( )([0-9]+)' },
+            { token: 'support.function.directive.assembly',
+                regex: '^%endmacro' },
+            { token: ['text',
+                    'support.function.directive.assembly',
+                    'text',
+                    'entity.name.function.assembly'],
+                regex: '(\\s*)(%define|%xdefine|%idefine|%undef|%assign|%defstr|%strcat|%strlen|%substr|%00|%0|%rotate|%rep|%endrep|%include|\\$\\$|\\$|%unmacro|%if|%elif|%else|%endif|%(?:el)?ifdef|%(?:el)?ifmacro|%(?:el)?ifctx|%(?:el)?ifidn|%(?:el)?ifidni|%(?:el)?ifid|%(?:el)?ifnum|%(?:el)?ifstr|%(?:el)?iftoken|%(?:el)?ifempty|%(?:el)?ifenv|%pathsearch|%depend|%use|%push|%pop|%repl|%arg|%stacksize|%local|%error|%warning|%fatal|%line|%!|%comment|%endcomment|__NASM_VERSION_ID__|__NASM_VER__|__FILE__|__LINE__|__BITS__|__OUTPUT_FORMAT__|__DATE__|__TIME__|__DATE_NUM__|_TIME__NUM__|__UTC_DATE__|__UTC_TIME__|__UTC_DATE_NUM__|__UTC_TIME_NUM__|__POSIX_TIME__|__PASS__|ISTRUC|AT|IEND|BITS 16|BITS 32|BITS 64|USE16|USE32|__SECT__|ABSOLUTE|EXTERN|GLOBAL|COMMON|CPU|FLOAT)\\b( ?)((?:[_a-zA-Z][_a-zA-Z0-9]*)?)',
+                caseInsensitive: true },
+            { token: 'support.function.directive.assembly',
+                regex: '\\b(?:d[bwdqtoy]|res[bwdqto]|equ|times|align|alignb|sectalign|section|ptr|byte|word|dword|qword|incbin)\\b',
+                caseInsensitive: true },
+            { token: 'entity.name.function.assembly', regex: '^\\s*%%[\\w.]+?:$' },
+            { token: 'entity.name.function.assembly', regex: '^\\s*%\\$[\\w.]+?:$' },
+            { token: 'entity.name.function.assembly', regex: '^[\\w.]+?:' },
+            { token: 'entity.name.function.assembly', regex: '^[\\w.]+?\\b' },
+            { token: 'comment.assembly', regex: ';.*$' }]
+    };
+    this.normalizeRules();
+};
+AssemblyX86HighlightRules.metaData = { fileTypes: ['asm'],
+    name: 'Assembly x86',
+    scopeName: 'source.assembly' };
+oop.inherits(AssemblyX86HighlightRules, TextHighlightRules);
+exports.AssemblyX86HighlightRules = AssemblyX86HighlightRules;
+
+});
+
+ace.define("ace/mode/folding/coffee",["require","exports","module","ace/lib/oop","ace/mode/folding/fold_mode","ace/range"], function(require, exports, module){"use strict";
+var oop = require("../../lib/oop");
+var BaseFoldMode = require("./fold_mode").FoldMode;
+var Range = require("../../range").Range;
+var FoldMode = exports.FoldMode = function () { };
+oop.inherits(FoldMode, BaseFoldMode);
+(function () {
+    this.getFoldWidgetRange = function (session, foldStyle, row) {
+        var range = this.indentationBlock(session, row);
+        if (range)
+            return range;
+        var re = /\S/;
+        var line = session.getLine(row);
+        var startLevel = line.search(re);
+        if (startLevel == -1 || line[startLevel] != "#")
+            return;
+        var startColumn = line.length;
+        var maxRow = session.getLength();
+        var startRow = row;
+        var endRow = row;
+        while (++row < maxRow) {
+            line = session.getLine(row);
+            var level = line.search(re);
+            if (level == -1)
+                continue;
+            if (line[level] != "#")
+                break;
+            endRow = row;
+        }
+        if (endRow > startRow) {
+            var endColumn = session.getLine(endRow).length;
+            return new Range(startRow, startColumn, endRow, endColumn);
+        }
+    };
+    this.getFoldWidget = function (session, foldStyle, row) {
+        var line = session.getLine(row);
+        var indent = line.search(/\S/);
+        var next = session.getLine(row + 1);
+        var prev = session.getLine(row - 1);
+        var prevIndent = prev.search(/\S/);
+        var nextIndent = next.search(/\S/);
+        if (indent == -1) {
+            session.foldWidgets[row - 1] = prevIndent != -1 && prevIndent < nextIndent ? "start" : "";
+            return "";
+        }
+        if (prevIndent == -1) {
+            if (indent == nextIndent && line[indent] == "#" && next[indent] == "#") {
+                session.foldWidgets[row - 1] = "";
+                session.foldWidgets[row + 1] = "";
+                return "start";
+            }
+        }
+        else if (prevIndent == indent && line[indent] == "#" && prev[indent] == "#") {
+            if (session.getLine(row - 2).search(/\S/) == -1) {
+                session.foldWidgets[row - 1] = "start";
+                session.foldWidgets[row + 1] = "";
+                return "";
+            }
+        }
+        if (prevIndent != -1 && prevIndent < indent)
+            session.foldWidgets[row - 1] = "start";
+        else
+            session.foldWidgets[row - 1] = "";
+        if (indent < nextIndent)
+            return "start";
+        else
+            return "";
+    };
+}).call(FoldMode.prototype);
+
+});
+
+ace.define("ace/mode/assembly_x86",["require","exports","module","ace/lib/oop","ace/mode/text","ace/mode/assembly_x86_highlight_rules","ace/mode/folding/coffee"], function(require, exports, module){/*
+  THIS FILE WAS AUTOGENERATED BY mode.tmpl.js
+*/
+"use strict";
+var oop = require("../lib/oop");
+var TextMode = require("./text").Mode;
+var AssemblyX86HighlightRules = require("./assembly_x86_highlight_rules").AssemblyX86HighlightRules;
+var FoldMode = require("./folding/coffee").FoldMode;
+var Mode = function () {
+    this.HighlightRules = AssemblyX86HighlightRules;
+    this.foldingRules = new FoldMode();
+    this.$behaviour = this.$defaultBehaviour;
+};
+oop.inherits(Mode, TextMode);
+(function () {
+    this.lineCommentStart = [";"];
+    this.$id = "ace/mode/assembly_x86";
+}).call(Mode.prototype);
+exports.Mode = Mode;
+
+});                (function() {
+                    ace.require(["ace/mode/assembly_x86"], function(m) {
+                        if (typeof module == "object" && typeof exports == "object" && module) {
+                            module.exports = m;
+                        }
+                    });
+                })();
+            
+},{}],"assets/fib-asm.ts":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.fibCode = void 0;
-exports.fibCode = "# set x0 to x\n" + "XOR x0, x0, x0\n" + "\n" + "# calculate x1 Fibonacci numbers\n" + "ADDI x1, x0, 31\n" + "\n" + "# initialize the counter\n" + "ADDI x2, x0, 2\n" + "\n" + "# initialize the destination pointer\n" + "ADDI x3, x0, 0\n" + "\n" + "# set the first two Fibbonaci numbers and store them in memory\n" + "ADDI x5, x0, 0\n" + "ADDI x6, x0, 1\n" + "\n" + "# store the first two pointers and increment the destination pointer\n" + "SW x5, 0(x3)\n" + "ADDI x3, x3, 4\n" + "SW x6, 0(x3)\n" + "ADDI x3, x3, 4\n" + "\n" + "# calculate the next Fibonacci and store it\n" + "ADD x7, x6, x5\n" + "SW x7, 0x0(x3)\n" + "ADDI x3, x3, 4\n" + "\n" + "ADDI x5, x6, 0\n" + "ADDI x6, x7, 0\n" + "\n" + "# increment the counter, and jump back if necessary\n" + "ADDI x2, x2, 1\n" + "BGE x1, x2, -0x18\n" + "BGE x0, x0, 0";
+exports.fibAsm = void 0;
+exports.fibAsm = "ADDI x1, x0, 31 ; calculate x1 Fibonacci numbers\n" + "ADDI x2, x0, 2 ; initialize the counter\n" + "ADDI x3, x0, 0 ; initialize the destination pointer\n" + "\n" + "; set the first two Fibonacci numbers\n" + "; and store them in memory\n" + "ADDI x5, x0, 0\n" + "ADDI x6, x0, 1\n" + "\n" + "; store the first two pointers \n" + "; and increment the destination pointer\n" + "SW x5, 0(x3)\n" + "ADDI x3, x3, 4\n" + "SW x6, 0(x3)\n" + "ADDI x3, x3, 4\n" + "\n" + "; calculate the next Fibonacci and store it\n" + "loop:\n" + "ADD x7, x6, x5\n" + "SW x7, 0x0(x3)\n" + "ADDI x3, x3, 4\n" + "\n" + "ADDI x5, x6, 0\n" + "ADDI x6, x7, 0\n" + "\n" + "; increment the counter\n" + "; and jump back if necessary\n" + "ADDI x2, x2, 1\n" + "BGE x1, x2, loop\n" + "BGE x0, x0, 0";
+},{}],"assets/mult-asm.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.multAsm = void 0;
+exports.multAsm = "; calculate x3 = x1 * x1\n" + "ADDI x1, x0, 128\n" + "ADDI x2, x0, 99\n" + "ADDI x3, x0, 0\n" + "\n" + "loop:\n" + "ANDI x4, x1, 1 ; should add flag\n" + "SRAI x1, x1, 1\n" + "BEQ x4, x0, skip\n" + "ADD x3, x3, x2\n" + "skip:\n" + "\n" + "SLLI x2, x2, 1\n" + "BNE x1, x0, loop\n" + "\n" + "; infinite loop\n" + "BEQ x0, x0, 0";
+},{}],"assets/pyramid-asm.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.pyramidAsm = void 0;
+exports.pyramidAsm = "ADDI x1, x0, 11     ; size\n" + "\n" + "; outer loop init\n" + "ADDI x2, x0, 0      ; lower bound\n" + "ADD x3, x0, x1      ; upper bound\n" + "ADDI x4, x0, 0      ; direction\n" + "\n" + "; outer lopp condition\n" + "loop1:\n" + "BGE x2, x3, loop1exit\n" + "\n" + "; inner loop init\n" + "ADDI x5, x2, 0      ; int control var\n" + "ADD x6, x5, x5      ; init offset offset (x5 * 2) * 2\n" + "ADD x6, x6, x6\n" + "\n" + "; inner loop condition\n" + "loop2:\n" + "BGE x5, x3, loop2exit      \n" + "\n" + "; inner loop bodyw\n" + "LW x7, 0x0(x6)      ; RMW  \n" + "ADDI x7, x7, 1\n" + "SW x7, 0x0(x6)\n" + "\n" + "; inner loop increment\n" + "ADDI x5, x5, 1\n" + "ADDI x6, x6, 4\n" + "BGE x0, x0, loop2\n" + "loop2exit:\n" + "\n" + "; outer lopp increment\n" + "ADDI x2, x2, 1\n" + "ADDI x3, x3, -1\n" + "BGE x0, x0, loop1\n" + "loop1exit:\n" + "\n" + "BGE x0, x0, 0";
 },{}],"ctrl/code-ctrl.ts":[function(require,module,exports) {
 "use strict";
 
@@ -25923,35 +26203,51 @@ var Assembler_1 = __importDefault(require("../instructions/Assembler"));
 var ace = __importStar(require("ace-builds/src-noconflict/ace"));
 require("ace-builds/src-noconflict/theme-monokai");
 require("ace-builds/src-noconflict/mode-javascript");
-var fib_src_1 = require("../assets/fib-src");
+require("ace-builds/src-noconflict/mode-assembly_x86");
+var fib_asm_1 = require("../assets/fib-asm");
+var mult_asm_1 = require("../assets/mult-asm");
+var pyramid_asm_1 = require("../assets/pyramid-asm");
 var CodeCtrl = /** @class */function () {
-  function CodeCtrl(loadFn) {
-    this.loadFn = loadFn;
-    this.btnBuild = document.getElementById("btn-build");
+  function CodeCtrl() {
+    this.btnFib = document.getElementById("btn-load-fib");
+    this.btnMult = document.getElementById("btn-load-mult");
+    this.btnPyramid = document.getElementById("btn-load-pyramid");
+    this.btnNew = document.getElementById("btn-load-new");
     this.btnClear = document.getElementById("btn-clear");
     this.output = document.getElementById("output");
     this.outputContent = document.getElementById("output-content");
     this.initEditor();
     this.addButtonListeners();
-    var parsed = Assembler_1.default.parse(this.editor.getValue());
-    if (parsed) {
-      this.loadFn(parsed);
-    }
   }
+  CodeCtrl.prototype.getBuildFn = function () {
+    var _this = this;
+    return function () {
+      try {
+        var parsed = Assembler_1.default.parse(_this.editor.getValue());
+        if (parsed) {
+          _this.outputContent.innerHTML += "<div style='color: white'>" + new Date().toLocaleString() + "</div>";
+          _this.outputContent.innerHTML += "<div class='success'>" + "Built successfully!" + "</div>";
+          _this.outputContent.innerHTML += "<br/>";
+          return parsed;
+        }
+      } catch (e) {
+        _this.outputContent.innerHTML += "<div class='error'>" + e + "</div>";
+      }
+    };
+  };
   CodeCtrl.prototype.initEditor = function () {
     var _this = this;
     this.editor = ace.edit("editor", {
       useWorker: false,
-      theme: "ace/theme/monokai"
-      // mode: "ace/mode/javascript"
+      theme: "ace/theme/monokai",
+      mode: "ace/mode/assembly_x86"
     });
-
     this.editor.session.setUseWrapMode(true);
     var code = window.localStorage.getItem(CodeCtrl.CODE_STORAGE_KEY);
     if (code) {
       this.editor.setValue(code, -1);
     } else {
-      this.editor.setValue(fib_src_1.fibCode, -1);
+      this.editor.setValue(fib_asm_1.fibAsm, -1);
     }
     this.editor.on('change', function () {
       window.localStorage.setItem(CodeCtrl.CODE_STORAGE_KEY, _this.editor.getValue());
@@ -25959,18 +26255,17 @@ var CodeCtrl = /** @class */function () {
   };
   CodeCtrl.prototype.addButtonListeners = function () {
     var _this = this;
-    this.btnBuild.addEventListener("click", function () {
-      try {
-        var parsed = Assembler_1.default.parse(_this.editor.getValue());
-        if (parsed) {
-          _this.loadFn(parsed);
-          _this.outputContent.innerHTML += "<div style='color: white'>" + new Date().toLocaleString() + "</div>";
-          _this.outputContent.innerHTML += "<div class='success'>" + "Built successfully!" + "</div>";
-          _this.outputContent.innerHTML += "<br/>";
-        }
-      } catch (e) {
-        _this.outputContent.innerHTML += "<div class='error'>" + e + "</div>";
-      }
+    this.btnFib.addEventListener('click', function () {
+      return _this.editor.setValue(fib_asm_1.fibAsm, -1);
+    });
+    this.btnMult.addEventListener('click', function () {
+      return _this.editor.setValue(mult_asm_1.multAsm, -1);
+    });
+    this.btnPyramid.addEventListener('click', function () {
+      return _this.editor.setValue(pyramid_asm_1.pyramidAsm, -1);
+    });
+    this.btnNew.addEventListener('click', function () {
+      return _this.editor.setValue("", -1);
     });
     this.btnClear.addEventListener('click', function () {
       _this.outputContent.innerHTML = "";
@@ -25980,7 +26275,7 @@ var CodeCtrl = /** @class */function () {
   return CodeCtrl;
 }();
 exports.default = CodeCtrl;
-},{"../instructions/Assembler":"instructions/Assembler.ts","ace-builds/src-noconflict/ace":"../node_modules/ace-builds/src-noconflict/ace.js","ace-builds/src-noconflict/theme-monokai":"../node_modules/ace-builds/src-noconflict/theme-monokai.js","ace-builds/src-noconflict/mode-javascript":"../node_modules/ace-builds/src-noconflict/mode-javascript.js","../assets/fib-src":"assets/fib-src.ts"}],"index.ts":[function(require,module,exports) {
+},{"../instructions/Assembler":"instructions/Assembler.ts","ace-builds/src-noconflict/ace":"../node_modules/ace-builds/src-noconflict/ace.js","ace-builds/src-noconflict/theme-monokai":"../node_modules/ace-builds/src-noconflict/theme-monokai.js","ace-builds/src-noconflict/mode-javascript":"../node_modules/ace-builds/src-noconflict/mode-javascript.js","ace-builds/src-noconflict/mode-assembly_x86":"../node_modules/ace-builds/src-noconflict/mode-assembly_x86.js","../assets/fib-asm":"assets/fib-asm.ts","../assets/mult-asm":"assets/mult-asm.ts","../assets/pyramid-asm":"assets/pyramid-asm.ts"}],"index.ts":[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -25994,9 +26289,9 @@ Object.defineProperty(exports, "__esModule", {
 var split_js_1 = __importDefault(require("split.js"));
 var simulator_ctrl_1 = __importDefault(require("./ctrl/simulator-ctrl"));
 var code_ctrl_1 = __importDefault(require("./ctrl/code-ctrl"));
-var simCtrl = new simulator_ctrl_1.default();
-var codeCtrl = new code_ctrl_1.default(simCtrl.getLoadFn());
-var mainSplitPane = (0, split_js_1.default)(["#code", "#simulator"], {
+var codeCtrl = new code_ctrl_1.default();
+var simCtrl = new simulator_ctrl_1.default(codeCtrl.getBuildFn());
+(0, split_js_1.default)(["#code", "#simulator"], {
   sizes: [25, 75],
   minSize: [300, 300],
   onDrag: simCtrl.getResizeFn()
