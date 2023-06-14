@@ -16,6 +16,7 @@ export let fibAsm =
     "ADDI x3, x3, 4\n" +
     "\n" +
     "; calculate the next Fibonacci and store it\n" +
+    "loop:\n" +
     "ADD x7, x6, x5\n" +
     "SW x7, 0x0(x3)\n" +
     "ADDI x3, x3, 4\n" +
@@ -26,5 +27,5 @@ export let fibAsm =
     "; increment the counter\n" +
     "; and jump back if necessary\n" +
     "ADDI x2, x2, 1\n" +
-    "BGE x1, x2, -0x18\n" +
+    "BGE x1, x2, loop\n" +
     "BGE x0, x0, 0"

@@ -4,27 +4,86 @@ import InstructionFactory from "./InstructionFactory";
 
 export default class Assembler {
 
+    private static readonly LABEL_DEF_REGEX = /^[a-zA-z0-9]+:/
+    private static readonly LABEL_REGEX = /^[a-zA-z0-9]+/
     private static readonly REG_REGEX = /^x\d+$/;
     private static readonly NUMBER_REGEX = /^-?((0x[0-9A-Fa-f]+)|\d+)$/;
     private static readonly INDEXING_REGEX = /^-?((0x[0-9A-Fa-f]+)|\d+)\(x\d+\)$/; // TODO: change name
 
+    private address: number = 0
+    private labels: { string: number } = <{ string, number }>{}
+
     static parse(text: string): Value[] {
+        return new Assembler().parse(text);
+    }
+
+    private parse(text: string): Value[] {
+        const lines = Assembler.preprocessCode(text)
+        this.labels = Assembler.extractLabels(lines)
+        return this.parseLines(lines);
+    }
+
+    private static extractLabels(text: string[]) {
+        let labels: { string: number } = <{ string, number }>{}
+        let address = 0;
+        for (const line of text) {
+            if (line.length == 0) {
+                continue;
+            }
+
+            if (line.match(Assembler.LABEL_DEF_REGEX)) {
+                const label = line.substring(0, line.length - 1)
+                labels[label] = address
+            } else {
+                address += 4
+            }
+        }
+        return labels
+    }
+
+    private static preprocessCode(text: string) {
         return text.split('\n')
             .map(value => value.replace(/#.*/, ''))
             .map(value => value.replace(/;.*/, ''))
             .map(value => value.trim())
-            .map((value, index) => {
-                try {
-                    return this.parseLine(value);
-                } catch (e) {
-                    throw "Line " + (index + 1) + ": " + e;
-                }
-            })
-            .filter(value => value != null);
     }
 
-    static parseLine(line: string): Value {
-        if (line.length == 0) {
+    private parseLines(lines: string[]) {
+        this.address = 0
+        let values: Value[] = []
+        for (const idx in lines) {
+            const line = lines[idx]
+            try {
+                const parsed = this.parseLine(line);
+                if (parsed) {
+                    values.push(parsed)
+                    this.address += 4
+                }
+            } catch (e) {
+                throw "Line " + (idx + 1) + ": " + e;
+            }
+        }
+
+        return values;
+    }
+
+    private parseConstant(value: string, base: number = 0) {
+        if (value.match(Assembler.NUMBER_REGEX)) {
+            return parseInt(value)
+        }
+
+        if (value.match(Assembler.LABEL_REGEX)) {
+            if (!this.labels[value]) {
+                throw "Label '" + value +"' does not exist";
+            }
+            return this.labels[value] - base
+        }
+
+        throw "Internal error."
+    }
+
+    private parseLine(line: string): Value {
+        if (line.length == 0 || line.match(Assembler.LABEL_DEF_REGEX)) {
             return null;
         }
 
@@ -154,41 +213,41 @@ export default class Assembler {
         }
     }
 
-    private static parseBranch(funct: string, argsStr: string): Value {
+    private parseBranch(funct: string, argsStr: string): Value {
         let args = argsStr.split(",").map(arg => arg.trim());
 
         if (args.length != 3) {
             throw "Instruction requires 3 arguments";
         }
 
-        if (!args[0].match(this.REG_REGEX)) {
+        if (!args[0].match(Assembler.REG_REGEX)) {
             throw "Invalid rs1 register format.";
         }
 
-        if (!args[1].match(this.REG_REGEX)) {
+        if (!args[1].match(Assembler.REG_REGEX)) {
             throw "Invalid rs2 register format.";
         }
 
-        if (!args[2].match(this.NUMBER_REGEX)) {
+        if (!args[2].match(Assembler.NUMBER_REGEX) && !args[2].match(Assembler.LABEL_REGEX)) {
             throw "Invalid relative address format.";
         }
 
         return InstructionFactory.createBType(InstructionConstants.OP_CODE_BRANCH, funct,
-            parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), parseInt(args[2]));
+            parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), this.parseConstant(args[2], this.address));
     }
 
-    private static parseLoad(funct: string, argsStr: string): Value {
+    private parseLoad(funct: string, argsStr: string): Value {
         let args = argsStr.split(",").map(arg => arg.trim());
 
         if (args.length != 2) {
             throw "Instruction requires 2 arguments";
         }
 
-        if (!args[0].match(this.REG_REGEX)) {
+        if (!args[0].match(Assembler.REG_REGEX)) {
             throw "Invalid rd register format.";
         }
 
-        if (!args[1].match(this.INDEXING_REGEX)) {
+        if (!args[1].match(Assembler.INDEXING_REGEX)) {
             throw "Invalid address format."; // TODO: change message
         }
 
@@ -198,18 +257,18 @@ export default class Assembler {
             parseInt(args[1].split("(")[0]));
     }
 
-    private static parseStore(funct: string, argsStr: string): Value {
+    private parseStore(funct: string, argsStr: string): Value {
         let args = argsStr.split(",").map(arg => arg.trim());
 
         if (args.length != 2) {
             throw "Instruction requires 2 arguments";
         }
 
-        if (!args[0].match(this.REG_REGEX)) {
+        if (!args[0].match(Assembler.REG_REGEX)) {
             throw "Invalid rs1 register format.";
         }
 
-        if (!args[1].match(this.INDEXING_REGEX)) {
+        if (!args[1].match(Assembler.INDEXING_REGEX)) {
             throw "Invalid address format."; // TODO: change message
         }
 
@@ -219,45 +278,45 @@ export default class Assembler {
             parseInt(args[1].split("(")[0]),);
     }
 
-    private static parseImm(funct: string, argsStr: string): Value {
+    private parseImm(funct: string, argsStr: string): Value {
         let args = argsStr.split(",").map(arg => arg.trim());
 
         if (args.length != 3) {
             throw "Instruction requires 3 arguments";
         }
 
-        if (!args[0].match(this.REG_REGEX)) {
+        if (!args[0].match(Assembler.REG_REGEX)) {
             throw "Invalid rd register format.";
         }
 
-        if (!args[1].match(this.REG_REGEX)) {
+        if (!args[1].match(Assembler.REG_REGEX)) {
             throw "Invalid rs1 register format.";
         }
 
-        if (!args[2].match(this.NUMBER_REGEX)) {
+        if (!args[2].match(Assembler.NUMBER_REGEX) && !args[2].match(Assembler.LABEL_REGEX)) {
             throw "Invalid relative address format.";
         }
 
         return InstructionFactory.createIType(InstructionConstants.OP_CODE_ALUI, funct,
-            parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), parseInt(args[2]));
+            parseInt(args[0].substr(1)), parseInt(args[1].substr(1)), this.parseConstant(args[2]));
     }
 
-    private static parseALU(funct: string, argsStr: string): Value {
+    private parseALU(funct: string, argsStr: string): Value {
         let args = argsStr.split(",").map(arg => arg.trim());
 
         if (args.length != 3) {
             throw "Instruction requires 3 arguments";
         }
 
-        if (!args[0].match(this.REG_REGEX)) {
+        if (!args[0].match(Assembler.REG_REGEX)) {
             throw "Invalid rd register format.";
         }
 
-        if (!args[1].match(this.REG_REGEX)) {
+        if (!args[1].match(Assembler.REG_REGEX)) {
             throw "Invalid rs1 register format.";
         }
 
-        if (!args[2].match(this.REG_REGEX)) {
+        if (!args[2].match(Assembler.REG_REGEX)) {
             throw "Invalid rs2 register format.";
         }
 
