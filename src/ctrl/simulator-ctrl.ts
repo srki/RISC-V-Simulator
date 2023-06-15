@@ -110,7 +110,7 @@ export default class SimulatorCtrl {
 
         this.btnDec.addEventListener("click", () => {
             this.freq /= 2
-            if (this.freq > 1) {
+            if (this.freq < 1) {
                 this.freq = 1
             }
             this.displayFreq()
