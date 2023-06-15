@@ -60,7 +60,7 @@ export default class Assembler {
                     this.address += 4
                 }
             } catch (e) {
-                throw "Line " + (idx + 1) + ": " + e;
+                throw "Line " + (parseInt(idx) + 1) + ": " + e;
             }
         }
 
