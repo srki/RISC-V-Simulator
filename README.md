@@ -3,7 +3,7 @@
 A fully functional RISC-V Assembler and simulator that runs in web browser.
 The assembler and simulator were implemented using TypeScript and HTML5 Canvas.
 
-<img alt="" src="assets/fib-example.gif" width="640"/>
+![](assets/fib-example.gif)
 
 ## Features
 - **Assembler**: Convert human-readable RISC-V assembly code into machine code instructions that can be executed by the simulator.
